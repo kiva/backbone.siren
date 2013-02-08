@@ -109,7 +109,7 @@ var myNestedEntity = siren.entity().fetch()
 Get a collection of all available actions
 ```
 sirenModel.actions();           // returns a backbone.sirenAction collection
-``
+```
 
 Auto-generate a form form
 ```
