@@ -51,39 +51,70 @@ var sirenModel = new Backbone.Siren.Model.extend({
 
 # The API
 
-// Not so sure we would need this.  Thinking that every siren representation should be a model (which can have 1+ nested collections)
-var mySirenCollection = Backbone.Siren.Collection.extend({]);
+Create a new instance of Backbone.Siren.Model
+```
+sirenModel = new Backbone.Siren.Model();
+```
 
-// Note that url is an array
-var mySirenModel = Backbone.Siren.Model.extend({
-    url: []
-})
+## Standard Backbone.Model methods
 
-var sirenCollection = new mySirenCollection();
-var siren = new mySirenModel({});
+Get properties (See http://backbonejs.org/#Model-get)
+```
+sirenModel.get(propName)
+```
 
+Set values to properties (See http://backbonejs.org/#Model-set)
+```
+sirenModel.set(propName, value)
+```
 
-siren.get() // get properties
-have to rename this as it collides with Backbone.save()    -> siren.set() // builds a serialized form in memory so that it can then be saved to the server on siren.save();  - it ignores readonly properties
-siren.save() // wrapper for Backbone.save() and takes care of updating multiple end points
-siren.url() // get the "self" current url
-siren.class() // get the current class
-siren.validate()   // validates all current writable properties (gets called behind the scenes on set) - returns undefined or an object
-siren.validate('propertyName') // validates the one property - returns undefined or a string
+Save the model to the server (See http://backbonejs.org/#Model-save)
+```
+sirenModel.save() // wrapper for Backbone.save() and takes care of updating multiple end points
+```
 
-siren.entity(someKindOfFilter)     // gets the first entity that matches (a backbone.siren model)
+Validation (See http://backbonejs.org/#Model-validate)
+```
+sirenModel.validate();          // validates all current writable properties (gets called behind the scenes on set) - returns undefined or an object
+sirenModel.validate('propName');// validates the one property - returns undefined or a string
+```
 
-siren.entities(someKindOfFilter)   // gets subentities (as a backbone.siren collection)
-siren.entities(someKindOfFilter).____ all of these are backbone methods
+## Custom Backbone.Siren.Model methods
 
-var myNestedEntity = siren.entity().fetch()         // does ajax request for more data
-siren.actions();           // returns a backbone.sirenAction collection
-siren.generateForm();  // this would be a seperate plugin that autogenerates a generic form, you have to pass it the display names for the fields.
+Get urls used to retrieve the properties
+```
+sirenModel.url() // Should it be .urls()?
+```
 
+Get the siren "class" for the given model(s)
+```
+sirenModel.class()
+```
 
-Entity Filtering:
+Get nested entities
+```
+siren.entity(someKindOfFilter)     // Returns a Backbone.Siren.Model representation of the first entity that matches
+siren.entities(someKindOfFilter)   // Returns a collection of all subentities that match the filter
+```
 
-you pass it a string and it will search in the following order for something that matches:
+Fetch more data from a sub-entity
+```
+var myNestedEntity = siren.entity().fetch()
+```
+
+Get a collection of all available actions
+```
+sirenModel.actions();           // returns a backbone.sirenAction collection
+``
+
+Auto-generate a form form
+```
+sirenModel.generateForm();  // this would be a seperate plugin that autogenerates a generic form, you have to pass it the display names for the fields.
+```
+
+## Entity Filtering:
+
+You pass it a string and it will search in the following order for something that matches:
 - always has to be a string, or number
 - rel
 - class
