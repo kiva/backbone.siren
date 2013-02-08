@@ -1,10 +1,14 @@
-There are a few different things we can represent with Siren:
-- Entity Model
-- Entity Collection
-- Actions Collection
-- Links Collection
+# Backbone-Siren
 
-I'm thinking maybe I should only represent models, everything else would be a property of the siren model.
+A client side adapter that converts resource representations from [Siren JSON](https://github.com/kevinswiber/siren) to [Backbone Models](http://backbonejs.org/#Model).
+
+In Siren, there are a few different objects that can be represented:
+* Entity Model
+* Entity Collection
+* Actions Collection
+* Links Collection
+
+Backbone-Siren subclasses the Backbone.Model and Backbone.Collection objects as Backbone.Siren.Model and Backbone.Siren.Collection.
 
 # Creating a Backbone.Siren Model
 
