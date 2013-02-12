@@ -1,0 +1,64 @@
+{
+	"bitwise": true
+	, "curly": true
+	, "immed": true
+	, "latedef": true
+	, "maxcomplexity": 5
+	, "maxdepth": 3
+	, "maxerr": 1000000
+	, "maxstatements": 15
+	, "newcap": true
+	, "noarg": true
+	, "noempty": true
+	, "unused": false
+	, "strict": true
+	, "trailing": true
+	, "quotmark": "single"
+
+	, "laxbreak": true
+	, "laxcomma": true
+	, "loopfunc": true
+	, "smarttabs": true
+	, "validthis": true
+
+    , "node": true
+	, "browser": true
+	, "jquery": true
+
+	, "predef": [
+		"qi"
+		, "requirejs"
+		, "define"
+		, "Modernizr"
+
+		, "kvTestHelper"
+
+		, "afterEach"
+		, "beforeEach"
+		, "describe"
+		, "expect"
+		, "it"
+		, "jasmine"
+		, "runs"
+		, "spyOn"
+		, "waits"
+		, "waitsFor"
+		, "xdescribe"
+		, "xit"
+
+		, "appendLoadFixtures"
+		, "appendLoadStyleFixtures"
+		, "appendSetFixtures"
+		, "appendSetStyleFixtures"
+		, "clearCache"
+		, "cleanUp"
+		, "getJSONFixture"
+		, "loadFixtures"
+		, "loadJSONFixtures"
+		, "loadStyleFixtures"
+		, "readFixtures:"
+		, "sandbox"
+		, "setFixtures"
+		, "setStyleFixtures"
+	]
+}
