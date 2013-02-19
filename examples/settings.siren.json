@@ -1,13 +1,12 @@
 {
-    "href": "api.kiva.org/lenders/gabrielcastillo"
-    , "properties": {
-    "lastName": "castillo"
-    , "firstName": "gabriel"
-    , "id": 363934
-    , "email": "gcastillo@gmx.com"
-    , "member_since" : "2008-11-22T05:11:09Z"
-    , "password": "@TODO Not sure how to do this yet"
-}
+    "properties": {
+        "lastName": "castillo"
+        , "firstName": "gabriel"
+        , "id": 363934
+        , "email": "gcastillo@gmx.com"
+        , "member_since" : "2008-11-22T05:11:09Z"
+        , "password": "@TODO Not sure how to do this yet"
+    }
     , "entities": [
     {
         "rel": ["api.kiva.org/rels/stats"]
@@ -15,7 +14,6 @@
     }
     , {
         "rel": ["api.kiva.org/rels/address"]
-        , "href": "api.kiva.org/lenders/gabrielcastillo/address"
         , "properties": {
             "street": "1427 E 36th"
             , "city": "Oakland"
@@ -23,10 +21,12 @@
             , "zip": "94602"
             , "country": "USA"
         }
+        , "links": [
+            {"self": "api.kiva.org/lenders/gabrielcastillo/address"}
+        ]
     }
     , {
         "rel": ["api.kiva.org/rels/profile"]
-        , "href": "api.kiva.org/lenders/gabrielcastillo/profile"
         , "properties": {
             "name": "gcastillo"
             , "city": "Oakland"
@@ -38,20 +38,23 @@
             , "describeWork": "its fun"
             , "lenderPageUrl": "//kiva.org/lender/gabrielcastillo"
         }
+        , "links": [
+            {"self": "api.kiva.org/lenders/gabrielcastillo/profile"}
+        ]
     }
     , {
         "rel": ["api.kiva.org/rels/facebook"]
-        , "href": "api.kiva.org/lenders/gabrielcastillo/facebook-settings"
         , "properties": {
             "automaticallPostToWall": ["loans", "repayments"]
             , "facebookConnected": true
             , "facebookEmail": "uglymunky@gmail.com"
         }
+        , "links": [
+            {"self": "api.kiva.org/lenders/gabrielcastillo/facebook-settings"}
+        ]
     }
-
     , {
         "rel": ["api.kiva.org/rels/credit-settings"]
-        , "href": "api.kiva.org/lenders/gabrielcastillo/credit-settings"
         , "properties": {
             "repayment": "deposit"
             , "inactivity": "donate"
@@ -59,19 +62,25 @@
             , "monthlyDeposit": 0
             , "monthlyDonation": 0
         }
+        , "links": [
+            {"self": "api.kiva.org/lenders/gabrielcastillo/credit-settings"}
+        ]
     }
-
     , {
         "rel": ["api.kiva.org/rels/autolending-settings"]
-        , "href": "api.kiva.org/lenders/gabrielcastillo/autolending-settings"
         , "properties": {
             "when": "never"
             , "criteria": []
             , "limit": 45
             , "donation": 10
         }
+        , "links": [
+            {"self": "api.kiva.org/lenders/gabrielcastillo/autolending-settings"}
+        ]
     }
 ]
     , "actions": []
-    , "links": []
+    , "links": [
+    {"self": "api.kiva.org/lenders/gabrielcastillo"}
+]
 }

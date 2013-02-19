@@ -9,18 +9,18 @@ Backbone.Siren = (function (_, Backbone) {
         } else {
             url = entity.links.filter(function (el) {
                 return _.indexOf(el.rel, 'self' > -1);
-            })[0];
+            })[0].self;
         }
 
-        return self;
+        return url;
     }
 
     return {
         Model:  Backbone.Model.extend({
 
-            parse: function (response) {
-                this._data = response;
-                return response.properties;
+            parse: function (sirenObj) {
+                this._data = sirenObj;
+                return sirenObj.properties;
             }
 
 
@@ -50,6 +50,10 @@ Backbone.Siren = (function (_, Backbone) {
 
             /**
              *
+             * @param options
+             * @param options.force
+             * @param options.range see http://underscorejs.org/#range
+             *
              * @returns {jQuery.Deferred}
              */
             , entities: function (filters, options) {
@@ -60,6 +64,10 @@ Backbone.Siren = (function (_, Backbone) {
                 entities = entities.filter(function (el) {
                     return _.indexOf(el.rel, filters.rel) > -1;
                 });
+
+                if (options.range) {
+                    entities = entities.slice(options.range.start, options.range.end);
+                }
 
                 _.each(entities, function (entity, index, list) {
                     var url = getUrl(entity);

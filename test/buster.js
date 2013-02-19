@@ -6,6 +6,11 @@ buster.spec.expose();
 config['Browser Tests'] = {
     env: 'browser'
     , rootPath: '../'
-    , sources: ['src/Backbone.Siren.js']
+    , deps: [
+        'components/jquery/jquery.js'
+        , 'components/underscore/underscore.js'
+        , 'components/backbone/backbone.js'
+    ]
+    , sources: ['src/backbone.siren.js']
     , tests: ['test/spec/**/*.js']
 };
