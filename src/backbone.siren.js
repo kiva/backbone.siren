@@ -62,7 +62,10 @@ Backbone.Siren = (function (_, Backbone) {
 
                 // @todo Currently only have a filter for "rel"
                 entities = entities.filter(function (el) {
-                    return _.indexOf(el.rel, filters.rel) > -1;
+                    var rel = el.rel;
+
+                    rel = rel.slice(rel.lastIndexOf('/') + 1, rel.length);
+                    return _.indexOf(rel, filters.rel) > -1;
                 });
 
                 if (options.range) {
