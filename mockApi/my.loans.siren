@@ -1,0 +1,84 @@
+{
+    "class" : [ "loans" ]
+    , "entities" : [
+        {
+            "links" : [
+                {
+                    "href" : "api.kiva.org/loans/38928"
+                    , "rel" : [ "self" ]
+                }
+            ]
+            , "properties" : {
+                "activity" : "Timber Sales"
+                , "description" : {
+                    "languages" : [
+                        "es"
+                        , "en"
+                    ]
+                }
+                , "id" : 473205
+                , "image" : {
+                    "id" : 1195973
+                    , "template_id" : 1
+                },
+                , "loan_amount" : 1400
+                , "location" : { "country" : "Colombia"
+                    "country_code" : "CO"
+                    , "town" : "El Carmen de Viboral"
+                }
+                , "name" : "Oscar"
+                , "partner_id" : 177
+                , "sector" : "Construction"
+                , "status" : "in_repayment"
+                , "use" : "to buy a chainsaw."
+            }
+            , "rel" : [ "loan" ]
+        }
+
+        , {
+            "links" : [
+                {
+                    "href" : "api.kiva.org/loans/38928"
+                    , "rel" : [ "self" ]
+                }
+            ]
+
+            , "properties" : {
+                "activity" : "Timber Sales"
+                , "description" : {
+                    "languages" : [
+                        "es"
+                        , "en"
+                    ]
+                }
+                , "id" : 473205
+                , "image" : {
+                    "id" : 1195973
+                    , "template_id" : 1
+                }
+                , "loan_amount" : 1400
+                , "location" : {
+                    "country" : "Colombia"
+                    , "country_code" : "CO"
+                    , "town" : "El Carmen de Viboral"
+                }
+                , "name" : "Oscar"
+                , "partner_id" : 177
+                , "sector" : "Construction"
+                , "status" : "in_repayment"
+                , "use" : "to buy a chainsaw."
+            }
+            , "rel" : [ "loan" ]
+        }
+    ],
+    "links" : [
+        {
+            "href" : "api.kiva.org/lender/jeremy/loans"
+            , "rel" : [ "self" ]
+        },
+        {
+            "href" : "api.kiva.org/lender/jeremy"
+            , "rel" : [ "lender" ]
+        }
+    ]
+}

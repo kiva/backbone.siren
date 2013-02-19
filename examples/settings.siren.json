@@ -1,0 +1,77 @@
+{
+    "href": "api.kiva.org/lenders/gabrielcastillo"
+    , "properties": {
+    "lastName": "castillo"
+    , "firstName": "gabriel"
+    , "id": 363934
+    , "email": "gcastillo@gmx.com"
+    , "member_since" : "2008-11-22T05:11:09Z"
+    , "password": "@TODO Not sure how to do this yet"
+}
+    , "entities": [
+    {
+        "rel": ["api.kiva.org/rels/stats"]
+        , "href": "api.kiva.org/lenders/gabrielcastillo/stats"
+    }
+    , {
+        "rel": ["api.kiva.org/rels/address"]
+        , "href": "api.kiva.org/lenders/gabrielcastillo/address"
+        , "properties": {
+            "street": "1427 E 36th"
+            , "city": "Oakland"
+            , "state": "CA"
+            , "zip": "94602"
+            , "country": "USA"
+        }
+    }
+    , {
+        "rel": ["api.kiva.org/rels/profile"]
+        , "href": "api.kiva.org/lenders/gabrielcastillo/profile"
+        , "properties": {
+            "name": "gcastillo"
+            , "city": "Oakland"
+            , "state/": "CA"
+            , "country": "USA"
+            , "occupation": "Web Developer"
+            , "website": "seemunkygo.com"
+            , "iLoanBecause": "me likey"
+            , "describeWork": "its fun"
+            , "lenderPageUrl": "//kiva.org/lender/gabrielcastillo"
+        }
+    }
+    , {
+        "rel": ["api.kiva.org/rels/facebook"]
+        , "href": "api.kiva.org/lenders/gabrielcastillo/facebook-settings"
+        , "properties": {
+            "automaticallPostToWall": ["loans", "repayments"]
+            , "facebookConnected": true
+            , "facebookEmail": "uglymunky@gmail.com"
+        }
+    }
+
+    , {
+        "rel": ["api.kiva.org/rels/credit-settings"]
+        , "href": "api.kiva.org/lenders/gabrielcastillo/credit-settings"
+        , "properties": {
+            "repayment": "deposit"
+            , "inactivity": "donate"
+            , "autolender": "never"
+            , "monthlyDeposit": 0
+            , "monthlyDonation": 0
+        }
+    }
+
+    , {
+        "rel": ["api.kiva.org/rels/autolending-settings"]
+        , "href": "api.kiva.org/lenders/gabrielcastillo/autolending-settings"
+        , "properties": {
+            "when": "never"
+            , "criteria": []
+            , "limit": 45
+            , "donation": 10
+        }
+    }
+]
+    , "actions": []
+    , "links": []
+}

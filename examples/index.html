@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+
+    <script src="/components/jquery/jquery.js"></script>
+    <script src="/components/underscore/underscore.js"></script>
+    <script src="/components/backbone/backbone.js"></script>
+    <script src="/src/Backbone.Siren.js"></script>
+</head>
+
+<body>
+<script>
+
+    var sirenUrl = 'settings.siren.json';
+
+    $.getJSON(sirenUrl, function (results) {
+//        var bbsiren = new Backbone.Siren.Model(Backbone.Siren.Model.prototype.parse(results));
+        bbsiren = new Backbone.Siren.Model(results);
+
+    });
+
+</script>
+</body>
+</html>

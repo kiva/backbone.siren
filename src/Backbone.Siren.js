@@ -1,78 +1,85 @@
 Backbone.Siren = (function (_, Backbone) {
     'use strict';
 
-    var objCache = {};
+    function getUrl(entity) {
+        var url;
 
+        if (entity.href) {
+            url = entity.href
+        } else {
+            url = entity.links.filter(function (el) {
+                return _.indexOf(el.rel, 'self' > -1);
+            })[0];
+        }
+
+        return self;
+    }
 
     return {
         Model:  Backbone.Model.extend({
 
-            attributes: objCache
-
-
-            , endpoint: function (url) {
-                if (url) {
-                    objCache[url] = {};
-                }
-
-                return objCache[url];
-            }
-
-            , fetch: function () {
-                // calls Backbone.sync, signature: (method, model, options)
-                // @todo Backbone.sync fires a change event when the server representation is different than the one we already have
-                // Therefore seems it might make sense to always have methods fetch representations from the cache
-                // (otherwise we have to synchronize the Model with the cache)
-                return this.sync('read', this, {});
+            parse: function (response) {
+                this._data = response;
+                return response.properties;
             }
 
 
+            /**
+             * Accesses the "class" property of the Siren Object
+             */
             , classes: function () {
-                var arr = [];
-
-                for (var key in objCache) {
-                    if (objCache.hasOwnProperty(key)) {
-                        $.merge(arr, objCache[key]['class'] );
-                    }
-                }
-
-                return arr;
+                return this._data.class;
             }
 
 
+            /**
+             * Access to the representation's "self" url, or its "href" if there is one.
+             */
             , url: function() {
-                var arr = [];
-
-                for (var key in objCache) {
-                    if (objCache.hasOwnProperty(key)) {
-                        $.merge(arr, objCache[key].links.filter(function (link) {
-                            return $.inArray(link.rel, 'self') != -1;
-                        }).url);
-                    }
-                }
-
-                return arr;
+                return getUrl(this._data);
             }
 
+
+            /**
+             * Access to the representation's "actions"
+             */
             , actions: function () {
-                var arr = [];
+                return this._data.actions;
+            }
 
-                for (var key in objCache) {
-                    if (objCache.hasOwnProperty(key)) {
-                        $.merge(arr, objCache[key].actions);
+
+            /**
+             *
+             * @returns {jQuery.Deferred}
+             */
+            , entities: function (filters, options) {
+                var deferreds = []
+                , entities = this._data.entities;
+
+                // @todo Currently only have a filter for "rel"
+                entities = entities.filter(function (el) {
+                    return _.indexOf(el.rel, filters.rel) > -1;
+                });
+
+                _.each(entities, function (entity, index, list) {
+                    var url = getUrl(entity);
+
+                    if ((! entity.properties || options.force) && url) {
+                        deferreds.push($.getJSON(url));
+                    } else if (entity.properties) {
+                        deferreds.push(entity);
                     }
-                }
+                });
 
-                return arr;
+                return $.when(deferreds);
             }
 
-            , entity: function () {
-                return this.entities(arguments)[0];
+            , constructor: function (attributes, options) {
+                options = options || {};
+                options.parse = true;
+                Backbone.Model.call(this, attributes, options);
             }
 
-            , entities: function () {
-                return [1, 2, 3, 5];
-            }
         })
     };
 
