@@ -11,18 +11,24 @@
         root.Backbone.Siren = factory(_, Backbone);
     }
 
-}(this, function (_, Backbone) {
+}(this, function (_, Backbone, undefined) {
     'use strict';
 
     function getUrl(entity) {
-        var url;
+        var link, url;
 
         if (entity.href) {
             url = entity.href
         } else {
-            url = entity.links.filter(function (el) {
-                return _.indexOf(el.rel, 'self' > -1);
-            })[0].self;
+            link = entity.links.filter(function (link) {
+                return !!(link.rel && link.rel.filter(function (relType) {
+                    return relType == 'self';
+                }).length);
+            })[0];
+
+            if (link) {
+                url = link.href;
+            }
         }
 
         return url;
@@ -100,10 +106,33 @@
 
             , constructor: function (attributes, options) {
                 options = options || {};
+
+                // Force "parse" to be called on instantiation: http://stackoverflow.com/questions/11068989/backbone-js-using-parse-without-calling-fetch/14950519#14950519
                 options.parse = true;
                 Backbone.Model.call(this, attributes, options);
             }
 
+        })
+
+        , Collection: Backbone.Collection.extend({
+            parse: function (sirenObj) {
+                this._data = sirenObj;
+                return sirenObj.entities;
+            }
+
+
+            , url: function () {
+                return getUrl(this._data);
+            }
+
+
+            , constructor: function (attributes, options) {
+                options = options || {};
+
+                // Force "parse" to be called on instantiation: http://stackoverflow.com/questions/11068989/backbone-js-using-parse-without-calling-fetch/14950519#14950519
+                options.parse = true;
+                Backbone.Collection.call(this, attributes, options);
+            }
         })
     };
 
