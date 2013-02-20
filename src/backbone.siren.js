@@ -1,4 +1,17 @@
-Backbone.Siren = (function (_, Backbone) {
+(function(root, factory) {
+
+
+    if (typeof define === 'function' && define.amd) {
+        // AMD
+        define(['underscore', 'backbone'], function(_, Backbone) {
+            Backbone.Siren = factory(_, Backbone);
+        });
+    } else {
+        // Browser globals
+        root.Backbone.Siren = factory(_, Backbone);
+    }
+
+}(this, function (_, Backbone) {
     'use strict';
 
     function getUrl(entity) {
@@ -58,7 +71,7 @@ Backbone.Siren = (function (_, Backbone) {
              */
             , entities: function (filters, options) {
                 var deferreds = []
-                , entities = this._data.entities;
+                    , entities = this._data.entities;
 
                 // @todo Currently only have a filter for "rel"
                 entities = entities.filter(function (el) {
@@ -94,4 +107,4 @@ Backbone.Siren = (function (_, Backbone) {
         })
     };
 
-}(_, Backbone));
+}));
