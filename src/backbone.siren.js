@@ -3,7 +3,7 @@
 
     if (typeof define === 'function' && define.amd) {
         // AMD
-        define(['underscore', 'backbone'], function(_, Backbone) {
+        define(['underscore', 'backbone', 'backbone-relational'], function(_, Backbone) {
             Backbone.Siren = factory(_, Backbone);
         });
     } else {
@@ -13,6 +13,39 @@
 
 }(this, function (_, Backbone, undefined) {
     'use strict';
+
+    // The store
+    var _store = {}
+    , store = {
+        _store: {}
+
+        , key: function (model) {
+            return model.rel() + model.cid;
+        }
+
+        , add: function (model) {
+            _store[this.key(model)] = model;
+        }
+
+        , exists: function (model) {
+            return !!_store[this.key(model)];
+        }
+
+        , all: function () {
+            return _store;
+        }
+    };
+
+
+    /**
+     *
+     * @param name
+     * @param lowercaseFirstChar
+     * @return {String}
+     */
+    function toCamelCase(name, lowercaseFirstChar) {
+        return ((lowercaseFirstChar ? '' : '-') + name).replace(/(\-[a-z])/g, function(match){return match.toUpperCase().replace('-','');});
+    }
 
 
     /**
@@ -62,6 +95,22 @@
 
 
     /**
+     *
+     * @param {Boolean} verbose By default returns characters after the last '/'.  Set to true to pass the entire rel string.
+     * @return {String}
+     */
+    function rel(verbose) {
+        var _rel = this._data.rel[0];
+
+        if (! verbose) {
+            _rel = _rel.slice(_rel.lastIndexOf('/') + 1, _rel.length);
+        }
+
+        return _rel;
+    }
+
+
+    /**
      * Access to the representation's "title"
      *
      * @return {String}
@@ -82,10 +131,13 @@
 
 
     return {
-        Model: Backbone.Model.extend({
+        store: store
+
+        , Model: Backbone.Model.extend({
 
             url: url
             , classes: classes
+            , rel: rel
             , title: title
             , actions: actions
 
@@ -96,6 +148,19 @@
              */
             , parse: function (sirenObj) {
                 this._data = sirenObj;
+
+                var self = this;
+
+
+                var entities = this.entities();
+                entities.done(function (args) {
+                    _.each(args, function (entity, index) {
+                        var model = new Backbone.Siren.Model(entity);
+                        store.add(model);
+                    })
+                });
+
+
                 return sirenObj.properties;
             }
 
@@ -109,16 +174,20 @@
              * @returns {jQuery.Deferred}
              */
             , entities: function (filters, options) {
+                options = options || {};
+
                 var deferreds = []
-                    , entities = this._data.entities;
+                , entities = this._data.entities;
 
-                // @todo Currently only have a filter for "rel"
-                entities = entities.filter(function (el) {
-                    var rel = el.rel;
+                if (filters) {
+                    // @todo Currently only have a filter for "rel"
+                    entities = entities.filter(function (el) {
+                        var rel = el.rel;
 
-                    rel = rel.slice(rel.lastIndexOf('/') + 1, rel.length);
-                    return _.indexOf(rel, filters.rel) > -1;
-                });
+                        rel = rel.slice(rel.lastIndexOf('/') + 1, rel.length);
+                        return _.indexOf(rel, filters.rel) > -1;
+                    });
+                }
 
                 if (options.range) {
                     entities = entities.slice(options.range[0], options.range[1]);

@@ -9,10 +9,6 @@
     }
     , "entities": [
     {
-        "rel": ["api.kiva.org/rels/stats"]
-        , "href": "api.kiva.org/lenders/gabrielcastillo/stats"
-    }
-    , {
         "rel": ["api.kiva.org/rels/address"]
         , "properties": {
             "street": "1427 E 36th"
@@ -22,7 +18,7 @@
             , "country": "USA"
         }
         , "links": [
-            {"self": "api.kiva.org/lenders/gabrielcastillo/address"}
+            {"rel": ["self"], "href": "api.kiva.org/lenders/gabrielcastillo/address"}
         ]
     }
     , {
@@ -39,7 +35,7 @@
             , "lenderPageUrl": "//kiva.org/lender/gabrielcastillo"
         }
         , "links": [
-            {"self": "api.kiva.org/lenders/gabrielcastillo/profile"}
+            {"rel": ["self"], "href": "api.kiva.org/lenders/gabrielcastillo/profile"}
         ]
     }
     , {
@@ -50,7 +46,7 @@
             , "facebookEmail": "uglymunky@gmail.com"
         }
         , "links": [
-            {"self": "api.kiva.org/lenders/gabrielcastillo/facebook-settings"}
+            {"rel": ["self"], "href": "api.kiva.org/lenders/gabrielcastillo/facebook-settings"}
         ]
     }
     , {
@@ -63,7 +59,7 @@
             , "monthlyDonation": 0
         }
         , "links": [
-            {"self": "api.kiva.org/lenders/gabrielcastillo/credit-settings"}
+            {"rel": ["self"], "href": "api.kiva.org/lenders/gabrielcastillo/credit-settings"}
         ]
     }
     , {
@@ -75,12 +71,12 @@
             , "donation": 10
         }
         , "links": [
-            {"self": "api.kiva.org/lenders/gabrielcastillo/autolending-settings"}
+            {"rel": ["self"], "href": "api.kiva.org/lenders/gabrielcastillo/autolending-settings"}
         ]
     }
 ]
     , "actions": []
     , "links": [
-    {"self": "api.kiva.org/lenders/gabrielcastillo"}
+    {"rel": ["self"], "href": "api.kiva.org/lenders/gabrielcastillo"}
 ]
 }
