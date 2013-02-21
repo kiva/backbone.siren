@@ -34,44 +34,54 @@
         return url;
     }
 
-    return {
-        Model:  Backbone.Model.extend({
 
-            parse: function (sirenObj) {
+    /**
+     * Access to the representation's "self" url, or its "href" if there is one.
+     */
+    function url() {
+        return getUrl(this._data);
+    }
+
+
+    /**
+     * Accesses the "class" property of the Siren Object
+     */
+    function classes() {
+        return this._data.class;
+    }
+
+
+    /**
+     * Access to the representation's "actions"
+     */
+    function actions() {
+        return this._data.actions;
+    }
+
+
+    return {
+        Model: Backbone.Model.extend({
+
+            url: url
+            , classes: classes
+            , actions: actions
+
+
+            /**
+             *
+             * @param {Object} sirenObj
+             */
+            , parse: function (sirenObj) {
                 this._data = sirenObj;
                 return sirenObj.properties;
             }
 
 
             /**
-             * Accesses the "class" property of the Siren Object
-             */
-            , classes: function () {
-                return this._data.class;
-            }
-
-
-            /**
-             * Access to the representation's "self" url, or its "href" if there is one.
-             */
-            , url: function() {
-                return getUrl(this._data);
-            }
-
-
-            /**
-             * Access to the representation's "actions"
-             */
-            , actions: function () {
-                return this._data.actions;
-            }
-
-
-            /**
              *
-             * @param options
-             * @param options.force
-             * @param options.range see http://underscorejs.org/#range
+             * @param {Object} options
+             * @param {Boolean} options.force forces an ajax request
+             * @param {} options.range see http://underscorejs.org/#range
              *
              * @returns {jQuery.Deferred}
              */
@@ -114,15 +124,16 @@
 
         })
 
+
         , Collection: Backbone.Collection.extend({
-            parse: function (sirenObj) {
+
+            url: url
+            , classes: classes
+
+
+            , parse: function (sirenObj) {
                 this._data = sirenObj;
                 return sirenObj.entities;
-            }
-
-
-            , url: function () {
-                return getUrl(this._data);
             }
 
 
