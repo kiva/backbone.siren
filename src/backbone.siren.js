@@ -14,6 +14,12 @@
 }(this, function (_, Backbone, undefined) {
     'use strict';
 
+
+    /**
+     *
+     * @param entity
+     * @return {Object}
+     */
     function getUrl(entity) {
         var link, url;
 
@@ -37,6 +43,8 @@
 
     /**
      * Access to the representation's "self" url, or its "href" if there is one.
+     *
+     * @return {String}
      */
     function url() {
         return getUrl(this._data);
@@ -45,6 +53,8 @@
 
     /**
      * Accesses the "class" property of the Siren Object
+     *
+     * @return {Array}
      */
     function classes() {
         return this._data.class;
@@ -52,7 +62,19 @@
 
 
     /**
+     * Access to the representation's "title"
+     *
+     * @return {String}
+     */
+    function title() {
+        return this._data.title;
+    }
+
+
+    /**
      * Access to the representation's "actions"
+     *
+     * @return {Array}
      */
     function actions() {
         return this._data.actions;
@@ -64,6 +86,7 @@
 
             url: url
             , classes: classes
+            , title: title
             , actions: actions
 
 
@@ -135,6 +158,7 @@
 
             url: url
             , classes: classes
+            , title: title
 
 
             /**
