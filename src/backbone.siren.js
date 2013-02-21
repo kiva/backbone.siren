@@ -81,7 +81,7 @@
              *
              * @param {Object} options
              * @param {Boolean} options.force forces an ajax request
-             * @param {} options.range see http://underscorejs.org/#range
+             * @param {Array} options.range See http://underscorejs.org/#range
              *
              * @returns {jQuery.Deferred}
              */
@@ -98,10 +98,10 @@
                 });
 
                 if (options.range) {
-                    entities = entities.slice(options.range.start, options.range.end);
+                    entities = entities.slice(options.range[0], options.range[1]);
                 }
 
-                _.each(entities, function (entity, index, list) {
+                _.each(entities, function (entity) {
                     var url = getUrl(entity);
 
                     if ((! entity.properties || options.force) && url) {
@@ -114,6 +114,12 @@
                 return $.when(deferreds);
             }
 
+
+            /**
+             *
+             * @param {Object} attributes
+             * @param {Object} options
+             */
             , constructor: function (attributes, options) {
                 options = options || {};
 
@@ -131,12 +137,21 @@
             , classes: classes
 
 
+            /**
+             *
+             * @param {Object} sirenObj
+             */
             , parse: function (sirenObj) {
                 this._data = sirenObj;
                 return sirenObj.entities;
             }
 
 
+            /**
+             *
+             * @param {Object} attributes
+             * @param {Object} options
+             */
             , constructor: function (attributes, options) {
                 options = options || {};
 
