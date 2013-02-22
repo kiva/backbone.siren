@@ -100,10 +100,14 @@
      * @return {String}
      */
     function rel(verbose) {
-        var _rel = this._data.rel[0];
+        var _rel = this._data.rel;
 
-        if (! verbose) {
-            _rel = _rel.slice(_rel.lastIndexOf('/') + 1, _rel.length);
+        if (_rel) {
+            _rel = _rel[0];
+
+            if (! verbose) {
+                _rel = _rel.slice(_rel.lastIndexOf('/') + 1, _rel.length);
+            }
         }
 
         return _rel;
