@@ -20,7 +20,7 @@
         _store: {}
 
         , key: function (model) {
-            return model.rel() + model.cid;
+            return model.url() + '-' +  model.cid;
         }
 
         , add: function (model) {
