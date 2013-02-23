@@ -224,7 +224,7 @@
                 _.each(entities, function (entity) {
                     var url = getUrl(entity);
 
-                    if ((! entity.properties || options.force) && url) {
+                    if ((entity.href || options.force) && url) {
                         deferreds.push($.getJSON(url));
                     } else if (entity.properties) {
                         deferreds.push(entity);
