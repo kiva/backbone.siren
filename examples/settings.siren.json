@@ -72,17 +72,16 @@
         }
         , "entities": [
             {
-                "rel": ["api.kiva.org/rels/shitesettings"]
+                "rel": ["api.kiva.org/rels/conf"]
                 , "properties": {
-                "when": "never"
-                , "criteria": []
-                , "limit": 45
-                , "donation": 10
-
-            }
+                    "when": "never"
+                    , "criteria": []
+                    , "limit": 45
+                    , "donation": 10
+                }
                 , "links": [
-                {"rel": ["self"], "href": "api.kiva.org/loan/123"}
-            ]
+                    {"rel": ["self"], "href": "api.kiva.org/conf/222"}
+                ]
             }
             , {
                 "class": ["collection"]
