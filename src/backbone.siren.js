@@ -1,5 +1,7 @@
+/*global _ Backbone */
+
 /*
- * backbone.siren
+ * Backbone.Siren
  *
  * Copyright (c) 2013 Kiva Microfunds
  * Licensed under the MIT license.
@@ -7,7 +9,7 @@
  */
 
 (function(root, factory) {
-
+    'use strict';
 
     if (typeof define === 'function' && define.amd) {
         // AMD
@@ -25,9 +27,7 @@
     // The store
     var _store = {}
     , store = {
-        _store: {}
-
-        , key: function (model) {
+        key: function (model) {
             return model.url() + '-' +  model.cid;
         }
 
@@ -44,12 +44,15 @@
         }
     }
     , warn = function (msg) {
-        Backbone.Siren.settings.showWarnings && console && console.warn(msg);
+        if (Backbone.Siren.settings.showWarnings && console) {
+            console.warn(msg);
+        }
     };
 
 
     /**
      *
+     * @static
      * @param name
      * @param lowercaseFirstChar
      * @return {String}
@@ -61,6 +64,7 @@
 
     /**
      *
+     * @static
      * @param entity
      * @return {Object}
      */
@@ -68,7 +72,7 @@
         var link, url;
 
         if (entity.href) {
-            url = entity.href
+            url = entity.href;
         } else if (entity.links) {
             link = entity.links.filter(function (link) {
                 return !!(link.rel && link.rel.filter(function (relType) {
@@ -98,16 +102,17 @@
 
 
     /**
-     * Accesses the "class" property of the Siren Object
      *
+     * @static
      * @return {Array}
      */
     function getClasses(entity) {
-        return entity.class;
+        return entity['class'];
     }
 
 
     /**
+     * Accesses the "class" property of the Siren Object
      *
      * @return {Array}
      */
@@ -117,8 +122,9 @@
 
 
     /**
+     * By default returns characters after the last '/'.  Set to `verbose` to true to return the entire rel string.
      *
-     * @param {Boolean} verbose By default returns characters after the last '/'.  Set to true to pass the entire rel string.
+     * @param {Boolean} verbose
      * @return {String}
      */
     function rel(verbose) {
@@ -175,40 +181,46 @@
 
 
             /**
+             * http://backbonejs.org/#Model-parse
              *
              * @param {Object} sirenObj
              */
             , parse: function (sirenObj) {
                 var self = this;
 
-                var entities = this.resolveEntities();
-                entities.done(function (args) {
-                    _.each(args, function (entity, index) {
-                        if (_.indexOf(getClasses(entity), 'collection') == -1) {
-                            var model = new Backbone.Siren.Model(entity);
-                            self[toCamelCase(model.rel())] = model;
-                            self._entities.push(model);
-                            store.add(model);
-                        } else {
-                            // Its a collection, iterate over each entity in the array, create models and store in a backbone collection
-                            var collection = new Backbone.Siren.Collection(entity);
+                this.resolveEntities()
+                    .done(function (args) {
+                        _.each(args, function (entity) {
+                            if (_.indexOf(getClasses(entity), 'collection') == -1) {
+                                // Its a model
+                                var model = new Backbone.Siren.Model(entity);
 
-                            self[toCamelCase(collection.rel())] = collection;
-                            self._entities.push(collection);
+                                self[toCamelCase(model.rel())] = model;
+                                self._entities.push(model);
+                                store.add(model);
+                            } else {
+                                // Its a collection
+                                var collection = new Backbone.Siren.Collection(entity);
 
-                            // some stuff will have to be different.  For instance, the property name on the parent will have to be plural
-                        }
-                    })
-                });
-
+                                self[toCamelCase(collection.rel())] = collection;
+                                self._entities.push(collection);
+                            }
+                        });
+                    });
 
                 return sirenObj.properties;
             }
 
 
+            /**
+             * http://backbonejs.org/#Model-toJSON
+             *
+             * @param {Object} options
+             */
             , toJSON: function () {
-                var json = _.clone(this.attributes);
-                var entities = this.entities();
+                var json = _.clone(this.attributes)
+                , entities = this.entities();
+
                 _.each(entities, function (entity) {
                     json[entity.rel()] = entity;
                 });
@@ -217,6 +229,10 @@
             }
 
 
+            /**
+             * Access to the representation's "actions"
+             *
+             */
             , entities: function () {
                 return this._entities;
             }
@@ -265,6 +281,7 @@
 
 
             /**
+             * http://backbonejs.org/#Model-constructor
              *
              * @param {Object} attributes
              * @param {Object} options
@@ -289,6 +306,11 @@
             , rel: rel
 
 
+            /**
+             * http://backbonejs.org/#Collection-toJSON
+             *
+             * @param {Object} options
+             */
             , toJSON: function (options) {
                 return this.map(function(model){
                     return model.toJSON(options);
@@ -297,6 +319,7 @@
 
 
             /**
+             * http://backbonejs.org/#Collection-parse
              *
              * @param {Object} sirenObj
              */
@@ -307,11 +330,13 @@
                     models.push(model);
                     store.add(model);
                 });
+
                 return models;
             }
 
 
             /**
+             * http://backbonejs.org/#Collection-constructor
              *
              * @param {Object} attributes
              * @param {Object} options
