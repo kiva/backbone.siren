@@ -42,6 +42,9 @@
         , all: function () {
             return _store;
         }
+    }
+    , warn = function (msg) {
+        Backbone.Siren.settings.showWarnings && console && console.warn(msg);
     };
 
 
@@ -66,7 +69,7 @@
 
         if (entity.href) {
             url = entity.href
-        } else {
+        } else if (entity.links) {
             link = entity.links.filter(function (link) {
                 return !!(link.rel && link.rel.filter(function (relType) {
                     return relType == 'self';
@@ -76,6 +79,8 @@
             if (link) {
                 url = link.href;
             }
+        } else {
+            warn('Missing href or "self" link');
         }
 
         return url;
@@ -125,6 +130,8 @@
             if (! verbose) {
                 _rel = _rel.slice(_rel.lastIndexOf('/') + 1, _rel.length);
             }
+        } else {
+            warn('Missing "rel" attribute');
         }
 
         return _rel;
@@ -154,6 +161,10 @@
     return {
         store: store
 
+        , settings: {
+            showWarnings: true
+        }
+
         , Model: Backbone.Model.extend({
 
             url: url
@@ -168,7 +179,6 @@
              * @param {Object} sirenObj
              */
             , parse: function (sirenObj) {
-                this._data = sirenObj;
                 var self = this;
 
                 var entities = this.entities();
@@ -179,9 +189,10 @@
                             self[toCamelCase(model.rel())] = model;
                             store.add(model);
                         } else {
+                            // Its a collection, iterate over each entity in the array, create models and store in a backbone collection
                             var collection = new Backbone.Siren.Collection(entity);
-                            self[toCamelCase('loans')] = collection;
-                            self.add(collection);
+
+                            self[toCamelCase(collection.rel())] = collection;
 
                             // some stuff will have to be different.  For instance, the property name on the parent will have to be plural
                         }
@@ -240,19 +251,19 @@
              * @param {Object} attributes
              * @param {Object} options
              */
-            , constructor: function (attributes, options) {
+            , constructor: function (sirenObj, options) {
                 options = options || {};
+                options.parse = true; // Force "parse" to be called on instantiation: http://stackoverflow.com/questions/11068989/backbone-js-using-parse-without-calling-fetch/14950519#14950519
 
-                // Force "parse" to be called on instantiation: http://stackoverflow.com/questions/11068989/backbone-js-using-parse-without-calling-fetch/14950519#14950519
-                options.parse = true;
-                Backbone.Model.call(this, attributes, options);
+                this._data = sirenObj;
+
+                Backbone.Model.call(this, sirenObj, options);
             }
 
         })
 
 
         , Collection: Backbone.Collection.extend({
-
             url: url
             , classes: classes
             , title: title
@@ -264,8 +275,13 @@
              * @param {Object} sirenObj
              */
             , parse: function (sirenObj) {
-                this._data = sirenObj;
-                return sirenObj.entities;
+                var models = [];
+                _.each(sirenObj.entities, function (entity) {
+                    var model = new Backbone.Siren.Model(entity);
+                    models.push(model);
+                    store.add(model);
+                });
+                return models;
             }
 
 
@@ -274,12 +290,13 @@
              * @param {Object} attributes
              * @param {Object} options
              */
-            , constructor: function (attributes, options) {
+            , constructor: function (sirenObj, options) {
                 options = options || {};
+                options.parse = true; // Force "parse" to be called on instantiation: http://stackoverflow.com/questions/11068989/backbone-js-using-parse-without-calling-fetch/14950519#14950519
 
-                // Force "parse" to be called on instantiation: http://stackoverflow.com/questions/11068989/backbone-js-using-parse-without-calling-fetch/14950519#14950519
-                options.parse = true;
-                Backbone.Collection.call(this, attributes, options);
+                this._data = sirenObj;
+
+                Backbone.Collection.call(this, sirenObj, options);
             }
         })
     };

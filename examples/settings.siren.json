@@ -72,39 +72,55 @@
         }
         , "entities": [
             {
+                "rel": ["api.kiva.org/rels/shitesettings"]
+                , "properties": {
+                "when": "never"
+                , "criteria": []
+                , "limit": 45
+                , "donation": 10
+
+            }
+                , "links": [
+                {"rel": ["self"], "href": "api.kiva.org/loan/123"}
+            ]
+            }
+            , {
                 "class": ["collection"]
                 , "rel": ["api.kiva.org/rels/loans"]
                 , "entities": [
                     {
                         "rel": ["api.kiva.org/rels/loan"]
                         , "properties": {
-                            "locaiont": "far away"
+                            "location": "far away"
                             , "loan_amount": 300
                         }
                         , "links": [
-                            {"rel": ["self"], "href": "api.kiva.org/lenders/gabrielcastillo/autolending-settings"}
+                            {"rel": ["self"], "href": "api.kiva.org/loan/123"}
                         ]
                     }
                     , {
                         "rel": ["api.kiva.org/rels/loan"]
                         , "properties": {
-                            "locaiont": "far away"
+                            "location": "far away"
                             , "loan_amount": 400
                         }
                         , "links": [
-                            {"rel": ["self"], "href": "api.kiva.org/lenders/gabrielcastillo/autolending-settings"}
+                            {"rel": ["self"], "href": "api.kiva.org/loan/234"}
                         ]
                     }
                     , {
                         "rel": ["api.kiva.org/rels/loan"]
                         , "properties": {
-                            "locaiont": "far away"
+                            "location": "far away"
                             , "loan_amount": 500
                         }
                         , "links": [
-                            {"rel": ["self"], "href": "api.kiva.org/lenders/gabrielcastillo/autolending-settings"}
+                            {"rel": ["self"], "href": "api.kiva.org/loan/345"}
                         ]
                     }
+                ]
+                , "links": [
+                    {"rel": ["self"], "href": "api.kiva.org/lender/gabrielcastillo/autolending-settings/loans"}
                 ]
             }
         ]
