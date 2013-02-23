@@ -1,3 +1,11 @@
+/*
+ * backbone.siren
+ *
+ * Copyright (c) 2013 Kiva Microfunds
+ * Licensed under the MIT license.
+ * https://github.com/kiva/backbone.siren/blob/master/license.txt
+ */
+
 (function(root, factory) {
 
 
