@@ -70,6 +70,44 @@
             , "limit": 45
             , "donation": 10
         }
+        , "entities": [
+            {
+                "class": ["collection"]
+                , "rel": ["api.kiva.org/rels/loans"]
+                , "entities": [
+                    {
+                        "rel": ["api.kiva.org/rels/loan"]
+                        , "properties": {
+                            "locaiont": "far away"
+                            , "loan_amount": 300
+                        }
+                        , "links": [
+                            {"rel": ["self"], "href": "api.kiva.org/lenders/gabrielcastillo/autolending-settings"}
+                        ]
+                    }
+                    , {
+                        "rel": ["api.kiva.org/rels/loan"]
+                        , "properties": {
+                            "locaiont": "far away"
+                            , "loan_amount": 400
+                        }
+                        , "links": [
+                            {"rel": ["self"], "href": "api.kiva.org/lenders/gabrielcastillo/autolending-settings"}
+                        ]
+                    }
+                    , {
+                        "rel": ["api.kiva.org/rels/loan"]
+                        , "properties": {
+                            "locaiont": "far away"
+                            , "loan_amount": 500
+                        }
+                        , "links": [
+                            {"rel": ["self"], "href": "api.kiva.org/lenders/gabrielcastillo/autolending-settings"}
+                        ]
+                    }
+                ]
+            }
+        ]
         , "links": [
             {"rel": ["self"], "href": "api.kiva.org/lenders/gabrielcastillo/autolending-settings"}
         ]

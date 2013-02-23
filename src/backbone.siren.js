@@ -97,8 +97,17 @@
      *
      * @return {Array}
      */
+    function getClasses(entity) {
+        return entity.class;
+    }
+
+
+    /**
+     *
+     * @return {Array}
+     */
     function classes() {
-        return this._data.class;
+        return getClasses(this._data);
     }
 
 
@@ -165,9 +174,17 @@
                 var entities = this.entities();
                 entities.done(function (args) {
                     _.each(args, function (entity, index) {
-                        var model = new Backbone.Siren.Model(entity);
-                        self[toCamelCase(model.rel())] = model;
-                        store.add(model);
+                        if (_.indexOf(getClasses(entity), 'collection') == -1) {
+                            var model = new Backbone.Siren.Model(entity);
+                            self[toCamelCase(model.rel())] = model;
+                            store.add(model);
+                        } else {
+                            var collection = new Backbone.Siren.Collection(entity);
+                            self[toCamelCase('loans')] = collection;
+                            self.add(collection);
+
+                            // some stuff will have to be different.  For instance, the property name on the parent will have to be plural
+                        }
                     })
                 });
 
@@ -239,6 +256,7 @@
             url: url
             , classes: classes
             , title: title
+            , rel: rel
 
 
             /**

@@ -5,19 +5,89 @@
     <script src="/components/jquery/jquery.js"></script>
     <script src="/components/underscore/underscore.js"></script>
     <script src="/components/backbone/backbone.js"></script>
-    <script src="/src/Backbone.Siren.js"></script>
+    <script src="/components/backbone-relational/backbone-relational.js"></script>
+    <script src="/src/backbone.siren.js"></script>
 </head>
 
 <body>
 <script>
 
     var sirenUrl = 'settings.siren.json';
-
     $.getJSON(sirenUrl, function (results) {
 //        var bbsiren = new Backbone.Siren.Model(Backbone.Siren.Model.prototype.parse(results));
-        bbsiren = new Backbone.Siren.Model(results);
-
+        settings = new Backbone.Siren.Model(results);
     });
+
+
+    /**
+     * Never used backbone-relational, create some simple models as a guide.
+     *
+     */
+    var jsonUrl = 'settings.json';
+    $.getJSON(jsonUrl, function (results) {
+        Address = Backbone.RelationalModel.extend({
+            url: '/address'
+        });
+
+        AutolendingSettings = Backbone.RelationalModel.extend({
+            url: '/auto'
+        });
+
+        CreditSettings = Backbone.RelationalModel.extend({
+            url: '/credit'
+        });
+
+        Facebook = Backbone.RelationalModel.extend({
+            url: '/facebook'
+        });
+
+        Profile = Backbone.RelationalModel.extend({
+            url: '/profile'
+        });
+
+        Thing = Backbone.RelationalModel.extend({
+            url: '/thing'
+        });
+
+        Things = Backbone.Collection.extend();
+
+        Settings = Backbone.RelationalModel.extend({
+            relations: [
+                {
+                    type: Backbone.HasOne
+                    , key: 'address'
+                    , relatedModel: 'Address'
+                }
+                , {
+                    type: Backbone.HasOne
+                    , key: 'autolending-settings'
+                    , relatedModel: 'AutolendingSettings'
+                }
+                , {
+                    type: Backbone.HasOne
+                    , key: 'credit-settings'
+                    , relatedModel: 'CreditSettings'
+                }
+                , {
+                    type: Backbone.HasOne
+                    , key: 'facebook'
+                    , relatedModel: 'Facebook'
+                }
+                , {
+                    type: Backbone.HasOne
+                    , key: 'profile'
+                    , relatedModel: 'Profile'
+                }
+                , {
+                    type: Backbone.HasMany
+                    , key: 'things'
+                    , relatedModel: 'Thing'
+                }
+            ]
+        });
+
+        rSettings = new Settings(results);
+    })
 
 </script>
 </body>

@@ -1,0 +1,51 @@
+{
+    "lastName": "castillo"
+    , "firstName": "gabriel"
+    , "id": 363934
+    , "email": "gcastillo@gmx.com"
+    , "member_since" : "2008-11-22T05:11:09Z"
+    , "password": "@TODO Not sure how to do this yet"
+    , "things": [
+        {"width": 1, "depth": 2, "height": 3}
+        , {"width": 1, "depth": 2, "height": 3}
+        , {"width": 1, "depth": 2, "height": 3}
+        , {"width": 1, "depth": 2, "height": 3}
+        , {"width": 1, "depth": 2, "height": 3}
+    ]
+    , "address": {
+        "street": "1427 E 36th"
+        , "city": "Oakland"
+        , "state": "CA"
+        , "zip": "94602"
+        , "country": "USA"
+    }
+    , "profile": {
+        "name": "gcastillo"
+        , "city": "Oakland"
+        , "state/": "CA"
+        , "country": "USA"
+        , "occupation": "Web Developer"
+        , "website": "seemunkygo.com"
+        , "iLoanBecause": "me likey"
+        , "describeWork": "its fun"
+        , "lenderPageUrl": "//kiva.org/lender/gabrielcastillo"
+    }
+    , "facebook": {
+        "automaticallPostToWall": ["loans", "repayments"]
+        , "facebookConnected": true
+        , "facebookEmail": "uglymunky@gmail.com"
+    }
+    , "credit-settings": {
+        "repayment": "deposit"
+        , "inactivity": "donate"
+        , "autolender": "never"
+        , "monthlyDeposit": 0
+        , "monthlyDonation": 0
+    }
+    , "autolending-settings": {
+        "when": "never"
+        , "criteria": []
+        , "limit": 45
+        , "donation": 10
+    }
+}
