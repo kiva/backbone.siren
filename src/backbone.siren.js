@@ -104,10 +104,101 @@
     /**
      *
      * @static
+     * @param {Object} sirenObj Can be a siren entity or siren action object
      * @return {Array}
      */
-    function getClasses(entity) {
-        return entity['class'];
+    function getClassNames(sirenObj) {
+        return sirenObj['class'];
+    }
+
+
+    /**
+     *
+     * @static
+     * @param {Array} entities
+     * @param {Object} filters
+     * @return {Array}
+     */
+    function filter(entities, filters) {
+        return _.filter(entities, function (entity) {
+            return ModelHasFilterProperties(entity, filters);
+        });
+    }
+
+
+    /**
+     *
+     * @param entity
+     * @param filters
+     * @return {Boolean}
+     */
+    function ModelHasFilterProperties(entity, filters) {
+        var hasProperties = true;
+
+        if (filters.className) {
+            hasProperties = entity.hasClass(filters.className);
+        }
+
+        if (filters.rel) {
+            hasProperties = hasProperties && (entity.rel() == filters.rel);
+        }
+
+        return hasProperties;
+    }
+
+
+    /**
+     *
+     * @param {Object} obj
+     * @param {Object} filtersObj
+     * @return {Boolean}
+     */
+    function ObjectHasFilterProperties(obj, filtersObj) {
+        var hasProperties = true;
+
+        if (filtersObj.className) {
+            hasProperties = _hasClass(obj, filtersObj.className);
+        }
+
+        if (filtersObj.rel) {
+            hasProperties = hasRel(obj, filtersObj.rel);
+        }
+
+        return hasProperties;
+    }
+
+
+    /**
+     *
+     * @static
+     * @param sirenObj
+     * @param className
+     * @return {Boolean}
+     */
+    function _hasClass(sirenObj, className) {
+        return _.indexOf(getClassNames(sirenObj), className) > -1;
+    }
+
+
+    /**
+     *
+     * @param className
+     * @return {Boolean}
+     */
+    function hasClass(className) {
+        return _hasClass(this._data, className);
+    }
+
+
+    /**
+     *
+     * @static
+     * @param sirenObj
+     * @param relValue
+     * @return {Boolean}
+     */
+    function hasRel(sirenObj, relValue) {
+        return getRel(sirenObj) == relValue;
     }
 
 
@@ -117,18 +208,19 @@
      * @return {Array}
      */
     function classes() {
-        return getClasses(this._data);
+        return getClassNames(this._data);
     }
 
 
     /**
-     * By default returns characters after the last '/'.  Set to `verbose` to true to return the entire rel string.
      *
-     * @param {Boolean} verbose
+     * @static
+     * @param sirenObj
+     * @param verbose
      * @return {String}
      */
-    function rel(verbose) {
-        var _rel = this._data.rel;
+    function getRel(sirenObj, verbose) {
+        var _rel = sirenObj.rel;
 
         if (_rel) {
             _rel = _rel[0];
@@ -145,22 +237,23 @@
 
 
     /**
+     * By default returns characters after the last '/'.  Set to `verbose` to true to return the entire rel string.
+     *
+     * @param {Boolean} verbose
+     * @return {String}
+     */
+    function rel(verbose) {
+        return getRel(this._data, verbose);
+    }
+
+
+    /**
      * Access to the representation's "title"
      *
      * @return {String}
      */
     function title() {
         return this._data.title;
-    }
-
-
-    /**
-     * Access to the representation's "actions"
-     *
-     * @return {Array}
-     */
-    function actions() {
-        return this._data.actions;
     }
 
 
@@ -175,9 +268,9 @@
 
             url: url
             , classes: classes
+            , hasClass: hasClass
             , rel: rel
             , title: title
-            , actions: actions
 
 
             /**
@@ -193,7 +286,7 @@
                         _.each(args, function (entity) {
                             var camelCaseRel, model, collection;
 
-                            if (_.indexOf(getClasses(entity), 'collection') == -1) {
+                            if (_.indexOf(getClassNames(entity), 'collection') == -1) {
                                 // Its a model
                                 model = new Backbone.Siren.Model(entity);
                                 camelCaseRel = toCamelCase(model.rel());
@@ -236,12 +329,37 @@
             /**
              * Filters the entitie's properties and returns only sub-entities
              *
+             * @return {Array}
              */
-            , entities: function () {
-                var self = this;
-                return _.filter(this, function (val, name) {
+
+            , entities: function (filters) {
+                var self = this
+                , entities = _.filter(this, function (val, name) {
                     return _.indexOf(self._entities, name) > -1;
                 });
+
+                if (filters) {
+                    entities = filter(entities, filters);
+                }
+
+                return entities;
+            }
+
+
+            /**
+             * Access to the representation's "actions"
+             *
+             * @return {Array}
+             */
+            , actions: function (filterObj) {
+                var actions = this._data.actions;
+
+                if (filterObj) {
+                    actions = _.filter(actions, function (action) {
+                        return ObjectHasFilterProperties(action, filterObj)
+                    });
+                }
+                return actions;
             }
 
 
@@ -251,7 +369,7 @@
              * @param {Boolean} options.force forces an ajax request
              * @param {Array} options.range See http://underscorejs.org/#range
              *
-             * @returns {jQuery.Deferred}
+             * @return {jQuery.Deferred}
              */
             , resolveEntities: function (filters, options) {
                 options = options || {};
@@ -309,6 +427,7 @@
         , Collection: Backbone.Collection.extend({
             url: url
             , classes: classes
+            , hasClass: hasClass
             , title: title
             , rel: rel
 
@@ -322,6 +441,20 @@
                 return this.map(function(model){
                     return model.toJSON(options);
                 });
+            }
+
+
+            /**
+             *
+             * @param {Function|Object} arg
+             * @return {Array}
+             */
+            , filter: function (arg) {
+                if (typeof arg ==  'function') {
+                    return _filter(this, arg);
+                } else {
+                    return filter(this, arg);
+                }
             }
 
 
