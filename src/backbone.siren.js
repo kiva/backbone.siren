@@ -152,14 +152,13 @@
              */
             , parse: function (sirenObj) {
                 this._data = sirenObj;
-
                 var self = this;
-
 
                 var entities = this.entities();
                 entities.done(function (args) {
                     _.each(args, function (entity, index) {
                         var model = new Backbone.Siren.Model(entity);
+                        self[toCamelCase(model.rel())] = model;
                         store.add(model);
                     })
                 });
