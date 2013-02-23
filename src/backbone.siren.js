@@ -191,19 +191,23 @@
                 this.resolveEntities()
                     .done(function (args) {
                         _.each(args, function (entity) {
+                            var camelCaseRel, model, collection;
+
                             if (_.indexOf(getClasses(entity), 'collection') == -1) {
                                 // Its a model
-                                var model = new Backbone.Siren.Model(entity);
+                                model = new Backbone.Siren.Model(entity);
+                                camelCaseRel = toCamelCase(model.rel());
 
-                                self[toCamelCase(model.rel())] = model;
-                                self._entities.push(model);
+                                self[camelCaseRel] = model;
+                                self._entities.push(camelCaseRel);
                                 store.add(model);
                             } else {
                                 // Its a collection
-                                var collection = new Backbone.Siren.Collection(entity);
+                                collection = new Backbone.Siren.Collection(entity);
+                                camelCaseRel = toCamelCase(collection.rel());
 
-                                self[toCamelCase(collection.rel())] = collection;
-                                self._entities.push(collection);
+                                self[camelCaseRel] = collection;
+                                self._entities.push(camelCaseRel);
                             }
                         });
                     });
@@ -230,11 +234,14 @@
 
 
             /**
-             * Access to the representation's "actions"
+             * Filters the entitie's properties and returns only sub-entities
              *
              */
             , entities: function () {
-                return this._entities;
+                var self = this;
+                return _.filter(this, function (val, name) {
+                    return _.indexOf(self._entities, name) > -1;
+                });
             }
 
 
