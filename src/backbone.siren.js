@@ -226,7 +226,7 @@
 
                     if ((entity.href || options.force) && url) {
                         deferreds.push($.getJSON(url));
-                    } else if (entity.properties) {
+                    } else if (! entity.href) {
                         deferreds.push(entity);
                     }
                 });
