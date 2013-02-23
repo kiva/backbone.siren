@@ -181,18 +181,20 @@
             , parse: function (sirenObj) {
                 var self = this;
 
-                var entities = this.entities();
+                var entities = this.resolveEntities();
                 entities.done(function (args) {
                     _.each(args, function (entity, index) {
                         if (_.indexOf(getClasses(entity), 'collection') == -1) {
                             var model = new Backbone.Siren.Model(entity);
                             self[toCamelCase(model.rel())] = model;
+                            self._entities.push(model);
                             store.add(model);
                         } else {
                             // Its a collection, iterate over each entity in the array, create models and store in a backbone collection
                             var collection = new Backbone.Siren.Collection(entity);
 
                             self[toCamelCase(collection.rel())] = collection;
+                            self._entities.push(collection);
 
                             // some stuff will have to be different.  For instance, the property name on the parent will have to be plural
                         }
@@ -204,6 +206,22 @@
             }
 
 
+            , toJSON: function () {
+                var json = _.clone(this.attributes);
+                var entities = this.entities();
+                _.each(entities, function (entity) {
+                    json[entity.rel()] = entity;
+                });
+
+                return json;
+            }
+
+
+            , entities: function () {
+                return this._entities;
+            }
+
+
             /**
              *
              * @param {Object} options
@@ -212,7 +230,7 @@
              *
              * @returns {jQuery.Deferred}
              */
-            , entities: function (filters, options) {
+            , resolveEntities: function (filters, options) {
                 options = options || {};
 
                 var deferreds = []
@@ -255,7 +273,8 @@
                 options = options || {};
                 options.parse = true; // Force "parse" to be called on instantiation: http://stackoverflow.com/questions/11068989/backbone-js-using-parse-without-calling-fetch/14950519#14950519
 
-                this._data = sirenObj;
+                this._data = sirenObj; // Stores the entire siren object in raw json
+                this._entities = []; // Stores sub-entity models
 
                 Backbone.Model.call(this, sirenObj, options);
             }
@@ -268,6 +287,13 @@
             , classes: classes
             , title: title
             , rel: rel
+
+
+            , toJSON: function (options) {
+                return this.map(function(model){
+                    return model.toJSON(options);
+                });
+            }
 
 
             /**
