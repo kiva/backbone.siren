@@ -451,7 +451,7 @@
              */
             , filter: function (arg) {
                 if (typeof arg ==  'function') {
-                    return _filter(this, arg);
+                    return _.filter(this, arg);
                 } else {
                     return filter(this, arg);
                 }
