@@ -121,7 +121,7 @@
      */
     function filter(entities, filters) {
         return _.filter(entities, function (entity) {
-            return ModelHasFilterProperties(entity, filters);
+            return modelHasFilterProperties(entity, filters);
         });
     }
 
@@ -132,7 +132,7 @@
      * @param filters
      * @return {Boolean}
      */
-    function ModelHasFilterProperties(entity, filters) {
+    function modelHasFilterProperties(entity, filters) {
         var hasProperties = true;
 
         if (filters.className) {
@@ -153,7 +153,7 @@
      * @param {Object} filtersObj
      * @return {Boolean}
      */
-    function ObjectHasFilterProperties(obj, filtersObj) {
+    function objectHasFilterProperties(obj, filtersObj) {
         var hasProperties = true;
 
         if (filtersObj.className) {
@@ -356,7 +356,7 @@
 
                 if (filterObj) {
                     actions = _.filter(actions, function (action) {
-                        return ObjectHasFilterProperties(action, filterObj)
+                        return objectHasFilterProperties(action, filterObj);
                     });
                 }
                 return actions;

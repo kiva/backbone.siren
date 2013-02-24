@@ -6,8 +6,7 @@
 	, "maxcomplexity": 5
 	, "maxdepth": 3
 	, "maxerr": 1000000
-	, "maxstatements": 15
-	, "newcap": true
+    , "newcap": true
 	, "noarg": true
 	, "noempty": true
 	, "unused": true
