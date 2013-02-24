@@ -365,36 +365,15 @@
 
             /**
              *
-             * @param {Object} options
-             * @param {Boolean} options.force forces an ajax request
-             * @param {Array} options.range See http://underscorejs.org/#range
-             *
              * @return {jQuery.Deferred}
              */
-            , resolveEntities: function (filters, options) {
-                options = options || {};
+            , resolveEntities: function () {
+                var deferreds = [];
 
-                var deferreds = []
-                , entities = this._data.entities;
-
-                if (filters) {
-                    // @todo Currently only have a filter for "rel"
-                    entities = entities.filter(function (el) {
-                        var rel = el.rel;
-
-                        rel = rel.slice(rel.lastIndexOf('/') + 1, rel.length);
-                        return _.indexOf(rel, filters.rel) > -1;
-                    });
-                }
-
-                if (options.range) {
-                    entities = entities.slice(options.range[0], options.range[1]);
-                }
-
-                _.each(entities, function (entity) {
+                _.each(this._data.entities, function (entity) {
                     var url = getUrl(entity);
 
-                    if ((entity.href || options.force) && url) {
+                    if (entity.href && url) {
                         deferreds.push($.getJSON(url));
                     } else if (! entity.href) {
                         deferreds.push(entity);
@@ -416,7 +395,7 @@
                 options.parse = true; // Force "parse" to be called on instantiation: http://stackoverflow.com/questions/11068989/backbone-js-using-parse-without-calling-fetch/14950519#14950519
 
                 this._data = sirenObj; // Stores the entire siren object in raw json
-                this._entities = []; // Stores sub-entity models
+                this._entities = []; // Stores sub-entity names
 
                 Backbone.Model.call(this, sirenObj, options);
             }
