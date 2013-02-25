@@ -247,6 +247,18 @@
     }
 
 
+    function actions(filters) {
+        var actions = this._data.actions;
+
+        if (filters) {
+            actions = _.filter(actions, function (action) {
+                return objectHasFilterProperties(action, filters);
+            });
+        }
+        return actions;
+    }
+
+
     /**
      * Access to the representation's "title"
      *
@@ -257,12 +269,33 @@
     }
 
 
+    function parseActions(model, options) {
+         _.each(model.actions(), function (action) {
+            model[toCamelCase(action.name, true)] = function () {
+
+                options.url = action.href;
+
+                if (action.method) {
+                    options.method = action.method;
+                }
+
+                if (action.type) {
+                    options.type = action.type;
+                }
+
+                return model.save(arguments, options);
+            }
+         });
+    }
+
+
     return {
         store: store
 
         , settings: {
             showWarnings: true
         }
+
 
         , Model: Backbone.Model.extend({
 
@@ -271,6 +304,7 @@
             , hasClass: hasClass
             , rel: rel
             , title: title
+            , actions: actions
 
 
             /**
@@ -278,32 +312,30 @@
              *
              * @param {Object} sirenObj
              */
-            , parse: function (sirenObj) {
+            , parse: function (sirenObj, options) {
                 var self = this;
 
                 this.resolveEntities()
                     .done(function (args) {
                         _.each(args, function (entity) {
-                            var camelCaseRel, model, collection;
+                            var camelCaseRel, bbSiren;
 
                             if (_.indexOf(getClassNames(entity), 'collection') == -1) {
                                 // Its a model
-                                model = new Backbone.Siren.Model(entity);
-                                camelCaseRel = toCamelCase(model.rel());
-
-                                self[camelCaseRel] = model;
-                                self._entities.push(camelCaseRel);
-                                store.add(model);
+                                bbSiren = new Backbone.Siren.Model(entity);
+                                store.add(bbSiren);
                             } else {
                                 // Its a collection
-                                collection = new Backbone.Siren.Collection(entity);
-                                camelCaseRel = toCamelCase(collection.rel());
-
-                                self[camelCaseRel] = collection;
-                                self._entities.push(camelCaseRel);
+                                bbSiren = new Backbone.Siren.Collection(entity);
                             }
+
+                            camelCaseRel = toCamelCase(bbSiren.rel());
+                            self[camelCaseRel] = bbSiren;
+                            self._entities.push(camelCaseRel);
                         });
                     });
+
+                parseActions(this, options);
 
                 return sirenObj.properties;
             }
@@ -331,7 +363,6 @@
              *
              * @return {Array}
              */
-
             , entities: function (filters) {
                 var self = this
                 , entities = _.filter(this, function (val, name) {
@@ -343,23 +374,6 @@
                 }
 
                 return entities;
-            }
-
-
-            /**
-             * Access to the representation's "actions"
-             *
-             * @return {Array}
-             */
-            , actions: function (filterObj) {
-                var actions = this._data.actions;
-
-                if (filterObj) {
-                    actions = _.filter(actions, function (action) {
-                        return objectHasFilterProperties(action, filterObj);
-                    });
-                }
-                return actions;
             }
 
 
@@ -409,6 +423,7 @@
             , hasClass: hasClass
             , title: title
             , rel: rel
+            , actions: actions
 
 
             /**
@@ -442,13 +457,15 @@
              *
              * @param {Object} sirenObj
              */
-            , parse: function (sirenObj) {
+            , parse: function (sirenObj, options) {
                 var models = [];
                 _.each(sirenObj.entities, function (entity) {
                     var model = new Backbone.Siren.Model(entity);
                     models.push(model);
                     store.add(model);
                 });
+
+                parseActions(this, options);
 
                 return models;
             }
