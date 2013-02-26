@@ -27,16 +27,12 @@
     // The store
     var _store = {}
     , store = {
-        key: function (model) {
-            return model.url() + '-' +  model.cid;
-        }
-
-        , add: function (model) {
-            _store[this.key(model)] = model;
+        add: function (model) {
+            _store[model.url()] = model;
         }
 
         , exists: function (model) {
-            return !!_store[this.key(model)];
+            return !!_store[model.url()];
         }
 
         , all: function () {
