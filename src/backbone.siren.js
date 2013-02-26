@@ -54,11 +54,10 @@
      *
      * @static
      * @param name
-     * @param lowercaseFirstChar
      * @return {String}
      */
-    function toCamelCase(name, lowercaseFirstChar) {
-        return ((lowercaseFirstChar ? '' : '-') + name).replace(/(\-[a-z])/g, function(match){return match.toUpperCase().replace('-','');});
+    function toCamelCase(name) {
+        return name.replace(/(\-[a-z])/g, function(match){return match.toUpperCase().replace('-','');});
     }
 
 
@@ -140,7 +139,7 @@
         }
 
         if (filters.rel) {
-            hasProperties = hasProperties && (entity.rel() == filters.rel);
+            hasProperties = hasProperties && (entity.name() == filters.rel);
         }
 
         return hasProperties;
@@ -216,46 +215,48 @@
      *
      * @static
      * @param sirenObj
-     * @param verbose
      * @return {String}
      */
-    function getRel(sirenObj, verbose) {
-        var _rel = sirenObj.rel;
+    function getName(sirenObj) {
+        var rel = sirenObj.rel[0];
 
-        if (_rel) {
-            _rel = _rel[0];
-
-            if (! verbose) {
-                _rel = _rel.slice(_rel.lastIndexOf('/') + 1, _rel.length);
-            }
-        } else {
-            warn('Missing "rel" attribute');
+        if (rel) {
+            rel = rel.slice(rel.lastIndexOf('/') + 1, rel.length);
         }
 
-        return _rel;
+        return rel;
+    }
+
+
+    function name() {
+        return getName(this._data);
+    }
+
+
+    function getRel(sirenObj) {
+        return sirenObj.rel;
     }
 
 
     /**
      * By default returns characters after the last '/'.  Set to `verbose` to true to return the entire rel string.
      *
-     * @param {Boolean} verbose
      * @return {String}
      */
-    function rel(verbose) {
-        return getRel(this._data, verbose);
+    function rel() {
+        return getRel(this._data);
     }
 
 
     function actions(filters) {
-        var actions = this._data.actions;
+        var _actions = this._data.actions;
 
         if (filters) {
-            actions = _.filter(actions, function (action) {
+            _actions = _.filter(_actions, function (action) {
                 return objectHasFilterProperties(action, filters);
             });
         }
-        return actions;
+        return _actions;
     }
 
 
@@ -271,7 +272,7 @@
 
     function parseActions(model, options) {
          _.each(model.actions(), function (action) {
-            model[toCamelCase(action.name, true)] = function () {
+            model[toCamelCase(action.name)] = function () {
 
                 options.url = action.href;
 
@@ -284,7 +285,7 @@
                 }
 
                 return model.save(arguments, options);
-            }
+            };
          });
     }
 
@@ -303,6 +304,7 @@
             , classes: classes
             , hasClass: hasClass
             , rel: rel
+            , name: name
             , title: title
             , actions: actions
 
@@ -329,8 +331,8 @@
                                 bbSiren = new Backbone.Siren.Collection(entity);
                             }
 
-                            camelCaseRel = toCamelCase(bbSiren.rel());
-                            self[camelCaseRel] = bbSiren;
+                            camelCaseRel = toCamelCase(bbSiren.name());
+                            self.set(camelCaseRel, bbSiren);
                             self._entities.push(camelCaseRel);
                         });
                     });
@@ -351,7 +353,7 @@
                 , entities = this.entities();
 
                 _.each(entities, function (entity) {
-                    json[entity.rel()] = entity;
+                    json[entity.name()] = entity;
                 });
 
                 return json;
@@ -423,6 +425,7 @@
             , hasClass: hasClass
             , title: title
             , rel: rel
+            , name: name
             , actions: actions
 
 
