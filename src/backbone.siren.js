@@ -13,7 +13,7 @@
 
     if (typeof define === 'function' && define.amd) {
         // AMD
-        define(['underscore', 'backbone', 'backbone-relational'], function(_, Backbone) {
+        define(['underscore', 'backbone'], function(_, Backbone) {
             Backbone.Siren = factory(_, Backbone);
         });
     } else {
