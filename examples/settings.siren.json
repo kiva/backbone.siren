@@ -94,6 +94,7 @@
                             , "properties": {
                                 "location": "far away"
                                 , "loan_amount": 300
+                                , "id": 101
                             }
                             , "links": [
                                 {"rel": ["self"], "href": "api.kiva.org/loan/123"}
@@ -104,6 +105,7 @@
                             , "properties": {
                                 "location": "far away"
                                 , "loan_amount": 400
+                                , "id": 102
                             }
                             , "links": [
                                 {"rel": ["self"], "href": "api.kiva.org/loan/234"}
@@ -114,6 +116,7 @@
                             , "properties": {
                                 "location": "far away"
                                 , "loan_amount": 500
+                                , "id": 103
                             }
                             , "links": [
                                 {"rel": ["self"], "href": "api.kiva.org/loan/345"}

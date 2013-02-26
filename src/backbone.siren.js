@@ -120,26 +120,26 @@
      */
     function filter(entities, filters) {
         return _.filter(entities, function (entity) {
-            return modelHasFilterProperties(entity, filters);
+            return modelHasProperties(entity, filters);
         });
     }
 
 
     /**
      *
-     * @param entity
-     * @param filters
+     * @param {Backbone.Siren.Model|Backbone.Siren.Collection} bbSiren
+     * @param {Object} filters
      * @return {Boolean}
      */
-    function modelHasFilterProperties(entity, filters) {
+    function modelHasProperties(bbSiren, filters) {
         var hasProperties = true;
 
         if (filters.className) {
-            hasProperties = entity.hasClass(filters.className);
+            hasProperties = bbSiren.hasClass(filters.className);
         }
 
         if (filters.rel) {
-            hasProperties = hasProperties && (entity.name() == filters.rel);
+            hasProperties = bbSiren.rel() == filters.rel;
         }
 
         return hasProperties;
@@ -148,19 +148,19 @@
 
     /**
      *
-     * @param {Object} obj
-     * @param {Object} filtersObj
+     * @param {Object} action
+     * @param {Object} filters
      * @return {Boolean}
      */
-    function objectHasFilterProperties(obj, filtersObj) {
+    function actionHasProperties(action, filters) {
         var hasProperties = true;
 
-        if (filtersObj.className) {
-            hasProperties = _hasClass(obj, filtersObj.className);
+        if (filters.className) {
+            hasProperties = _hasClass(action, filters.className);
         }
 
-        if (filtersObj.rel) {
-            hasProperties = hasRel(obj, filtersObj.rel);
+        if (filters.name) {
+            hasProperties = action.name == filters.name;
         }
 
         return hasProperties;
@@ -190,18 +190,6 @@
 
 
     /**
-     *
-     * @static
-     * @param sirenObj
-     * @param relValue
-     * @return {Boolean}
-     */
-    function hasRel(sirenObj, relValue) {
-        return getRel(sirenObj) == relValue;
-    }
-
-
-    /**
      * Accesses the "class" property of the Siren Object
      *
      * @return {Array}
@@ -217,10 +205,11 @@
      * @param sirenObj
      * @return {String}
      */
-    function getName(sirenObj) {
-        var rel = sirenObj.rel[0];
+    function getRel(sirenObj) {
+        var rel = sirenObj.rel;
 
         if (rel) {
+            rel = rel[0]; // @todo, arbitrarily grabbing the first rel might be bad but I still don't understand the use case for many rels...
             rel = rel.slice(rel.lastIndexOf('/') + 1, rel.length);
         }
 
@@ -228,21 +217,6 @@
     }
 
 
-    function name() {
-        return getName(this._data);
-    }
-
-
-    function getRel(sirenObj) {
-        return sirenObj.rel;
-    }
-
-
-    /**
-     * By default returns characters after the last '/'.  Set to `verbose` to true to return the entire rel string.
-     *
-     * @return {String}
-     */
     function rel() {
         return getRel(this._data);
     }
@@ -253,7 +227,7 @@
 
         if (filters) {
             _actions = _.filter(_actions, function (action) {
-                return objectHasFilterProperties(action, filters);
+                return actionHasProperties(action, filters);
             });
         }
         return _actions;
@@ -304,7 +278,6 @@
             , classes: classes
             , hasClass: hasClass
             , rel: rel
-            , name: name
             , title: title
             , actions: actions
 
@@ -320,7 +293,7 @@
                 this.resolveEntities()
                     .done(function (args) {
                         _.each(args, function (entity) {
-                            var camelCaseRel, bbSiren;
+                            var rel, bbSiren;
 
                             if (_.indexOf(getClassNames(entity), 'collection') == -1) {
                                 // Its a model
@@ -331,9 +304,9 @@
                                 bbSiren = new Backbone.Siren.Collection(entity);
                             }
 
-                            camelCaseRel = toCamelCase(bbSiren.name());
-                            self.set(camelCaseRel, bbSiren);
-                            self._entities.push(camelCaseRel);
+                            rel = bbSiren.rel();
+                            self.set(rel, bbSiren);
+                            self._entities.push(rel);
                         });
                     });
 
@@ -353,7 +326,7 @@
                 , entities = this.entities();
 
                 _.each(entities, function (entity) {
-                    json[entity.name()] = entity;
+                    json[entity.rel()] = entity;
                 });
 
                 return json;
@@ -425,7 +398,6 @@
             , hasClass: hasClass
             , title: title
             , rel: rel
-            , name: name
             , actions: actions
 
 
