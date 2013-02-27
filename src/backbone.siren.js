@@ -116,7 +116,7 @@
      */
     function filter(entities, filters) {
         return _.filter(entities, function (entity) {
-            return modelHasProperties(entity, filters);
+            return hasProperties(entity, filters);
         });
     }
 
@@ -127,7 +127,7 @@
      * @param {Object} filters
      * @return {Boolean}
      */
-    function modelHasProperties(bbSiren, filters) {
+    function hasProperties(bbSiren, filters) {
         var hasProperties = true;
 
         if (filters.className) {
@@ -291,10 +291,12 @@
                         _.each(args, function (entity) {
                             var rel, bbSiren;
 
-                            if (_.indexOf(getClassNames(entity), 'collection') == -1) {
+                            if (_hasClass(entity, 'collection')) {
                                 // Its a model
                                 bbSiren = new Backbone.Siren.Model(entity);
                                 store.add(bbSiren);
+                            } else if (_hasClass(entity, 'error')) {
+                                // @todo how should we represent errors?
                             } else {
                                 // Its a collection
                                 bbSiren = new Backbone.Siren.Collection(entity);
