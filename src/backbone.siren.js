@@ -46,6 +46,21 @@
     };
 
 
+
+    function Action(actionData) {
+        _.extend(this, actionData);
+    }
+
+
+    Action.prototype = {
+        field: function (name) {
+            return _.find(this.fields, function (field) {
+                return field.name == name;
+            });
+        }
+    };
+
+
     /**
      *
      * @static
@@ -219,7 +234,7 @@
 
 
     function actions(filters) {
-        var _actions = this._data.actions;
+        var _actions = this._actions;
 
         if (filters) {
             _actions = _.filter(_actions, function (action) {
@@ -227,6 +242,13 @@
             });
         }
         return _actions;
+    }
+
+
+    function action(name) {
+        return _.find(this._actions, function (action) {
+            return action.name == name;
+        });
     }
 
 
@@ -240,11 +262,23 @@
     }
 
 
+    /**
+     *
+     * @param model
+     * @param options
+     */
     function parseActions(model, options) {
-         _.each(model.actions(), function (action) {
+        var _actions = [];
+
+        _.each(model._data.actions, function (action) {
+            var bbSirenAction = new Backbone.Siren.Action(action);
+
+            _actions.push(bbSirenAction);
+
             model[toCamelCase(action.name)] = function () {
 
                 options.url = action.href;
+                options.actionName = action.name;
 
                 if (action.method) {
                     options.method = action.method;
@@ -256,16 +290,20 @@
 
                 return model.save(arguments, options);
             };
-         });
+        });
+
+        model._actions = _actions;
     }
 
 
     return {
-        store: store
-
-        , settings: {
+        settings: {
             showWarnings: true
         }
+
+        , store: store
+
+        , Action: Action
 
 
         , Model: Backbone.Model.extend({
@@ -276,6 +314,7 @@
             , rel: rel
             , title: title
             , actions: actions
+            , action: action
 
 
             /**
@@ -332,7 +371,7 @@
 
 
             /**
-             * Filters the entitie's properties and returns only sub-entities
+             * Filters the entity's properties and returns only sub-entities
              *
              * @return {Array}
              */
@@ -397,6 +436,7 @@
             , title: title
             , rel: rel
             , actions: actions
+            , action: action
 
 
             /**
