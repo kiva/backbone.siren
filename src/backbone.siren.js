@@ -292,14 +292,14 @@
                             var rel, bbSiren;
 
                             if (_hasClass(entity, 'collection')) {
-                                // Its a model
-                                bbSiren = new Backbone.Siren.Model(entity);
-                                store.add(bbSiren);
+                                // Its a collection
+                                bbSiren = new Backbone.Siren.Collection(entity);
                             } else if (_hasClass(entity, 'error')) {
                                 // @todo how should we represent errors?
                             } else {
-                                // Its a collection
-                                bbSiren = new Backbone.Siren.Collection(entity);
+                                // Its a model
+                                bbSiren = new Backbone.Siren.Model(entity);
+                                store.add(bbSiren);
                             }
 
                             rel = bbSiren.rel();
