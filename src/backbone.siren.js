@@ -143,17 +143,17 @@
      * @return {Boolean}
      */
     function hasProperties(bbSiren, filters) {
-        var hasProperties = true;
+        var _hasProperties = true;
 
         if (filters.className) {
-            hasProperties = bbSiren.hasClass(filters.className);
+            _hasProperties = bbSiren.hasClass(filters.className);
         }
 
         if (filters.rel) {
-            hasProperties = bbSiren.rel() == filters.rel;
+            _hasProperties = bbSiren.rel() == filters.rel;
         }
 
-        return hasProperties;
+        return _hasProperties;
     }
 
 
@@ -245,6 +245,19 @@
     }
 
 
+    function getAllByAction(actionName) {
+        var action = this.action(actionName)
+        , values = {}
+        , self = this;
+
+        _.each(action.fields, function (field) {
+            values[field.name] = self.get(field.name);
+        });
+
+        return values;
+    }
+
+
     function action(name) {
         return _.find(this._actions, function (action) {
             return action.name == name;
@@ -288,7 +301,7 @@
                     options.type = action.type;
                 }
 
-                return model.save(arguments, options);
+                return model.save(model.getAllByAction(action.name), options);
             };
         });
 
@@ -315,6 +328,7 @@
             , title: title
             , actions: actions
             , action: action
+            , getAllByAction: getAllByAction
 
 
             /**
@@ -335,6 +349,7 @@
                                 bbSiren = new Backbone.Siren.Collection(entity);
                             } else if (_hasClass(entity, 'error')) {
                                 // @todo how should we represent errors?
+                                warn('@todo - errors');
                             } else {
                                 // Its a model
                                 bbSiren = new Backbone.Siren.Model(entity);
@@ -437,6 +452,7 @@
             , rel: rel
             , actions: actions
             , action: action
+            , getAllByAction: getAllByAction
 
 
             /**
