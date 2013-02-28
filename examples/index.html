@@ -7,9 +7,32 @@
     <script src="/components/backbone/backbone.js"></script>
 <!--    <script src="/components/backbone-relational/backbone-relational.js"></script> -->
     <script src="/src/backbone.siren.js"></script>
+    <script src="/src/backbone.siren.validate.js"></script>
 </head>
 
 <body>
+
+    <!-- demo for editing fields on a settings.siren.json representation -->
+    <!-- possible actions: create, update, delete, email_user -->
+    <form>
+        <label>
+            firstName:
+            <input type="text" />
+        </label>
+
+        <label>
+            lastName:
+            <input type="text" />
+        </label>
+
+        <label>
+            email:
+            <input type="email" />
+        </label>
+    </form>
+
+
+
 <script>
 
     var sirenUrl = 'settings.siren.json';
