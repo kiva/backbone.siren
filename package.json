@@ -1,7 +1,7 @@
 {
   "name": "backbone.siren",
   "version": "0.0.0",
-  "description": "Converts Siren JSON representations into Backbone Models",
+  "description": "Converts Siren JSON representations into Backbone Models and Collections",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/kiva/backbone-siren.git"
+    "url": "git://github.com/kiva/backbone.siren.git"
   },
   "keywords": [
     "backbone",
@@ -24,10 +24,8 @@
   "license": "BSD",
   "readmeFilename": "readme.md",
   "devDependencies": {
-    "buster": "~0.6.12",
     "grunt": "git://github.com/gruntjs/grunt.git#2943060eaa7107fea77f4507437c5f087995eafa",
     "grunt-contrib-jshint": "~0.1.1rc6",
     "grunt-buster": "~0.1.2",
-    "grunt-dox": "~0.3.1"
   }
 }

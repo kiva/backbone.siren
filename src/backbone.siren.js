@@ -7,7 +7,6 @@
  * Licensed under the MIT license.
  * https://github.com/kiva/backbone.siren/blob/master/license.txt
  */
-
 (function(root, factory) {
     'use strict';
 
@@ -46,13 +45,23 @@
     };
 
 
-
+    /**
+     *
+     * @param actionData
+     * @constructor
+     */
     function Action(actionData) {
         _.extend(this, actionData);
     }
 
 
     Action.prototype = {
+
+        /**
+         *
+         * @param name
+         * @return {*}
+         */
         field: function (name) {
             return _.find(this.fields, function (field) {
                 return field.name == name;
@@ -228,11 +237,20 @@
     }
 
 
+    /**
+     *
+     * @return {String}
+     */
     function rel() {
         return getRel(this._data);
     }
 
 
+    /**
+     *
+     * @param filters
+     * @return {*|Array}
+     */
     function actions(filters) {
         var _actions = this._actions;
 
@@ -315,7 +333,6 @@
         }
 
         , store: store
-
         , Action: Action
 
 
