@@ -24,6 +24,7 @@
   "license": "BSD",
   "readmeFilename": "readme.md",
   "devDependencies": {
+    "buster": "~0.6.12",
     "grunt": "git://github.com/gruntjs/grunt.git#2943060eaa7107fea77f4507437c5f087995eafa",
     "grunt-buster": "~0.1.2",
     "grunt-contrib-jshint": "~0.1.1rc6"
