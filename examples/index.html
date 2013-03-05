@@ -35,11 +35,18 @@
 
 <script>
 
-    var sirenUrl = 'settings.siren.json';
+    var settings, sirenUrl = 'settings.siren.json';
+    var alps, alpsUrl = 'http://siren-alps.herokuapp.com/';
+
     $.getJSON(sirenUrl, function (results) {
-//        var bbsiren = new Backbone.Siren.Model(Backbone.Siren.Model.prototype.parse(results));
         settings = new Backbone.Siren.Model(results);
     });
+
+    $.getJSON(alpsUrl, function (results) {
+        alps = new Backbone.Siren.Model(results);
+    });
+
+
 
 
     /**
