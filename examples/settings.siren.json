@@ -12,8 +12,7 @@
             "class": ["test", "trial"]
             , "rel": ["api.kiva.org/rels/address"]
             , "properties": {
-                "street": "1427 E 36th"
-                , "city": "Oakland"
+                "city": "Oakland"
                 , "state": "CA"
                 , "zip": "94602"
                 , "country": "USA"

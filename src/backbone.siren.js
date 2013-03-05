@@ -324,6 +324,7 @@
         });
 
         self._actions = _actions;
+        return _actions;
     }
 
 
