@@ -89,7 +89,7 @@
                     // @todo iterate through and validate sub-entity actions.
                     console.log('@todo');
                 } else {
-                    var errorMsg = self.validateOne(val, action.field(name), options);
+                    var errorMsg = self.validateOne(val, action.getFieldByName(name), options);
                     if (errorMsg) {
                         errors[name] = errorMsg;
                     }

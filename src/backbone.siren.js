@@ -62,7 +62,7 @@
          * @param name
          * @return {*}
          */
-        field: function (name) {
+        getFieldByName: function (name) {
             return _.find(this.fields, function (field) {
                 return field.name == name;
             });
