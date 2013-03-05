@@ -85,7 +85,7 @@
      *
      * @static
      * @param entity
-     * @return {Object}
+     * @return {String}
      */
     function getUrl(entity) {
         var link, url;
@@ -398,7 +398,7 @@
                 , resolvedEntities = [];
 
                 _.each(sirenObj.entities, function(entity) {
-                    if ((entity.href || options.autoFetch == 'linked') || options.autoFetch == 'all') {
+                    if ((entity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
                         resolvedEntities.push(self.fetchEntity(entity, options));
                     } else {
                         resolvedEntities.push(self.addEntity(entity, options));
