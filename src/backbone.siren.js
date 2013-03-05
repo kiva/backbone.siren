@@ -354,31 +354,21 @@
              * @param {Object} sirenObj
              * @param {Object} options
              */
-            , parseEntities: function (sirenObj, options) {
-                var self = this;
+            , resolveEntities: function (sirenObj, options) {
+                var self = this
+                , resolvedEntities = [];
 
-                return this.resolveEntities()
-                    .done(function (args) {
-                        _.each(args, function (entity) {
-                            var rel, bbSiren;
+                _.each(sirenObj.entities, function(entity) {
+                    if ((entity.href || options.autoFetch == 'linked') || options.autoFetch == 'all') {
+                        resolvedEntities.push(self.fetchEntity(entity, options));
+                    } else {
+                        resolvedEntities.push(self.addEntity(entity, options));
+                    }
+                });
 
-                            if (_hasClass(entity, 'collection')) {
-                                // Its a collection
-                                bbSiren = new Backbone.Siren.Collection(entity);
-                            } else if (_hasClass(entity, 'error')) {
-                                // @todo how should we represent errors?
-                                warn('@todo - errors');
-                            } else {
-                                // Its a model
-                                bbSiren = new Backbone.Siren.Model(entity);
-                                store.add(bbSiren);
-                            }
-
-                            rel = bbSiren.rel();
-                            self.set(rel, bbSiren);
-                            self._entities.push(rel);
-                        });
-                    });
+                return $.when(resolvedEntities).done(function () {
+                    self.trigger('resolve', self);
+                });
             }
 
 
@@ -388,7 +378,7 @@
              * @param {Object} sirenObj
              */
             , parse: function (sirenObj, options) {
-                this.parseEntities(sirenObj, options);
+                this.resolveEntities(sirenObj, options);
                 this.parseActions(options);
 
                 return sirenObj.properties;
@@ -433,22 +423,50 @@
 
             /**
              *
-             * @return {jQuery.Deferred}
+             * @param {Object} entity
              */
-            , resolveEntities: function () {
-                var deferreds = [];
+            , fetchEntity: function (entity) {
+                var self = this;
 
-                _.each(this._data.entities, function (entity) {
-                    var url = getUrl(entity);
-
-                    if (entity.href && url) {
-                        deferreds.push($.getJSON(url));
-                    } else if (! entity.href) {
-                        deferreds.push(entity);
-                    }
+                return $.getJSON(getUrl(entity), function (resolvedEntity) {
+                    self.addEntity(resolvedEntity);
                 });
+            }
 
-                return $.when(deferreds);
+
+            /**
+             *
+             * @param {Object} entity
+             */
+            , parseEntity: function (entity) {
+                var bbSiren;
+
+                if (_hasClass(entity, 'collection')) {
+                    bbSiren = new Backbone.Siren.Collection(entity);
+                } else if (_hasClass(entity, 'error')) {
+                    // @todo how should we represent errors?
+                    warn('@todo - errors');
+                } else {
+                    bbSiren = new Backbone.Siren.Model(entity);
+                    store.add(bbSiren);
+                }
+
+                return bbSiren;
+            }
+
+
+            /**
+             *
+             * @param {Object} entity
+             */
+            , addEntity: function (entity) {
+                var bbSiren = this.parseEntity(entity)
+                , rel = bbSiren.rel();
+
+                this.set(rel, bbSiren);
+                this._entities.push(rel);
+
+                return bbSiren;
             }
 
 
