@@ -4,7 +4,7 @@
   "description": "Converts Siren JSON representations into Backbone Models and Collections",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "grunt test --verbose",
     "prepublish": "bower install"
   },
   "repository": {
