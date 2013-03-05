@@ -1,6 +1,6 @@
 {
   "name": "backbone.siren",
-  "version": "0.0.0",
+  "version": "0.0.2",
   "description": "Converts Siren JSON representations into Backbone Models and Collections",
   "main": "index.js",
   "scripts": {
@@ -25,7 +25,7 @@
   "readmeFilename": "readme.md",
   "devDependencies": {
     "grunt": "git://github.com/gruntjs/grunt.git#2943060eaa7107fea77f4507437c5f087995eafa",
-    "grunt-contrib-jshint": "~0.1.1rc6",
     "grunt-buster": "~0.1.2",
+    "grunt-contrib-jshint": "~0.1.1rc6"
   }
 }

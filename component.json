@@ -1,6 +1,6 @@
 {
   "name": "backbone.siren",
-  "version": "0.0.0",
+  "version": "0.0.2",
   "dependencies": {
     "backbone": "backbone",
     "jquery": "~1.9.1",
