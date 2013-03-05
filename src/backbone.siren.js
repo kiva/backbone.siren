@@ -350,14 +350,14 @@
 
 
             /**
-             * http://backbonejs.org/#Model-parse
              *
              * @param {Object} sirenObj
+             * @param {Object} options
              */
-            , parse: function (sirenObj, options) {
+            , parseEntities: function (sirenObj, options) {
                 var self = this;
 
-                this.resolveEntities()
+                return this.resolveEntities()
                     .done(function (args) {
                         _.each(args, function (entity) {
                             var rel, bbSiren;
@@ -379,7 +379,16 @@
                             self._entities.push(rel);
                         });
                     });
+            }
 
+
+            /**
+             * http://backbonejs.org/#Model-parse
+             *
+             * @param {Object} sirenObj
+             */
+            , parse: function (sirenObj, options) {
+                this.parseEntities(sirenObj, options);
                 this.parseActions(options);
 
                 return sirenObj.properties;
