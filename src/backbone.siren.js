@@ -295,18 +295,18 @@
 
     /**
      *
-     * @param model
      * @param options
      */
-    function parseActions(model, options) {
-        var _actions = [];
+    function parseActions(options) {
+        var self = this
+        , _actions = [];
 
-        _.each(model._data.actions, function (action) {
+        _.each(self._data.actions, function (action) {
             var bbSirenAction = new Backbone.Siren.Action(action);
 
             _actions.push(bbSirenAction);
 
-            model[toCamelCase(action.name)] = function () {
+            self[toCamelCase(action.name)] = function () {
 
                 options.url = action.href;
                 options.actionName = action.name;
@@ -319,11 +319,11 @@
                     options.type = action.type;
                 }
 
-                return model.save(model.getAllByAction(action.name), options);
+                return self.save(self.getAllByAction(action.name), options);
             };
         });
 
-        model._actions = _actions;
+        self._actions = _actions;
     }
 
 
@@ -346,6 +346,7 @@
             , actions: actions
             , action: action
             , getAllByAction: getAllByAction
+            , parseActions: parseActions
 
 
             /**
@@ -379,7 +380,7 @@
                         });
                     });
 
-                parseActions(this, options);
+                this.parseActions(options);
 
                 return sirenObj.properties;
             }
@@ -470,6 +471,7 @@
             , actions: actions
             , action: action
             , getAllByAction: getAllByAction
+            , parseActions: parseActions
 
 
             /**
@@ -511,7 +513,7 @@
                     store.add(model);
                 });
 
-                parseActions(this, options);
+                this.parseActions(options);
 
                 return models;
             }
