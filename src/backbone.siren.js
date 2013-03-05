@@ -352,6 +352,44 @@
 
             /**
              *
+             * @param {String} rel
+             * @return {Array} An array of jqXhr objects.
+             */
+            , request: function (rel) {
+                var self = this
+                , request = []
+                , links = this.links(rel);
+
+                _.each(links, function (link) {
+                    request.push($.getJSON(link.href, function (sirenResponse) {
+                        self.parseEntity(sirenResponse);
+                    }));
+                });
+
+                return request;
+            }
+
+
+            /**
+             *
+             * @param {String} rel
+             * @return Array
+             */
+            , links: function (rel) {
+                var links = this._data.links;
+
+                if (rel) {
+                    links = _.filter(links, function (link) {
+                        return _.indexOf(link.rel, rel) > -1;
+                    });
+                }
+
+                return links;
+            }
+
+
+            /**
+             *
              * @param {Object} sirenObj
              * @param {Object} options
              */

@@ -21,6 +21,26 @@ describe('Siren Models: ', function () {
     });
 
 
+    it('provides access to a model\'s links via .links()', function () {
+        var expectedLinks = [
+            { "rel": [ "self" ], "href": "http://api.x.io/orders/42" },
+            { "rel": [ "previous" ], "href": "http://api.x.io/orders/41" },
+            { "rel": [ "next" ], "href": "http://api.x.io/orders/43" }
+        ];
+
+        expect(sirenModel.links()).toMatch(expectedLinks);
+    });
+
+
+    it('provides method for requesting a linked resource via .request()', function () {
+        this.stub($, "ajax");
+
+        sirenModel.request('next');
+        expect($.ajax).toHaveBeenCalled();
+//        @todo expect($.ajax).toHaveBeenCalledWithMatch({url: 'http://api.x.io/orders/43'});
+    });
+
+
     it('determine\'s if a model has a given "class"', function () {
         expect(sirenModel.hasClass('wtf')).toBe(false);
         expect(sirenModel.hasClass('order')).toBe(true);
