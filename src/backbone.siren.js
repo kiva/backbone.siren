@@ -264,7 +264,7 @@
 
 
     function getAllByAction(actionName) {
-        var action = this.action(actionName)
+        var action = this.getActionByName(actionName)
         , values = {}
         , self = this;
 
@@ -276,7 +276,7 @@
     }
 
 
-    function action(name) {
+    function getActionByName(name) {
         return _.find(this._actions, function (action) {
             return action.name == name;
         });
@@ -345,7 +345,7 @@
             , rel: rel
             , title: title
             , actions: actions
-            , action: action
+            , getActionByName: getActionByName
             , getAllByAction: getAllByAction
             , parseActions: parseActions
 
@@ -535,7 +535,7 @@
             , title: title
             , rel: rel
             , actions: actions
-            , action: action
+            , getActionByName: getActionByName
             , getAllByAction: getAllByAction
             , parseActions: parseActions
 

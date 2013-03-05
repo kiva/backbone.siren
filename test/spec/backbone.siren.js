@@ -65,6 +65,13 @@ describe('Siren Models: ', function () {
     });
 
 
+    it('it gets a specific action from a model by name via .getActionByName()', function () {
+        var action = sirenModel.getActionByName('add-item');
+
+        expect(action.name).toBe('add-item');
+    });
+
+
     it('sets siren "properties" to the standard Backbone Model\'s "attributes" hash', function () {
         var expectedProperties = {
             orderNumber: 42
