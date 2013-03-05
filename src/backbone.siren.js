@@ -417,6 +417,9 @@
              * @param {Object} sirenObj
              */
             , parse: function (sirenObj, options) {
+                this._data = sirenObj; // Stores the entire siren object in raw json
+                this._entities = [];
+
                 this.resolveEntities(sirenObj, options);
                 this.parseActions(options);
 
@@ -519,9 +522,6 @@
                 options = options || {};
                 options.parse = true; // Force "parse" to be called on instantiation: http://stackoverflow.com/questions/11068989/backbone-js-using-parse-without-calling-fetch/14950519#14950519
 
-                this._data = sirenObj; // Stores the entire siren object in raw json
-                this._entities = []; // Stores sub-entity names
-
                 Backbone.Model.call(this, sirenObj, options);
             }
 
@@ -572,6 +572,8 @@
              * @param {Object} sirenObj
              */
             , parse: function (sirenObj, options) {
+                this._data = sirenObj; // Store the entire siren object in raw json
+
                 var models = [];
                 _.each(sirenObj.entities, function (entity) {
                     var model = new Backbone.Siren.Model(entity);
@@ -594,8 +596,6 @@
             , constructor: function (sirenObj, options) {
                 options = options || {};
                 options.parse = true; // Force "parse" to be called on instantiation: http://stackoverflow.com/questions/11068989/backbone-js-using-parse-without-calling-fetch/14950519#14950519
-
-                this._data = sirenObj;
 
                 Backbone.Collection.call(this, sirenObj, options);
             }
