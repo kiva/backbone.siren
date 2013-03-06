@@ -1,48 +1,26 @@
-/*global _ Backbone */
-
-/*
- * Backbone.Siren
- *
- * Copyright (c) 2013 Kiva Microfunds
- * Licensed under the MIT license.
- * https://github.com/kiva/backbone.siren/blob/master/license.txt
- */
-(function(root, factory) {
-    'use strict';
-
-    if (typeof define === 'function' && define.amd) {
-        // AMD
-        define(['underscore', 'backbone'], function(_, Backbone) {
-            Backbone.Siren = factory(_, Backbone);
-        });
-    } else {
-        // Browser globals
-        root.Backbone.Siren = factory(_, Backbone);
-    }
-
-}(this, function (_, Backbone, undefined) {
+Backbone.Siren = (function (_, Backbone) {
     'use strict';
 
     // The store
     var _store = {}
-    , store = {
-        add: function (model) {
-            _store[model.url()] = model;
-        }
+        , store = {
+            add: function (model) {
+                _store[model.url()] = model;
+            }
 
-        , exists: function (model) {
-            return !!_store[model.url()];
-        }
+            , exists: function (model) {
+                return !!_store[model.url()];
+            }
 
-        , all: function () {
-            return _store;
+            , all: function () {
+                return _store;
+            }
         }
-    }
-    , warn = function (msg) {
-        if (Backbone.Siren.settings.showWarnings && console) {
-            console.warn(msg);
-        }
-    };
+        , warn = function (msg) {
+            if (Backbone.Siren.settings.showWarnings && console) {
+                console.warn(msg);
+            }
+        };
 
 
     /**
@@ -270,8 +248,8 @@
      */
     function getAllByAction(actionName) {
         var action = this.getActionByName(actionName)
-        , values = {}
-        , self = this;
+            , values = {}
+            , self = this;
 
         _.each(action.fields, function (field) {
             values[field.name] = self.get(field.name);
@@ -310,7 +288,7 @@
      */
     function parseActions(options) {
         var self = this
-        , _actions = [];
+            , _actions = [];
 
         _.each(self._data.actions, function (action) {
             var bbSirenAction = new Backbone.Siren.Action(action);
@@ -368,8 +346,8 @@
              */
             , request: function (rel) {
                 var self = this
-                , request = []
-                , links = this.links(rel);
+                    , request = []
+                    , links = this.links(rel);
 
                 _.each(links, function (link) {
                     request.push($.getJSON(link.href, function (sirenResponse) {
@@ -406,7 +384,7 @@
              */
             , resolveEntities: function (sirenObj, options) {
                 var self = this
-                , resolvedEntities = [];
+                    , resolvedEntities = [];
 
                 _.each(sirenObj.entities, function(entity) {
                     if ((entity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
@@ -445,7 +423,7 @@
              */
             , toJSON: function () {
                 var json = _.clone(this.attributes)
-                , entities = this.entities();
+                    , entities = this.entities();
 
                 _.each(entities, function (entity) {
                     json[entity.rel()] = entity;
@@ -462,9 +440,9 @@
              */
             , entities: function (filters) {
                 var self = this
-                , entities = _.filter(this, function (val, name) {
-                    return _.indexOf(self._entities, name) > -1;
-                });
+                    , entities = _.filter(this, function (val, name) {
+                        return _.indexOf(self._entities, name) > -1;
+                    });
 
                 if (filters) {
                     entities = filter(entities, filters);
@@ -514,7 +492,7 @@
              */
             , addEntity: function (entity) {
                 var bbSiren = this.parseEntity(entity)
-                , rel = bbSiren.rel();
+                    , rel = bbSiren.rel();
 
                 this.set(rel, bbSiren);
                 this._entities.push(rel);
@@ -612,5 +590,4 @@
             }
         })
     };
-
-}));
+}(_, Backbone));

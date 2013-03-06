@@ -1,26 +1,4 @@
-/*global _ Backbone */
-
-/*
- * Backbone.Siren.Validate
- *
- * Copyright (c) 2013 Kiva Microfunds
- * Licensed under the MIT license.
- * https://github.com/kiva/backbone.siren/blob/master/license.txt
- */
-(function(root, factory) {
-    'use strict';
-
-    if (typeof define === 'function' && define.amd) {
-        // AMD
-        define(['underscore', 'backbone.siren'], function(_, Backbone) {
-            factory(_, Backbone);
-        });
-    } else {
-        // Browser globals
-        factory(_, Backbone);
-    }
-
-}(this, function (_, Backbone, undefined) {
+(function (_, Backbone) {
     'use strict';
 
 
@@ -72,7 +50,7 @@
          */
         , validate: function (attributes, options) {
             var self = this
-            , errors = this.errors = {};
+                , errors = this.errors = {};
 
             if (_.isEmpty(attributes)) {
                 return errors['non-writable-fields'] = 'There were no writable fields, check your siren action. @todo better messaging';
@@ -100,4 +78,5 @@
         }
 
     });
-}));
+
+}(_, Backbone));
