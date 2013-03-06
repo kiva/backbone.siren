@@ -263,6 +263,11 @@
     }
 
 
+    /**
+     *
+     * @param {String} actionName
+     * @return {Object}
+     */
     function getAllByAction(actionName) {
         var action = this.getActionByName(actionName)
         , values = {}
@@ -276,6 +281,11 @@
     }
 
 
+    /**
+     *
+     * @param {String} name
+     * @return {Object}
+     */
     function getActionByName(name) {
         return _.find(this._actions, function (action) {
             return action.name == name;
@@ -295,7 +305,8 @@
 
     /**
      *
-     * @param options
+     * @param {Object} options
+     * @return {Array}
      */
     function parseActions(options) {
         var self = this
