@@ -25,12 +25,8 @@
 	, "jquery": true
 
 	, "predef": [
-		"qi"
-		, "requirejs"
-		, "define"
-		, "Modernizr"
-
-		, "kvTestHelper"
+		"define"
+		, "Backbone"
 
 		, "afterEach"
 		, "beforeEach"
