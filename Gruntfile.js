@@ -21,6 +21,13 @@ module.exports = function(grunt) {
         }
 
 
+        , buster: {
+            test: {
+                reporter: 'specification'
+            }
+        }
+
+
         , jshint: {
             options: {
                 jshintrc: '.jshintrc'

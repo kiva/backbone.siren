@@ -13,16 +13,6 @@ describe('Siren Collection: ', function () {
     });
 
 
-    it('Adds siren sub-entities as models to a Backbone Collection\'s models property', function () {
-        expect(sirenCollection.models).toBeDefined();
-        expect(sirenCollection.models.length).toBe(3);
-
-        _.each(sirenCollection.models, function (model) {
-            expect(model.cid).toBeDefined();
-        });
-    });
-
-
     describe('.url()', function () {
         it('returns a collection\'s url, getting it from the href', function () {
             var mySirenCollection = new Backbone.Siren.Collection({href: 'http://api.x.io/blah'});
@@ -152,7 +142,7 @@ describe('Siren Collection: ', function () {
 
 
     describe('.getAllByAction()', function () {
-        it('get\'s all "properties" for a given "action"', function () {
+        it('gets all "properties" for a given "action"', function () {
             var expectedProperties = {
                 offset: 4
             };
@@ -183,6 +173,16 @@ describe('Siren Collection: ', function () {
                 expect(action instanceof Backbone.Siren.Action).toBeTrue();
             });
             expect(actions[0].name).toBe('do-stuff');
+        });
+    });
+
+
+    it('Adds siren sub-entities as models to a Backbone Collection\'s models property', function () {
+        expect(sirenCollection.models).toBeDefined();
+        expect(sirenCollection.models.length).toBe(3);
+
+        _.each(sirenCollection.models, function (model) {
+            expect(model.cid).toBeDefined();
         });
     });
 });

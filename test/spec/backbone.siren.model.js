@@ -13,17 +13,6 @@ describe('Siren Model: ', function () {
     });
 
 
-    it('sets a Backbone Model\'s "attributes" hash to the siren "properties"', function () {
-        var expectedProperties = {
-            orderNumber: 42
-            , itemCount: 3
-            , status: "pending"
-        };
-
-        expect(sirenModel.attributes).toMatch(expectedProperties);
-    });
-
-
     describe('.url()', function () {
         it('returns a model\'s url, getting it from the href', function () {
             var mySirenModel = new Backbone.Siren.Model({"href": "http://api.x.io/blah"});
@@ -155,7 +144,7 @@ describe('Siren Model: ', function () {
 
 
     describe('.getAllByAction()', function () {
-        it('get\'s all "properties" for a given "action"', function () {
+        it('gets all "properties" for a given "action"', function () {
             var expectedProperties = {
                 orderNumber: 42
             };
@@ -193,5 +182,16 @@ describe('Siren Model: ', function () {
 
             expect(actions[0].name).toBe('add-item');
         });
+    });
+
+
+    it('sets a Backbone Model\'s "attributes" hash to the siren "properties"', function () {
+        var expectedProperties = {
+            orderNumber: 42
+            , itemCount: 3
+            , status: "pending"
+        };
+
+        expect(sirenModel.attributes).toMatch(expectedProperties);
     });
 });

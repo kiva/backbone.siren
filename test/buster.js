@@ -12,7 +12,7 @@ config['development'] = {
         , 'components/backbone/backbone.js'
     ]
     , sources: ['src/backbone.siren.js']
-    , tests: ['test/spec/**/*.js']
+    , specs: ['test/spec/**/*.js']
 };
 
 
