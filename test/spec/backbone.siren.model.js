@@ -179,7 +179,7 @@ describe('Siren Model: ', function () {
         it('returns undefined if the action is not found', function () {
             var mySirenModel = new Backbone.Siren.Model({});
             expect(mySirenModel.getAllByAction('non-existent-action')).not.toBeDefined();
-        })
+        });
     });
 
 
