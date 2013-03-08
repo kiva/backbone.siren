@@ -25,7 +25,12 @@
 
     $.getJSON(sirenUrl, function (results) {
         settings = new Backbone.Siren.Model(results);
-        var form = settings.getActionByName('edit-lender').render();
+        var form = settings.getActionByName('edit-lender').render({
+            labels: {
+                firstName: 'First Name'
+                , lastName: 'Last Name'
+            }
+        });
         $('.wrap').html(form.$el);
     });
 

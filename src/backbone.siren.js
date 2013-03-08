@@ -52,10 +52,52 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         }
 
 
+        , fieldLabel: function (fieldName, label) {
+            if (label === undefined) {
+                return this.getFieldByName(fieldName).label;
+            } else {
+                return this.getFieldByName(fieldName).label = label;
+            }
+        }
+
+
+        , fieldId: function (fieldName, id) {
+            if (id) {
+                return this.getFieldByName(fieldName).id = id;
+            } else {
+                id = this.getFieldByName(fieldName).id;
+                if (!id) {
+                    this.fieldId(fieldName, fieldName);
+                }
+            }
+        }
+
+
         , render: function (options) {
             var FormView = Backbone.Siren.FormView;
             var defaults = {title: ''};
             var data = _.extend({}, defaults, this, options);
+            var self = this;
+
+            options = options || {};
+
+
+            // At render time, you can pass in a "labels" and/or "ids" object and it will set the label/id for the field:
+            // labels: {
+            //      fieldName: label
+            // }
+            // , ids: {
+            //      fieldName: id
+            // }
+            if (options.labels) {
+                _.each(options.labels, function (label, fieldName) {
+                    self.fieldLabel(fieldName, label);
+                });
+            }
+
+            _.each(this.fields, function (field) {
+                self.fieldId(field.name, field.name);
+            });
 
             return FormView
                 ? new FormView(data)

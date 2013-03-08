@@ -9,7 +9,7 @@
 
             var tpl = '<form action="<%= href %>"  title="<%= title %>" data-type="<%= type %>" method="<%= method %>"> \
             <% _.each(fields, function (field) { %> \
-                <label for="<%= field.id %> />"><%= field.name %></label> \
+                <label for="<%= field.id %>"><%= field.label %></label> \
                 <input type="<%= field.type %>" name="<%= field.name %>" id="<%= field.id %>"/> \
             <% }); %> </form>';
 
