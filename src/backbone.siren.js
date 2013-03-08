@@ -29,7 +29,12 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      * @constructor
      */
     function Action(actionData) {
-        _.extend(this, actionData);
+        var defaults = {
+            method: 'POST' // @todo siren docs say get should be assumed...? I think POST makes more sense
+            , type: 'application/x-www-form-urlencoded'
+        };
+
+        _.extend(this, defaults, actionData);
     }
 
 
@@ -44,6 +49,17 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             return _.find(this.fields, function (field) {
                 return field.name == name;
             });
+        }
+
+
+        , render: function (options) {
+            var FormView = Backbone.Siren.FormView;
+            var defaults = {title: ''};
+            var data = _.extend({}, defaults, this, options);
+
+            return FormView
+                ? new FormView(data)
+                : {};
         }
     };
 
