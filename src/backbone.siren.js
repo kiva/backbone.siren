@@ -1,4 +1,4 @@
-Backbone.Siren = (function (_, Backbone) {
+Backbone.Siren = (function (_, Backbone, undefined) {
     'use strict';
 
     // The store
@@ -82,6 +82,7 @@ Backbone.Siren = (function (_, Backbone) {
             }
         } else {
             warn('Missing href or "self" link');
+            url = '';
         }
 
         return url;
@@ -105,7 +106,7 @@ Backbone.Siren = (function (_, Backbone) {
      * @return {Array}
      */
     function getClassNames(sirenObj) {
-        return sirenObj['class'];
+        return sirenObj['class'] || [];
     }
 
 
@@ -199,6 +200,44 @@ Backbone.Siren = (function (_, Backbone) {
 
     /**
      *
+     * @param {String} rel
+     * @return {Array}
+     */
+    function links(rel) {
+        var links = this._data.links;
+
+        if (rel) {
+            links = _.filter(links, function (link) {
+                return _.indexOf(link.rel, rel) > -1;
+            });
+        }
+
+        return links || [];
+    }
+
+
+    /**
+     *
+     * @param {String} rel
+     * @return {Array} An array of jqXhr objects.
+     */
+    function request(rel) {
+        var self = this
+        , requests = []
+        , links = this.links(rel);
+
+        _.each(links, function (link) {
+            requests.push($.getJSON(link.href, function (sirenResponse) {
+                self.parseEntity(sirenResponse);
+            }));
+        });
+
+        return requests;
+    }
+
+
+    /**
+     *
      * @static
      * @param sirenObj
      * @return {String}
@@ -247,13 +286,21 @@ Backbone.Siren = (function (_, Backbone) {
      * @return {Object}
      */
     function getAllByAction(actionName) {
-        var action = this.getActionByName(actionName)
-            , values = {}
-            , self = this;
+        var values
+        , action = this.getActionByName(actionName)
+        , self = this;
 
-        _.each(action.fields, function (field) {
-            values[field.name] = self.get(field.name);
-        });
+        if (action) {
+            values = {};
+            _.each(action.fields, function (field) {
+                if (self instanceof Backbone.Model) {
+                    values[field.name] = self.get(field.name);
+                } else {
+                    values[field.name] = self.meta(field.name);
+                }
+
+            });
+        }
 
         return values;
     }
@@ -262,7 +309,7 @@ Backbone.Siren = (function (_, Backbone) {
     /**
      *
      * @param {String} name
-     * @return {Object}
+     * @return {Object|undefined}
      */
     function getActionByName(name) {
         return _.find(this._actions, function (action) {
@@ -334,47 +381,11 @@ Backbone.Siren = (function (_, Backbone) {
             , rel: rel
             , title: title
             , actions: actions
+            , links: links
             , getActionByName: getActionByName
             , getAllByAction: getAllByAction
             , parseActions: parseActions
-
-
-            /**
-             *
-             * @param {String} rel
-             * @return {Array} An array of jqXhr objects.
-             */
-            , request: function (rel) {
-                var self = this
-                    , request = []
-                    , links = this.links(rel);
-
-                _.each(links, function (link) {
-                    request.push($.getJSON(link.href, function (sirenResponse) {
-                        self.parseEntity(sirenResponse);
-                    }));
-                });
-
-                return request;
-            }
-
-
-            /**
-             *
-             * @param {String} rel
-             * @return Array
-             */
-            , links: function (rel) {
-                var links = this._data.links;
-
-                if (rel) {
-                    links = _.filter(links, function (link) {
-                        return _.indexOf(link.rel, rel) > -1;
-                    });
-                }
-
-                return links;
-            }
+            , request: request
 
 
             /**
@@ -492,7 +503,7 @@ Backbone.Siren = (function (_, Backbone) {
              */
             , addEntity: function (entity) {
                 var bbSiren = this.parseEntity(entity)
-                    , rel = bbSiren.rel();
+                , rel = bbSiren.rel();
 
                 this.set(rel, bbSiren);
                 this._entities.push(rel);
@@ -523,10 +534,12 @@ Backbone.Siren = (function (_, Backbone) {
             , hasClass: hasClass
             , title: title
             , rel: rel
+            , links: links
             , actions: actions
             , getActionByName: getActionByName
             , getAllByAction: getAllByAction
             , parseActions: parseActions
+            , request: request
 
 
             /**
@@ -562,6 +575,7 @@ Backbone.Siren = (function (_, Backbone) {
              */
             , parse: function (sirenObj, options) {
                 this._data = sirenObj; // Store the entire siren object in raw json
+                this._meta = sirenObj.properties || {};
 
                 var models = [];
                 _.each(sirenObj.entities, function (entity) {
@@ -573,6 +587,20 @@ Backbone.Siren = (function (_, Backbone) {
                 this.parseActions(options);
 
                 return models;
+            }
+
+
+            /**
+             * Unlike Models, collections don't have attributes.
+             * However, there are times we need to store "meta" data about the collection such as
+             * the paging "offset".
+             *
+             * @param {*} prop
+             * @param {*} value
+             * @return {Object}
+             */
+            , meta: function (name) {
+                return this._meta[name]
             }
 
 

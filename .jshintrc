@@ -27,6 +27,7 @@
 	, "predef": [
 		"define"
 		, "Backbone"
+		, "_"
 
 		, "afterEach"
 		, "beforeEach"
@@ -55,5 +56,6 @@
 		, "sandbox"
 		, "setFixtures"
 		, "setStyleFixtures"
+		, "sinon"
 	]
 }
