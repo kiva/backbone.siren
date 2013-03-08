@@ -7,7 +7,7 @@
         template: function (data) {
             /*jshint multistr:true */
 
-            var tpl = '<form action="<%= href %>"  title="<%= title %>" data-type="<%= type %>" method="<%= method %>"> \
+            var tpl = '<form action="<%= href %>" id="<%= id %>"  title="<%= title %>" data-type="<%= type %>" method="<%= method %>"> \
             <% _.each(fields, function (field) { %> \
                 <label for="<%= field.id %>"><%= field.label %></label> \
                 <input type="<%= field.type %>" name="<%= field.name %>" id="<%= field.id %>"/> \

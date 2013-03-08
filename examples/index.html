@@ -26,9 +26,17 @@
     $.getJSON(sirenUrl, function (results) {
         settings = new Backbone.Siren.Model(results);
         var form = settings.getActionByName('edit-lender').render({
-            labels: {
-                firstName: 'First Name'
-                , lastName: 'Last Name'
+            title: 'Edit Lender'
+            , id: ''
+            , fieldAttributes: {
+                firstName: {
+                    id: 'firstNameId'
+                    , label: 'First Name'
+                }
+                , lastName: {
+                    id: 'lastNameId'
+                    , label: 'Last Name'
+                }
             }
         });
         $('.wrap').html(form.$el);
