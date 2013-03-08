@@ -1,0 +1,697 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - coverage.lcov - src/backbone.siren.js</title>
+  <link rel="stylesheet" type="text/css" href="../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../index.html">top level</a> - <a href="index.html">src</a> - backbone.siren.js<span style="font-size: 80%;"> (source / <a href="backbone.siren.js.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">coverage.lcov</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">88</td>
+            <td class="headerCovTableEntry">123</td>
+            <td class="headerCovTableEntryLo">71.5 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2013-03-07</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntryHi">-</td>
+          </tr>
+          <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span><span class="lineCov">          2 : Backbone.Siren = (function (_, Backbone, undefined) {</span></a>
+<span class="lineNum">       2 </span><span class="lineCov">          1 :     'use strict';</span>
+<span class="lineNum">       3 </span>            : 
+<span class="lineNum">       4 </span>            :     // The store
+<span class="lineNum">       5 </span><span class="lineCov">          1 :     var _store = {}</span>
+<span class="lineNum">       6 </span>            :         , store = {
+<span class="lineNum">       7 </span>            :             add: function (model) {
+<span class="lineNum">       8 </span><span class="lineCov">        640 :                 _store[model.url()] = model;</span>
+<span class="lineNum">       9 </span>            :             }
+<span class="lineNum">      10 </span>            : 
+<span class="lineNum">      11 </span>            :             , exists: function (model) {
+<span class="lineNum">      12 </span><span class="lineNoCov">          0 :                 return !!_store[model.url()];</span>
+<span class="lineNum">      13 </span>            :             }
+<span class="lineNum">      14 </span>            : 
+<span class="lineNum">      15 </span>            :             , all: function () {
+<span class="lineNum">      16 </span>            :                 return _store;
+<span class="lineNum">      17 </span>            :             }
+<span class="lineNum">      18 </span>            :         }
+<span class="lineNum">      19 </span>            :         , warn = function (msg) {
+<span class="lineNum">      20 </span><span class="lineCov">          2 :             if (Backbone.Siren.settings.showWarnings &amp;&amp; console) {</span>
+<span class="lineNum">      21 </span><span class="lineCov">          4 :                 console.warn(msg);</span>
+<span class="lineNum">      22 </span>            :             }
+<span class="lineNum">      23 </span>            :         };
+<span class="lineNum">      24 </span>            : 
+<span class="lineNum">      25 </span>            : 
+<span class="lineNum">      26 </span>            :     /**
+<span class="lineNum">      27 </span>            :      *
+<span class="lineNum">      28 </span>            :      * @param actionData
+<span class="lineNum">      29 </span>            :      * @constructor
+<span class="lineNum">      30 </span>            :      */
+<span class="lineNum">      31 </span>            :     function Action(actionData) {
+<span class="lineNum">      32 </span><span class="lineCov">         90 :         _.extend(this, actionData);</span>
+<span class="lineNum">      33 </span>            :     }
+<span class="lineNum">      34 </span>            : 
+<span class="lineNum">      35 </span>            : 
+<span class="lineNum">      36 </span><span class="lineCov">          1 :     Action.prototype = {</span>
+<span class="lineNum">      37 </span>            : 
+<span class="lineNum">      38 </span>            :         /**
+<span class="lineNum">      39 </span>            :          *
+<span class="lineNum">      40 </span>            :          * @param name
+<span class="lineNum">      41 </span>            :          * @return {*}
+<span class="lineNum">      42 </span>            :          */
+<span class="lineNum">      43 </span>            :         getFieldByName: function (name) {
+<span class="lineNum">      44 </span><span class="lineCov">          1 :             return _.find(this.fields, function (field) {</span>
+<span class="lineNum">      45 </span><span class="lineCov">          1 :                 return field.name == name;</span>
+<span class="lineNum">      46 </span>            :             });
+<span class="lineNum">      47 </span>            :         }
+<span class="lineNum">      48 </span>            :     };
+<span class="lineNum">      49 </span>            : 
+<span class="lineNum">      50 </span>            : 
+<span class="lineNum">      51 </span>            :     /**
+<span class="lineNum">      52 </span>            :      *
+<span class="lineNum">      53 </span>            :      * @static
+<span class="lineNum">      54 </span>            :      * @param name
+<span class="lineNum">      55 </span>            :      * @return {String}
+<span class="lineNum">      56 </span>            :      */
+<span class="lineNum">      57 </span>            :     function toCamelCase(name) {
+<span class="lineNum">      58 </span><span class="lineCov">         88 :         return name.replace(/(\-[a-z])/g, function(match){return match.toUpperCase().replace('-','');});</span>
+<span class="lineNum">      59 </span>            :     }
+<span class="lineNum">      60 </span>            : 
+<span class="lineNum">      61 </span>            : 
+<span class="lineNum">      62 </span>            :     /**
+<span class="lineNum">      63 </span>            :      *
+<span class="lineNum">      64 </span>            :      * @static
+<span class="lineNum">      65 </span>            :      * @param entity
+<span class="lineNum">      66 </span>            :      * @return {String}
+<span class="lineNum">      67 </span>            :      */
+<span class="lineNum">      68 </span>            :     function getUrl(entity) {
+<span class="lineNum">      69 </span><span class="lineCov">        326 :         var link, url;</span>
+<span class="lineNum">      70 </span>            : 
+<span class="lineNum">      71 </span>            :         if (entity.href) {
+<span class="lineNum">      72 </span><span class="lineCov">        182 :             url = entity.href;</span>
+<span class="lineNum">      73 </span>            :         } else if (entity.links) {
+<span class="lineNum">      74 </span><span class="lineCov">        142 :             link = entity.links.filter(function (link) {</span>
+<span class="lineNum">      75 </span><span class="lineCov">        292 :                 return !!(link.rel &amp;&amp; link.rel.filter(function (relType) {</span>
+<span class="lineNum">      76 </span><span class="lineCov">        146 :                     return relType == 'self';</span>
+<span class="lineNum">      77 </span>            :                 }).length);
+<span class="lineNum">      78 </span>            :             })[0];
+<span class="lineNum">      79 </span>            : 
+<span class="lineNum">      80 </span>            :             if (link) {
+<span class="lineNum">      81 </span><span class="lineCov">        142 :                 url = link.href;</span>
+<span class="lineNum">      82 </span>            :             }
+<span class="lineNum">      83 </span>            :         } else {
+<span class="lineNum">      84 </span><span class="lineCov">          4 :             warn('Missing href or &quot;self&quot; link');</span>
+<span class="lineNum">      85 </span><span class="lineCov">          2 :             url = '';</span>
+<span class="lineNum">      86 </span>            :         }
+<span class="lineNum">      87 </span>            : 
+<span class="lineNum">      88 </span>            :         return url;
+<span class="lineNum">      89 </span>            :     }
+<span class="lineNum">      90 </span>            : 
+<span class="lineNum">      91 </span>            : 
+<span class="lineNum">      92 </span>            :     /**
+<span class="lineNum">      93 </span>            :      * Access to the representation's &quot;self&quot; url, or its &quot;href&quot; if there is one.
+<span class="lineNum">      94 </span>            :      *
+<span class="lineNum">      95 </span>            :      * @return {String}
+<span class="lineNum">      96 </span>            :      */
+<span class="lineNum">      97 </span>            :     function url() {
+<span class="lineNum">      98 </span><span class="lineCov">        326 :         return getUrl(this._data);</span>
+<span class="lineNum">      99 </span>            :     }
+<span class="lineNum">     100 </span>            : 
+<span class="lineNum">     101 </span>            : 
+<span class="lineNum">     102 </span>            :     /**
+<span class="lineNum">     103 </span>            :      *
+<span class="lineNum">     104 </span>            :      * @static
+<span class="lineNum">     105 </span>            :      * @param {Object} sirenObj Can be a siren entity or siren action object
+<span class="lineNum">     106 </span>            :      * @return {Array}
+<span class="lineNum">     107 </span>            :      */
+<span class="lineNum">     108 </span>            :     function getClassNames(sirenObj) {
+<span class="lineNum">     109 </span><span class="lineCov">        550 :         return sirenObj['class'] || [];</span>
+<span class="lineNum">     110 </span>            :     }
+<span class="lineNum">     111 </span>            : 
+<span class="lineNum">     112 </span>            : 
+<span class="lineNum">     113 </span>            :     /**
+<span class="lineNum">     114 </span>            :      *
+<span class="lineNum">     115 </span>            :      * @static
+<span class="lineNum">     116 </span>            :      * @param {Array} entities
+<span class="lineNum">     117 </span>            :      * @param {Object} filters
+<span class="lineNum">     118 </span>            :      * @return {Array}
+<span class="lineNum">     119 </span>            :      */
+<span class="lineNum">     120 </span>            :     function filter(entities, filters) {
+<span class="lineNum">     121 </span><span class="lineNoCov">          0 :         return _.filter(entities, function (entity) {</span>
+<span class="lineNum">     122 </span><span class="lineNoCov">          0 :             return hasProperties(entity, filters);</span>
+<span class="lineNum">     123 </span>            :         });
+<span class="lineNum">     124 </span>            :     }
+<span class="lineNum">     125 </span>            : 
+<span class="lineNum">     126 </span>            : 
+<span class="lineNum">     127 </span>            :     /**
+<span class="lineNum">     128 </span>            :      *
+<span class="lineNum">     129 </span>            :      * @param {Backbone.Siren.Model|Backbone.Siren.Collection} bbSiren
+<span class="lineNum">     130 </span>            :      * @param {Object} filters
+<span class="lineNum">     131 </span>            :      * @return {Boolean}
+<span class="lineNum">     132 </span>            :      */
+<span class="lineNum">     133 </span>            :     function hasProperties(bbSiren, filters) {
+<span class="lineNum">     134 </span><span class="lineNoCov">          0 :         var _hasProperties = true;</span>
+<span class="lineNum">     135 </span>            : 
+<span class="lineNum">     136 </span>            :         if (filters.className) {
+<span class="lineNum">     137 </span><span class="lineNoCov">          0 :             _hasProperties = bbSiren.hasClass(filters.className);</span>
+<span class="lineNum">     138 </span>            :         }
+<span class="lineNum">     139 </span>            : 
+<span class="lineNum">     140 </span>            :         if (filters.rel) {
+<span class="lineNum">     141 </span><span class="lineNoCov">          0 :             _hasProperties = bbSiren.rel() == filters.rel;</span>
+<span class="lineNum">     142 </span>            :         }
+<span class="lineNum">     143 </span>            : 
+<span class="lineNum">     144 </span>            :         return _hasProperties;
+<span class="lineNum">     145 </span>            :     }
+<span class="lineNum">     146 </span>            : 
+<span class="lineNum">     147 </span>            : 
+<span class="lineNum">     148 </span>            :     /**
+<span class="lineNum">     149 </span>            :      *
+<span class="lineNum">     150 </span>            :      * @param {Object} action
+<span class="lineNum">     151 </span>            :      * @param {Object} filters
+<span class="lineNum">     152 </span>            :      * @return {Boolean}
+<span class="lineNum">     153 </span>            :      */
+<span class="lineNum">     154 </span>            :     function actionHasProperties(action, filters) {
+<span class="lineNum">     155 </span><span class="lineNoCov">          0 :         var hasProperties = true;</span>
+<span class="lineNum">     156 </span>            : 
+<span class="lineNum">     157 </span>            :         if (filters.className) {
+<span class="lineNum">     158 </span><span class="lineNoCov">          0 :             hasProperties = _hasClass(action, filters.className);</span>
+<span class="lineNum">     159 </span>            :         }
+<span class="lineNum">     160 </span>            : 
+<span class="lineNum">     161 </span>            :         if (filters.name) {
+<span class="lineNum">     162 </span><span class="lineNoCov">          0 :             hasProperties = action.name == filters.name;</span>
+<span class="lineNum">     163 </span>            :         }
+<span class="lineNum">     164 </span>            : 
+<span class="lineNum">     165 </span>            :         return hasProperties;
+<span class="lineNum">     166 </span>            :     }
+<span class="lineNum">     167 </span>            : 
+<span class="lineNum">     168 </span>            : 
+<span class="lineNum">     169 </span>            :     /**
+<span class="lineNum">     170 </span>            :      *
+<span class="lineNum">     171 </span>            :      * @static
+<span class="lineNum">     172 </span>            :      * @param sirenObj
+<span class="lineNum">     173 </span>            :      * @param className
+<span class="lineNum">     174 </span>            :      * @return {Boolean}
+<span class="lineNum">     175 </span>            :      */
+<span class="lineNum">     176 </span>            :     function _hasClass(sirenObj, className) {
+<span class="lineNum">     177 </span><span class="lineCov">       1632 :         return _.indexOf(getClassNames(sirenObj), className) &gt; -1;</span>
+<span class="lineNum">     178 </span>            :     }
+<span class="lineNum">     179 </span>            : 
+<span class="lineNum">     180 </span>            : 
+<span class="lineNum">     181 </span>            :     /**
+<span class="lineNum">     182 </span>            :      *
+<span class="lineNum">     183 </span>            :      * @param className
+<span class="lineNum">     184 </span>            :      * @return {Boolean}
+<span class="lineNum">     185 </span>            :      */
+<span class="lineNum">     186 </span>            :     function hasClass(className) {
+<span class="lineNum">     187 </span><span class="lineCov">          4 :         return _hasClass(this._data, className);</span>
+<span class="lineNum">     188 </span>            :     }
+<span class="lineNum">     189 </span>            : 
+<span class="lineNum">     190 </span>            : 
+<span class="lineNum">     191 </span>            :     /**
+<span class="lineNum">     192 </span>            :      * Accesses the &quot;class&quot; property of the Siren Object
+<span class="lineNum">     193 </span>            :      *
+<span class="lineNum">     194 </span>            :      * @return {Array}
+<span class="lineNum">     195 </span>            :      */
+<span class="lineNum">     196 </span>            :     function classes() {
+<span class="lineNum">     197 </span><span class="lineCov">          6 :         return getClassNames(this._data);</span>
+<span class="lineNum">     198 </span>            :     }
+<span class="lineNum">     199 </span>            : 
+<span class="lineNum">     200 </span>            : 
+<span class="lineNum">     201 </span>            :     /**
+<span class="lineNum">     202 </span>            :      *
+<span class="lineNum">     203 </span>            :      * @param {String} rel
+<span class="lineNum">     204 </span>            :      * @return {Array}
+<span class="lineNum">     205 </span>            :      */
+<span class="lineNum">     206 </span>            :     function links(rel) {
+<span class="lineNum">     207 </span><span class="lineCov">          9 :         var _links = this._data.links;</span>
+<span class="lineNum">     208 </span>            : 
+<span class="lineNum">     209 </span>            :         if (rel) {
+<span class="lineNum">     210 </span><span class="lineCov">          8 :             _links = _.filter(_links, function (link) {</span>
+<span class="lineNum">     211 </span><span class="lineCov">         24 :                 return _.indexOf(link.rel, rel) &gt; -1;</span>
+<span class="lineNum">     212 </span>            :             });
+<span class="lineNum">     213 </span>            :         }
+<span class="lineNum">     214 </span>            : 
+<span class="lineNum">     215 </span><span class="lineCov">          9 :         return _links || [];</span>
+<span class="lineNum">     216 </span>            :     }
+<span class="lineNum">     217 </span>            : 
+<span class="lineNum">     218 </span>            : 
+<span class="lineNum">     219 </span>            :     /**
+<span class="lineNum">     220 </span>            :      *
+<span class="lineNum">     221 </span>            :      * @param {String} rel
+<span class="lineNum">     222 </span>            :      * @return {Array} An array of jqXhr objects.
+<span class="lineNum">     223 </span>            :      */
+<span class="lineNum">     224 </span>            :     function request(rel) {
+<span class="lineNum">     225 </span><span class="lineCov">          4 :         var self = this</span>
+<span class="lineNum">     226 </span>            :         , requests = []
+<span class="lineNum">     227 </span><span class="lineCov">          4 :         , links = this.links(rel);</span>
+<span class="lineNum">     228 </span>            : 
+<span class="lineNum">     229 </span><span class="lineCov">          8 :         _.each(links, function (link) {</span>
+<span class="lineNum">     230 </span><span class="lineCov">          6 :             requests.push($.getJSON(link.href, function (sirenResponse) {</span>
+<span class="lineNum">     231 </span><span class="lineNoCov">          0 :                 self.parseEntity(sirenResponse);</span>
+<span class="lineNum">     232 </span>            :             }));
+<span class="lineNum">     233 </span>            :         });
+<span class="lineNum">     234 </span>            : 
+<span class="lineNum">     235 </span>            :         return requests;
+<span class="lineNum">     236 </span>            :     }
+<span class="lineNum">     237 </span>            : 
+<span class="lineNum">     238 </span>            : 
+<span class="lineNum">     239 </span>            :     /**
+<span class="lineNum">     240 </span>            :      *
+<span class="lineNum">     241 </span>            :      * @static
+<span class="lineNum">     242 </span>            :      * @param sirenObj
+<span class="lineNum">     243 </span>            :      * @return {String}
+<span class="lineNum">     244 </span>            :      */
+<span class="lineNum">     245 </span>            :     function getRel(sirenObj) {
+<span class="lineNum">     246 </span><span class="lineCov">        282 :         var rel = sirenObj.rel;</span>
+<span class="lineNum">     247 </span>            : 
+<span class="lineNum">     248 </span>            :         if (rel) {
+<span class="lineNum">     249 </span><span class="lineCov">        282 :             rel = rel[0]; // @todo, arbitrarily grabbing the first rel might be bad but I still don't understand the use case for many rels...</span>
+<span class="lineNum">     250 </span><span class="lineCov">       1128 :             rel = rel.slice(rel.lastIndexOf('/') + 1, rel.length);</span>
+<span class="lineNum">     251 </span>            :         }
+<span class="lineNum">     252 </span>            : 
+<span class="lineNum">     253 </span>            :         return rel;
+<span class="lineNum">     254 </span>            :     }
+<span class="lineNum">     255 </span>            : 
+<span class="lineNum">     256 </span>            : 
+<span class="lineNum">     257 </span>            :     /**
+<span class="lineNum">     258 </span>            :      *
+<span class="lineNum">     259 </span>            :      * @return {String}
+<span class="lineNum">     260 </span>            :      */
+<span class="lineNum">     261 </span>            :     function rel() {
+<span class="lineNum">     262 </span><span class="lineCov">        282 :         return getRel(this._data);</span>
+<span class="lineNum">     263 </span>            :     }
+<span class="lineNum">     264 </span>            : 
+<span class="lineNum">     265 </span>            : 
+<span class="lineNum">     266 </span>            :     /**
+<span class="lineNum">     267 </span>            :      *
+<span class="lineNum">     268 </span>            :      * @param filters
+<span class="lineNum">     269 </span>            :      * @return {*|Array}
+<span class="lineNum">     270 </span>            :      */
+<span class="lineNum">     271 </span>            :     function actions(filters) {
+<span class="lineNum">     272 </span><span class="lineCov">          2 :         var _actions = this._actions;</span>
+<span class="lineNum">     273 </span>            : 
+<span class="lineNum">     274 </span>            :         if (filters) {
+<span class="lineNum">     275 </span><span class="lineNoCov">          0 :             _actions = _.filter(_actions, function (action) {</span>
+<span class="lineNum">     276 </span><span class="lineNoCov">          0 :                 return actionHasProperties(action, filters);</span>
+<span class="lineNum">     277 </span>            :             });
+<span class="lineNum">     278 </span>            :         }
+<span class="lineNum">     279 </span>            :         return _actions;
+<span class="lineNum">     280 </span>            :     }
+<span class="lineNum">     281 </span>            : 
+<span class="lineNum">     282 </span>            : 
+<span class="lineNum">     283 </span>            :     /**
+<span class="lineNum">     284 </span>            :      *
+<span class="lineNum">     285 </span>            :      * @param {String} actionName
+<span class="lineNum">     286 </span>            :      * @return {Object}
+<span class="lineNum">     287 </span>            :      */
+<span class="lineNum">     288 </span>            :     function getAllByAction(actionName) {
+<span class="lineNum">     289 </span><span class="lineCov">          7 :         var values</span>
+<span class="lineNum">     290 </span><span class="lineCov">          7 :         , action = this.getActionByName(actionName)</span>
+<span class="lineNum">     291 </span>            :         , self = this;
+<span class="lineNum">     292 </span>            : 
+<span class="lineNum">     293 </span>            :         if (action) {
+<span class="lineNum">     294 </span><span class="lineCov">          5 :             values = {};</span>
+<span class="lineNum">     295 </span><span class="lineCov">         10 :             _.each(action.fields, function (field) {</span>
+<span class="lineNum">     296 </span><span class="lineCov">          9 :                 if (self instanceof Backbone.Model) {</span>
+<span class="lineNum">     297 </span><span class="lineCov">         16 :                     values[field.name] = self.get(field.name);</span>
+<span class="lineNum">     298 </span>            :                 } else {
+<span class="lineNum">     299 </span><span class="lineCov">          2 :                     values[field.name] = self.meta(field.name);</span>
+<span class="lineNum">     300 </span>            :                 }
+<span class="lineNum">     301 </span>            : 
+<span class="lineNum">     302 </span>            :             });
+<span class="lineNum">     303 </span>            :         }
+<span class="lineNum">     304 </span>            : 
+<span class="lineNum">     305 </span>            :         return values;
+<span class="lineNum">     306 </span>            :     }
+<span class="lineNum">     307 </span>            : 
+<span class="lineNum">     308 </span>            : 
+<span class="lineNum">     309 </span>            :     /**
+<span class="lineNum">     310 </span>            :      *
+<span class="lineNum">     311 </span>            :      * @param {String} name
+<span class="lineNum">     312 </span>            :      * @return {Object|undefined}
+<span class="lineNum">     313 </span>            :      */
+<span class="lineNum">     314 </span>            :     function getActionByName(name) {
+<span class="lineNum">     315 </span><span class="lineCov">         13 :         return _.find(this._actions, function (action) {</span>
+<span class="lineNum">     316 </span><span class="lineCov">         11 :             return action.name == name;</span>
+<span class="lineNum">     317 </span>            :         });
+<span class="lineNum">     318 </span>            :     }
+<span class="lineNum">     319 </span>            : 
+<span class="lineNum">     320 </span>            : 
+<span class="lineNum">     321 </span>            :     /**
+<span class="lineNum">     322 </span>            :      * Access to the representation's &quot;title&quot;
+<span class="lineNum">     323 </span>            :      *
+<span class="lineNum">     324 </span>            :      * @return {String}
+<span class="lineNum">     325 </span>            :      */
+<span class="lineNum">     326 </span>            :     function title() {
+<span class="lineNum">     327 </span>            :         return this._data.title;
+<span class="lineNum">     328 </span>            :     }
+<span class="lineNum">     329 </span>            : 
+<span class="lineNum">     330 </span>            : 
+<span class="lineNum">     331 </span>            :     /**
+<span class="lineNum">     332 </span>            :      *
+<span class="lineNum">     333 </span>            :      * @param {Object} options
+<span class="lineNum">     334 </span>            :      * @return {Array}
+<span class="lineNum">     335 </span>            :      */
+<span class="lineNum">     336 </span>            :     function parseActions(options) {
+<span class="lineNum">     337 </span><span class="lineCov">        398 :         var self = this</span>
+<span class="lineNum">     338 </span>            :             , _actions = [];
+<span class="lineNum">     339 </span>            : 
+<span class="lineNum">     340 </span><span class="lineCov">        796 :         _.each(self._data.actions, function (action) {</span>
+<span class="lineNum">     341 </span><span class="lineCov">         44 :             var bbSirenAction = new Backbone.Siren.Action(action);</span>
+<span class="lineNum">     342 </span>            : 
+<span class="lineNum">     343 </span><span class="lineCov">         88 :             _actions.push(bbSirenAction);</span>
+<span class="lineNum">     344 </span>            : 
+<span class="lineNum">     345 </span><span class="lineCov">         88 :             self[toCamelCase(action.name)] = function () {</span>
+<span class="lineNum">     346 </span>            : 
+<span class="lineNum">     347 </span><span class="lineNoCov">          0 :                 options.url = action.href;</span>
+<span class="lineNum">     348 </span><span class="lineNoCov">          0 :                 options.actionName = action.name;</span>
+<span class="lineNum">     349 </span>            : 
+<span class="lineNum">     350 </span>            :                 if (action.method) {
+<span class="lineNum">     351 </span><span class="lineNoCov">          0 :                     options.method = action.method;</span>
+<span class="lineNum">     352 </span>            :                 }
+<span class="lineNum">     353 </span>            : 
+<span class="lineNum">     354 </span>            :                 if (action.type) {
+<span class="lineNum">     355 </span><span class="lineNoCov">          0 :                     options.type = action.type;</span>
+<span class="lineNum">     356 </span>            :                 }
+<span class="lineNum">     357 </span>            : 
+<span class="lineNum">     358 </span><span class="lineNoCov">          0 :                 return self.save(self.getAllByAction(action.name), options);</span>
+<span class="lineNum">     359 </span>            :             };
+<span class="lineNum">     360 </span>            :         });
+<span class="lineNum">     361 </span>            : 
+<span class="lineNum">     362 </span><span class="lineCov">        398 :         self._actions = _actions;</span>
+<span class="lineNum">     363 </span>            :         return _actions;
+<span class="lineNum">     364 </span>            :     }
+<span class="lineNum">     365 </span>            : 
+<span class="lineNum">     366 </span>            : 
+<span class="lineNum">     367 </span>            :     return {
+<span class="lineNum">     368 </span>            :         settings: {
+<span class="lineNum">     369 </span>            :             showWarnings: true
+<span class="lineNum">     370 </span>            :         }
+<span class="lineNum">     371 </span>            : 
+<span class="lineNum">     372 </span>            :         , store: store
+<span class="lineNum">     373 </span>            :         , Action: Action
+<span class="lineNum">     374 </span>            : 
+<span class="lineNum">     375 </span>            : 
+<span class="lineNum">     376 </span><span class="lineCov">          1 :         , Model: Backbone.Model.extend({</span>
+<span class="lineNum">     377 </span>            : 
+<span class="lineNum">     378 </span>            :             url: url
+<span class="lineNum">     379 </span>            :             , classes: classes
+<span class="lineNum">     380 </span>            :             , hasClass: hasClass
+<span class="lineNum">     381 </span>            :             , rel: rel
+<span class="lineNum">     382 </span>            :             , title: title
+<span class="lineNum">     383 </span>            :             , actions: actions
+<span class="lineNum">     384 </span>            :             , links: links
+<span class="lineNum">     385 </span>            :             , getActionByName: getActionByName
+<span class="lineNum">     386 </span>            :             , getAllByAction: getAllByAction
+<span class="lineNum">     387 </span>            :             , parseActions: parseActions
+<span class="lineNum">     388 </span>            :             , request: request
+<span class="lineNum">     389 </span>            : 
+<span class="lineNum">     390 </span>            : 
+<span class="lineNum">     391 </span>            :             /**
+<span class="lineNum">     392 </span>            :              *
+<span class="lineNum">     393 </span>            :              * @param {Object} sirenObj
+<span class="lineNum">     394 </span>            :              * @param {Object} options
+<span class="lineNum">     395 </span>            :              */
+<span class="lineNum">     396 </span>            :             , resolveEntities: function (sirenObj, options) {
+<span class="lineNum">     397 </span><span class="lineCov">        349 :                 var self = this</span>
+<span class="lineNum">     398 </span>            :                     , resolvedEntities = [];
+<span class="lineNum">     399 </span>            : 
+<span class="lineNum">     400 </span><span class="lineCov">        698 :                 _.each(sirenObj.entities, function(entity) {</span>
+<span class="lineNum">     401 </span><span class="lineCov">        560 :                     if ((entity.href &amp;&amp; options.autoFetch == 'linked') || options.autoFetch == 'all') {</span>
+<span class="lineNum">     402 </span><span class="lineNoCov">          0 :                         resolvedEntities.push(self.fetchEntity(entity, options));</span>
+<span class="lineNum">     403 </span>            :                     } else {
+<span class="lineNum">     404 </span><span class="lineCov">        840 :                         resolvedEntities.push(self.addEntity(entity, options));</span>
+<span class="lineNum">     405 </span>            :                     }
+<span class="lineNum">     406 </span>            :                 });
+<span class="lineNum">     407 </span>            : 
+<span class="lineNum">     408 </span><span class="lineCov">        349 :                 return $.when(resolvedEntities).done(function () {</span>
+<span class="lineNum">     409 </span><span class="lineCov">        698 :                     self.trigger('resolve', self);</span>
+<span class="lineNum">     410 </span>            :                 });
+<span class="lineNum">     411 </span>            :             }
+<span class="lineNum">     412 </span>            : 
+<span class="lineNum">     413 </span>            : 
+<span class="lineNum">     414 </span>            :             /**
+<span class="lineNum">     415 </span>            :              * http://backbonejs.org/#Model-parse
+<span class="lineNum">     416 </span>            :              *
+<span class="lineNum">     417 </span>            :              * @param {Object} sirenObj
+<span class="lineNum">     418 </span>            :              */
+<span class="lineNum">     419 </span>            :             , parse: function (sirenObj, options) {
+<span class="lineNum">     420 </span><span class="lineCov">        349 :                 this._data = sirenObj; // Stores the entire siren object in raw json</span>
+<span class="lineNum">     421 </span><span class="lineCov">        349 :                 this._entities = [];</span>
+<span class="lineNum">     422 </span>            : 
+<span class="lineNum">     423 </span><span class="lineCov">        698 :                 this.resolveEntities(sirenObj, options);</span>
+<span class="lineNum">     424 </span><span class="lineCov">        698 :                 this.parseActions(options);</span>
+<span class="lineNum">     425 </span>            : 
+<span class="lineNum">     426 </span>            :                 return sirenObj.properties;
+<span class="lineNum">     427 </span>            :             }
+<span class="lineNum">     428 </span>            : 
+<span class="lineNum">     429 </span>            : 
+<span class="lineNum">     430 </span>            :             /**
+<span class="lineNum">     431 </span>            :              * http://backbonejs.org/#Model-toJSON
+<span class="lineNum">     432 </span>            :              *
+<span class="lineNum">     433 </span>            :              * @param {Object} options
+<span class="lineNum">     434 </span>            :              */
+<span class="lineNum">     435 </span>            :             , toJSON: function () {
+<span class="lineNum">     436 </span><span class="lineNoCov">          0 :                 var json = _.clone(this.attributes)</span>
+<span class="lineNum">     437 </span><span class="lineNoCov">          0 :                     , entities = this.entities();</span>
+<span class="lineNum">     438 </span>            : 
+<span class="lineNum">     439 </span><span class="lineNoCov">          0 :                 _.each(entities, function (entity) {</span>
+<span class="lineNum">     440 </span><span class="lineNoCov">          0 :                     json[entity.rel()] = entity;</span>
+<span class="lineNum">     441 </span>            :                 });
+<span class="lineNum">     442 </span>            : 
+<span class="lineNum">     443 </span>            :                 return json;
+<span class="lineNum">     444 </span>            :             }
+<span class="lineNum">     445 </span>            : 
+<span class="lineNum">     446 </span>            : 
+<span class="lineNum">     447 </span>            :             /**
+<span class="lineNum">     448 </span>            :              * Filters the entity's properties and returns only sub-entities
+<span class="lineNum">     449 </span>            :              *
+<span class="lineNum">     450 </span>            :              * @return {Array}
+<span class="lineNum">     451 </span>            :              */
+<span class="lineNum">     452 </span>            :             , entities: function (filters) {
+<span class="lineNum">     453 </span><span class="lineNoCov">          0 :                 var self = this</span>
+<span class="lineNum">     454 </span><span class="lineNoCov">          0 :                     , entities = _.filter(this, function (val, name) {</span>
+<span class="lineNum">     455 </span><span class="lineNoCov">          0 :                         return _.indexOf(self._entities, name) &gt; -1;</span>
+<span class="lineNum">     456 </span>            :                     });
+<span class="lineNum">     457 </span>            : 
+<span class="lineNum">     458 </span>            :                 if (filters) {
+<span class="lineNum">     459 </span><span class="lineNoCov">          0 :                     entities = filter(entities, filters);</span>
+<span class="lineNum">     460 </span>            :                 }
+<span class="lineNum">     461 </span>            : 
+<span class="lineNum">     462 </span>            :                 return entities;
+<span class="lineNum">     463 </span>            :             }
+<span class="lineNum">     464 </span>            : 
+<span class="lineNum">     465 </span>            : 
+<span class="lineNum">     466 </span>            :             /**
+<span class="lineNum">     467 </span>            :              *
+<span class="lineNum">     468 </span>            :              * @param {Object} entity
+<span class="lineNum">     469 </span>            :              */
+<span class="lineNum">     470 </span>            :             , fetchEntity: function (entity) {
+<span class="lineNum">     471 </span><span class="lineNoCov">          0 :                 var self = this;</span>
+<span class="lineNum">     472 </span>            : 
+<span class="lineNum">     473 </span><span class="lineNoCov">          0 :                 return $.getJSON(getUrl(entity), function (resolvedEntity) {</span>
+<span class="lineNum">     474 </span><span class="lineNoCov">          0 :                     self.addEntity(resolvedEntity);</span>
+<span class="lineNum">     475 </span>            :                 });
+<span class="lineNum">     476 </span>            :             }
+<span class="lineNum">     477 </span>            : 
+<span class="lineNum">     478 </span>            : 
+<span class="lineNum">     479 </span>            :             /**
+<span class="lineNum">     480 </span>            :              *
+<span class="lineNum">     481 </span>            :              * @param {Object} entity
+<span class="lineNum">     482 </span>            :              */
+<span class="lineNum">     483 </span>            :             , parseEntity: function (entity) {
+<span class="lineNum">     484 </span><span class="lineCov">        280 :                 var bbSiren;</span>
+<span class="lineNum">     485 </span>            : 
+<span class="lineNum">     486 </span><span class="lineCov">        280 :                 if (_hasClass(entity, 'collection')) {</span>
+<span class="lineNum">     487 </span><span class="lineCov">         20 :                     bbSiren = new Backbone.Siren.Collection(entity);</span>
+<span class="lineNum">     488 </span><span class="lineCov">        260 :                 } else if (_hasClass(entity, 'error')) {</span>
+<span class="lineNum">     489 </span>            :                     // @todo how should we represent errors?
+<span class="lineNum">     490 </span><span class="lineNoCov">          0 :                     warn('@todo - errors');</span>
+<span class="lineNum">     491 </span>            :                 } else {
+<span class="lineNum">     492 </span><span class="lineCov">        260 :                     bbSiren = new Backbone.Siren.Model(entity);</span>
+<span class="lineNum">     493 </span><span class="lineCov">        520 :                     store.add(bbSiren);</span>
+<span class="lineNum">     494 </span>            :                 }
+<span class="lineNum">     495 </span>            : 
+<span class="lineNum">     496 </span>            :                 return bbSiren;
+<span class="lineNum">     497 </span>            :             }
+<span class="lineNum">     498 </span>            : 
+<span class="lineNum">     499 </span>            : 
+<span class="lineNum">     500 </span>            :             /**
+<span class="lineNum">     501 </span>            :              *
+<span class="lineNum">     502 </span>            :              * @param {Object} entity
+<span class="lineNum">     503 </span>            :              */
+<span class="lineNum">     504 </span>            :             , addEntity: function (entity) {
+<span class="lineNum">     505 </span><span class="lineCov">        560 :                 var bbSiren = this.parseEntity(entity)</span>
+<span class="lineNum">     506 </span><span class="lineCov">        280 :                 , rel = bbSiren.rel();</span>
+<span class="lineNum">     507 </span>            : 
+<span class="lineNum">     508 </span><span class="lineCov">        560 :                 this.set(rel, bbSiren);</span>
+<span class="lineNum">     509 </span><span class="lineCov">        560 :                 this._entities.push(rel);</span>
+<span class="lineNum">     510 </span>            : 
+<span class="lineNum">     511 </span>            :                 return bbSiren;
+<span class="lineNum">     512 </span>            :             }
+<span class="lineNum">     513 </span>            : 
+<span class="lineNum">     514 </span>            : 
+<span class="lineNum">     515 </span>            :             /**
+<span class="lineNum">     516 </span>            :              * http://backbonejs.org/#Model-constructor
+<span class="lineNum">     517 </span>            :              *
+<span class="lineNum">     518 </span>            :              * @param {Object} attributes
+<span class="lineNum">     519 </span>            :              * @param {Object} options
+<span class="lineNum">     520 </span>            :              */
+<span class="lineNum">     521 </span>            :             , constructor: function (sirenObj, options) {
+<span class="lineNum">     522 </span><span class="lineCov">        349 :                 options = options || {};</span>
+<span class="lineNum">     523 </span><span class="lineCov">        349 :                 options.parse = true; // Force &quot;parse&quot; to be called on instantiation: http://stackoverflow.com/questions/11068989/backbone-js-using-parse-without-calling-fetch/14950519#14950519</span>
+<span class="lineNum">     524 </span>            : 
+<span class="lineNum">     525 </span><span class="lineCov">        698 :                 Backbone.Model.call(this, sirenObj, options);</span>
+<span class="lineNum">     526 </span>            :             }
+<span class="lineNum">     527 </span>            : 
+<span class="lineNum">     528 </span>            :         })
+<span class="lineNum">     529 </span>            : 
+<span class="lineNum">     530 </span>            : 
+<span class="lineNum">     531 </span><span class="lineCov">          1 :         , Collection: Backbone.Collection.extend({</span>
+<span class="lineNum">     532 </span>            :             url: url
+<span class="lineNum">     533 </span>            :             , classes: classes
+<span class="lineNum">     534 </span>            :             , hasClass: hasClass
+<span class="lineNum">     535 </span>            :             , title: title
+<span class="lineNum">     536 </span>            :             , rel: rel
+<span class="lineNum">     537 </span>            :             , links: links
+<span class="lineNum">     538 </span>            :             , actions: actions
+<span class="lineNum">     539 </span>            :             , getActionByName: getActionByName
+<span class="lineNum">     540 </span>            :             , getAllByAction: getAllByAction
+<span class="lineNum">     541 </span>            :             , parseActions: parseActions
+<span class="lineNum">     542 </span>            :             , request: request
+<span class="lineNum">     543 </span>            : 
+<span class="lineNum">     544 </span>            : 
+<span class="lineNum">     545 </span>            :             /**
+<span class="lineNum">     546 </span>            :              * http://backbonejs.org/#Collection-toJSON
+<span class="lineNum">     547 </span>            :              *
+<span class="lineNum">     548 </span>            :              * @param {Object} options
+<span class="lineNum">     549 </span>            :              */
+<span class="lineNum">     550 </span>            :             , toJSON: function (options) {
+<span class="lineNum">     551 </span><span class="lineNoCov">          0 :                 return this.map(function(model){</span>
+<span class="lineNum">     552 </span><span class="lineNoCov">          0 :                     return model.toJSON(options);</span>
+<span class="lineNum">     553 </span>            :                 });
+<span class="lineNum">     554 </span>            :             }
+<span class="lineNum">     555 </span>            : 
+<span class="lineNum">     556 </span>            : 
+<span class="lineNum">     557 </span>            :             /**
+<span class="lineNum">     558 </span>            :              *
+<span class="lineNum">     559 </span>            :              * @param {Function|Object} arg
+<span class="lineNum">     560 </span>            :              * @return {Array}
+<span class="lineNum">     561 </span>            :              */
+<span class="lineNum">     562 </span>            :             , filter: function (arg) {
+<span class="lineNum">     563 </span><span class="lineNoCov">          0 :                 if (typeof arg ==  'function') {</span>
+<span class="lineNum">     564 </span><span class="lineNoCov">          0 :                     return _.filter(this, arg);</span>
+<span class="lineNum">     565 </span>            :                 } else {
+<span class="lineNum">     566 </span><span class="lineNoCov">          0 :                     return filter(this, arg);</span>
+<span class="lineNum">     567 </span>            :                 }
+<span class="lineNum">     568 </span>            :             }
+<span class="lineNum">     569 </span>            : 
+<span class="lineNum">     570 </span>            : 
+<span class="lineNum">     571 </span>            :             /**
+<span class="lineNum">     572 </span>            :              * http://backbonejs.org/#Collection-parse
+<span class="lineNum">     573 </span>            :              *
+<span class="lineNum">     574 </span>            :              * @param {Object} sirenObj
+<span class="lineNum">     575 </span>            :              */
+<span class="lineNum">     576 </span>            :             , parse: function (sirenObj, options) {
+<span class="lineNum">     577 </span><span class="lineCov">         47 :                 this._data = sirenObj; // Store the entire siren object in raw json</span>
+<span class="lineNum">     578 </span><span class="lineCov">         47 :                 this._meta = sirenObj.properties || {};</span>
+<span class="lineNum">     579 </span>            : 
+<span class="lineNum">     580 </span><span class="lineCov">         47 :                 var models = [];</span>
+<span class="lineNum">     581 </span><span class="lineCov">         94 :                 _.each(sirenObj.entities, function (entity) {</span>
+<span class="lineNum">     582 </span><span class="lineCov">         60 :                     var model = new Backbone.Siren.Model(entity);</span>
+<span class="lineNum">     583 </span><span class="lineCov">        120 :                     models.push(model);</span>
+<span class="lineNum">     584 </span><span class="lineCov">        120 :                     store.add(model);</span>
+<span class="lineNum">     585 </span>            :                 });
+<span class="lineNum">     586 </span>            : 
+<span class="lineNum">     587 </span><span class="lineCov">         94 :                 this.parseActions(options);</span>
+<span class="lineNum">     588 </span>            : 
+<span class="lineNum">     589 </span>            :                 return models;
+<span class="lineNum">     590 </span>            :             }
+<span class="lineNum">     591 </span>            : 
+<span class="lineNum">     592 </span>            : 
+<span class="lineNum">     593 </span>            :             /**
+<span class="lineNum">     594 </span>            :              * Unlike Models, collections don't have attributes.
+<span class="lineNum">     595 </span>            :              * However, there are times we need to store &quot;meta&quot; data about the collection such as
+<span class="lineNum">     596 </span>            :              * the paging &quot;offset&quot;.
+<span class="lineNum">     597 </span>            :              *
+<span class="lineNum">     598 </span>            :              * @param {*} prop
+<span class="lineNum">     599 </span>            :              * @param {*} value
+<span class="lineNum">     600 </span>            :              * @return {Object}
+<span class="lineNum">     601 </span>            :              */
+<span class="lineNum">     602 </span>            :             , meta: function (name) {
+<span class="lineNum">     603 </span>            :                 return this._meta[name];
+<span class="lineNum">     604 </span>            :             }
+<span class="lineNum">     605 </span>            : 
+<span class="lineNum">     606 </span>            : 
+<span class="lineNum">     607 </span>            :             /**
+<span class="lineNum">     608 </span>            :              * http://backbonejs.org/#Collection-constructor
+<span class="lineNum">     609 </span>            :              *
+<span class="lineNum">     610 </span>            :              * @param {Object} attributes
+<span class="lineNum">     611 </span>            :              * @param {Object} options
+<span class="lineNum">     612 </span>            :              */
+<span class="lineNum">     613 </span>            :             , constructor: function (sirenObj, options) {
+<span class="lineNum">     614 </span><span class="lineCov">         47 :                 options = options || {};</span>
+<span class="lineNum">     615 </span><span class="lineCov">         47 :                 options.parse = true; // Force &quot;parse&quot; to be called on instantiation: http://stackoverflow.com/questions/11068989/backbone-js-using-parse-without-calling-fetch/14950519#14950519</span>
+<span class="lineNum">     616 </span>            : 
+<span class="lineNum">     617 </span><span class="lineCov">         94 :                 Backbone.Collection.call(this, sirenObj, options);</span>
+<span class="lineNum">     618 </span>            :             }
+<span class="lineNum">     619 </span>            :         })
+<span class="lineNum">     620 </span>            :     };
+<span class="lineNum">     621 </span>            : }(_, Backbone));
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.10</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

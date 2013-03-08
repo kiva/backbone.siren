@@ -1,7 +1,4 @@
-var buster = require('buster');
 var config = module.exports;
-
-buster.spec.expose();
 
 config['development'] = {
     env: 'browser'
@@ -13,6 +10,12 @@ config['development'] = {
     ]
     , sources: ['src/backbone.siren.js']
     , specs: ['test/spec/**/*.js']
+    , extensions: [ require('buster-coverage') ]
+    , "buster-coverage": {
+        outputDirectory: "test/coverage"
+        , format: "lcov"
+        , combinedResultsOnly: true
+    }
 };
 
 
