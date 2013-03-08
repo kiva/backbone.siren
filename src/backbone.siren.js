@@ -204,15 +204,15 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      * @return {Array}
      */
     function links(rel) {
-        var links = this._data.links;
+        var _links = this._data.links;
 
         if (rel) {
-            links = _.filter(links, function (link) {
+            _links = _.filter(_links, function (link) {
                 return _.indexOf(link.rel, rel) > -1;
             });
         }
 
-        return links || [];
+        return _links || [];
     }
 
 
@@ -600,7 +600,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
              * @return {Object}
              */
             , meta: function (name) {
-                return this._meta[name]
+                return this._meta[name];
             }
 
 
