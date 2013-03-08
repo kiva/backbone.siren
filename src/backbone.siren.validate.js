@@ -57,7 +57,7 @@
             }
 
             // @todo actionName is not camelcase, unlike the action method that corresponds to the given action.  I don't think this is a big deal but it may throw some people off.
-            var action = this.action(options.actionName);
+            var action = this.getActionByName(options.actionName);
             if (!action) {
                 return errors['non-writable-fields'] = 'There were no writable fields, check your siren action. @todo better messaging';
             }
