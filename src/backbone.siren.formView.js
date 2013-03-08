@@ -4,14 +4,31 @@
 
     Backbone.Siren.FormView = Backbone.View.extend({
 
-        template: function (data) {
+        events: {
+            'submit form': 'handleFormSubmit'
+        }
+
+
+        , handleFormSubmit: function (event) {
+            event.preventDefault();
+            this.model.getActionByName(this.options.name).call();
+            console.log('submitted!');
+        }
+
+
+        /**
+         * Override to create a custom template
+         *
+         * @param {Object} data
+         */
+        , template: function (data) {
             /*jshint multistr:true */
 
             var tpl = '<form action="<%= href %>" id="<%= id %>"  title="<%= title %>" data-type="<%= type %>" method="<%= method %>"> \
             <% _.each(fields, function (field) { %> \
                 <label for="<%= field.id %>"><%= field.label %></label> \
                 <input type="<%= field.type %>" name="<%= field.name %>" id="<%= field.id %>"/> \
-            <% }); %> </form>';
+            <% }); %> <input type="submit" /> </form>';
 
 
             var compiled = _.template(tpl);
@@ -20,8 +37,8 @@
 
 
         , render: function (data) {
-            var html = this.template(data);
-            this.$el.html(html);
+            var $form = $(this.template(data));
+            this.$el.html($form);
         }
 
 

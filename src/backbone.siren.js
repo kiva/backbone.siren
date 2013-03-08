@@ -1,40 +1,73 @@
 Backbone.Siren = (function (_, Backbone, undefined) {
     'use strict';
 
-    // The store
+    // The store-cache
     var _store = {}
-        , store = {
-            add: function (model) {
-                _store[model.url()] = model;
-            }
 
-            , exists: function (model) {
-                return !!_store[model.url()];
-            }
 
-            , all: function () {
-                return _store;
-            }
+    /**
+     * Super simple store.  Good enough for now.
+     *
+     * @type {Object}
+     * @private
+     */
+    , store = {
+
+        /**
+         *
+         * @param {Backbone.Siren.Model} model
+         * @return {Backbone.Siren.Model}
+         */
+        add: function (model) {
+            return _store[model.url()] = model;
         }
-        , warn = function (msg) {
-            if (Backbone.Siren.settings.showWarnings && console) {
-                console.warn(msg);
-            }
-        };
+
+
+        /**
+         *
+         * @param {Backbone.Siren.Model} model
+         * @return {Boolean}
+         */
+        , exists: function (model) {
+            return !!_store[model.url()];
+        }
+
+
+        /**
+         *
+         * @return {Array}
+         */
+        , all: function () {
+            return _store;
+        }
+    }
+
+    /**
+     *
+     * @type {Object}
+     * @private
+     */
+    , warn = function (msg) {
+        if (Backbone.Siren.settings.showWarnings && console) {
+            console.warn(msg);
+        }
+    };
 
 
     /**
      *
+     * @param {Backbone.Siren.Model|Backbone.Siren.Collection} parent
      * @param actionData
      * @constructor
      */
-    function Action(actionData) {
+    function Action(actionData, parent) {
         var defaults = {
             method: 'POST' // @todo siren docs say get should be assumed...? I think POST makes more sense
             , type: 'application/x-www-form-urlencoded'
         };
 
         _.extend(this, defaults, actionData);
+        this.parent = parent;
     }
 
 
@@ -66,10 +99,39 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 });
             });
 
+            if (this.parent) {
+                if (this.parent instanceof Backbone.Model) {
+                    data.model = this.parent;
+                } else {
+                    data.collection = this.parent;
+                }
+
+                delete data.parent;
+            }
+
             return FormView
                 ? new FormView(data)
                 : {};
         }
+
+
+        , call: function (options) {
+            options = options || {};
+            options.url = this.href;
+            options.actionName = this.name;
+            options.validate = true;
+
+            if (this.method) {
+                options.method = this.method;
+            }
+
+            if (this.type) {
+                options.type = this.type;
+            }
+
+            return this.parent.save(this.parent.getAllByAction(this.name), options);
+        }
+
     };
 
 
@@ -358,30 +420,15 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      * @param {Object} options
      * @return {Array}
      */
-    function parseActions(options) {
+    function parseActions() {
         var self = this
-            , _actions = [];
+        , _actions = [];
 
         _.each(self._data.actions, function (action) {
-            var bbSirenAction = new Backbone.Siren.Action(action);
+            var bbSirenAction = new Backbone.Siren.Action(action, self);
 
             _actions.push(bbSirenAction);
-
-            self[toCamelCase(action.name)] = function () {
-
-                options.url = action.href;
-                options.actionName = action.name;
-
-                if (action.method) {
-                    options.method = action.method;
-                }
-
-                if (action.type) {
-                    options.type = action.type;
-                }
-
-                return self.save(self.getAllByAction(action.name), options);
-            };
+            self[toCamelCase(action.name)] = Backbone.Siren.Action.prototype.call;
         });
 
         self._actions = _actions;
@@ -459,7 +506,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
              */
             , toJSON: function () {
                 var json = _.clone(this.attributes)
-                    , entities = this.entities();
+                , entities = this.entities();
 
                 _.each(entities, function (entity) {
                     json[entity.rel()] = entity;

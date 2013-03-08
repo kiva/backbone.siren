@@ -137,7 +137,7 @@
             "class": ["edit"]
             , "name": "edit-lender"
             , "method": "PUT"
-            , "href": "api.kiva.org/lenders/gabrielcastillo"
+            , "href": "api.edit-lender-kiva.org/lenders/gabrielcastillo"
             , "fields": [
                 { "name": "firstName", "type": "text", "maxlength": 30}
                 , { "name": "lastName", "type": "text", "maxlength": 30}
