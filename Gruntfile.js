@@ -50,11 +50,11 @@ module.exports = function(grunt) {
 
 
         , rig: {
-            options: {
-                banner: '<%= meta.banner %>'
-            }
-            , files: {
-                compile: {
+            compile: {
+                options: {
+                    banner: '<%= meta.banner %>'
+                },
+                files: {
                     'build/backbone.siren.js': ['src/build/_core.js']
                     , 'build/amd/backbone.siren.js': ['src/build/_amd.js']
                 }
