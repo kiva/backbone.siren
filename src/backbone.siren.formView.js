@@ -4,15 +4,16 @@
 
     Backbone.Siren.FormView = Backbone.View.extend({
 
-        events: {
-            'submit form': 'handleFormSubmit'
+        tagName: 'form'
+
+        , events: {
+            'submit': 'handleFormSubmit'
         }
 
 
         , handleFormSubmit: function (event) {
             event.preventDefault();
-            this.model.getActionByName(this.options.name).execute();
-            console.log('submitted!');
+            this.action.parent.getActionByName(this.action.name).execute();
         }
 
 
@@ -24,26 +25,61 @@
         , template: function (data) {
             /*jshint multistr:true */
 
-            var tpl = '<form action="<%= href %>" id="<%= id %>"  title="<%= title %>" data-type="<%= type %>" method="<%= method %>"> \
-            <% _.each(fields, function (field) { %> \
-                <label for="<%= field.id %>"><%= field.label %></label> \
-                <input type="<%= field.type %>" name="<%= field.name %>" id="<%= field.id %>"/> \
-            <% }); %> <input type="submit" /> </form>';
+            var tpl = '<% _.each(fields, function (field) { %> \
+                <div> \
+                    <label for="<%= field.id %>"><%= field.label %></label> \
+                    <input type="<%= field.type %>" name="<%= field.name %>" id="<%= field.id %>"/> \
+                </div> \
+            <% }); %> <input type="submit" />';
 
-
-            var compiled = _.template(tpl);
-            return  compiled(data);
+            return  _.template(tpl)(data);
         }
 
 
-        , render: function (data) {
-            var $form = $(this.template(data));
-            this.$el.html($form);
+        /**
+         *
+         * @param {Object} data
+         */
+        , _render: function (data) {
+            var action = this.action;
+
+            this.$el.attr({
+                id: data.id || action.name + '-form'
+                , enctype: data.enctype || action.type
+                , method: data.method || action.method
+                , action: data.action || action.href
+                , title: data.title || action.title
+            });
+
+            _.each(data.fieldAttributes, function (fieldAttributes, fieldName) {
+                _.each(fieldAttributes, function (value, attribute) {
+                    action.getFieldByName(fieldName)[attribute] = value;
+                });
+            });
+
+            this.render(action);
+        }
+
+        /**
+         * Override if you wanna get fancy
+         *
+         * @param {Object} data
+         */
+        , render: function (action) {
+            this.$el.html(this.template(action));
         }
 
 
-        , initialize: function (data) {
-            this.render(data);
+        /**
+         *
+         * @param {Object} data
+         */
+        , constructor: function (data) {
+            this.action = data.action;
+            delete data.action;
+
+            Backbone.View.call(this, data);
+            this._render(data);
         }
 
     });

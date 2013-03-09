@@ -5,7 +5,6 @@
     <script src="/components/jquery/jquery.js"></script>
     <script src="/components/underscore/underscore.js"></script>
     <script src="/components/backbone/backbone.js"></script>
-<!--    <script src="/components/backbone-relational/backbone-relational.js"></script> -->
     <script src="/src/backbone.siren.js"></script>
     <script src="/src/backbone.siren.validate.js"></script>
     <script src="/src/backbone.siren.formView.js"></script>
@@ -13,115 +12,41 @@
 
 <body>
 
-    <!-- demo for editing fields on a settings.siren.json representation -->
-    <!-- possible actions: create, update, delete, email_user -->
     <div class="wrap"></div>
+    <script>
 
+        var settings, sirenUrl = 'settings.siren.json';
+        var alps, alpsUrl = 'http://siren-alps.herokuapp.com/';
+        var formView;
 
-<script>
+        $.getJSON(sirenUrl, function (results) {
+            settings = new Backbone.Siren.Model(results);
 
-    var settings, sirenUrl = 'settings.siren.json';
-    var alps, alpsUrl = 'http://siren-alps.herokuapp.com/';
-    var formView
-
-    $.getJSON(sirenUrl, function (results) {
-        settings = new Backbone.Siren.Model(results);
-        formView = settings.getActionByName('edit-lender').render({
-            title: 'Edit Lender'
-            , id: ''
-            , fieldAttributes: {
-                firstName: {
-                    id: 'firstNameId'
-                    , label: 'First Name'
+            var action = settings.getActionByName('edit-lender');
+            var data = {
+                action: action
+                , title: 'Edit Lender'
+                , id: ''
+                , fieldAttributes: {
+                    firstName: {
+                        id: 'firstNameId'
+                        , label: 'First Name'
+                    }
+                    , lastName: {
+                        id: 'lastNameId'
+                        , label: 'Last Name'
+                    }
                 }
-                , lastName: {
-                    id: 'lastNameId'
-                    , label: 'Last Name'
-                }
-            }
+            };
+            formView = new Backbone.Siren.FormView(data);
+
+            $('.wrap').html(formView.$el);
         });
 
-        $('.wrap').html(formView.$el);
-    });
-
-    $.getJSON(alpsUrl, function (results) {
-        alps = new Backbone.Siren.Model(results);
-    });
-
-
-
-
-    /**
-     * Never used backbone-relational, create some simple models as a guide.
-     *
-     */
-/*
-    var jsonUrl = 'settings.json';
-    $.getJSON(jsonUrl, function (results) {
-        Address = Backbone.RelationalModel.extend({
-            url: '/address'
+        $.getJSON(alpsUrl, function (results) {
+            alps = new Backbone.Siren.Model(results);
         });
 
-        AutolendingSettings = Backbone.RelationalModel.extend({
-            url: '/auto'
-        });
-
-        CreditSettings = Backbone.RelationalModel.extend({
-            url: '/credit'
-        });
-
-        Facebook = Backbone.RelationalModel.extend({
-            url: '/facebook'
-        });
-
-        Profile = Backbone.RelationalModel.extend({
-            url: '/profile'
-        });
-
-        Thing = Backbone.RelationalModel.extend({
-            url: '/thing'
-        });
-
-        Things = Backbone.Collection.extend();
-
-        Settings = Backbone.RelationalModel.extend({
-            relations: [
-                {
-                    type: Backbone.HasOne
-                    , key: 'address'
-                    , relatedModel: 'Address'
-                }
-                , {
-                    type: Backbone.HasOne
-                    , key: 'autolending-settings'
-                    , relatedModel: 'AutolendingSettings'
-                }
-                , {
-                    type: Backbone.HasOne
-                    , key: 'credit-settings'
-                    , relatedModel: 'CreditSettings'
-                }
-                , {
-                    type: Backbone.HasOne
-                    , key: 'facebook'
-                    , relatedModel: 'Facebook'
-                }
-                , {
-                    type: Backbone.HasOne
-                    , key: 'profile'
-                    , relatedModel: 'Profile'
-                }
-                , {
-                    type: Backbone.HasMany
-                    , key: 'things'
-                    , relatedModel: 'Thing'
-                }
-            ]
-        });
-
-        rSettings = new Settings(results);
-    })
-*/
-</script>
+    </script>
 </body>
 </html>

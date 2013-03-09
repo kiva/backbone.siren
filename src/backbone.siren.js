@@ -89,40 +89,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
          *
          * @param {Object} options
          */
-        , render: function (options) {
-            var FormView = Backbone.Siren.FormView || Backbone.Siren.settings.formView
-            , defaults = {title: this.name, id: ''}
-            , data = _.extend({}, defaults, this, options)
-            , self = this;
-
-            options = options || {};
-
-            _.each(options.fieldAttributes, function (fieldAttributes, fieldName) {
-                _.each(fieldAttributes, function (value, attribute) {
-                    self.getFieldByName(fieldName)[attribute] = value;
-                });
-            });
-
-            if (this.parent) {
-                if (this.parent instanceof Backbone.Model) {
-                    data.model = this.parent;
-                } else {
-                    data.collection = this.parent;
-                }
-
-                delete data.parent;
-            }
-
-            return FormView
-                ? new FormView(data)
-                : {};
-        }
-
-
-        /**
-         *
-         * @param {Object} options
-         */
         , execute: function (options) {
             var defaults = {
                 url: this.href
