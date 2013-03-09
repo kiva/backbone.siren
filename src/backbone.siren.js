@@ -61,12 +61,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      * @constructor
      */
     function Action(actionData, parent) {
-        var defaults = {
-            method: 'POST' // @todo siren docs say get should be assumed...? I think POST makes more sense
-            , type: 'application/x-www-form-urlencoded'
-        };
-
-        _.extend(this, defaults, actionData);
+        _.extend(this, actionData);
         this.parent = parent;
     }
 
@@ -88,8 +83,13 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         /**
          *
          * @param {Object} options
+         * @return {$.Deferred|undefined}
          */
         , execute: function (options) {
+            if (! this.parent) {
+                return;
+            }
+
             var defaults = {
                 url: this.href
                 , actionName: this.name
