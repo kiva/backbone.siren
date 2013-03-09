@@ -11,7 +11,7 @@
 
         , handleFormSubmit: function (event) {
             event.preventDefault();
-            this.model.getActionByName(this.options.name).call();
+            this.model.getActionByName(this.options.name).execute();
             console.log('submitted!');
         }
 

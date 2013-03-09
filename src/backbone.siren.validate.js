@@ -74,7 +74,7 @@
                 }
             });
 
-            return errors;
+//            @todo for now, always let it validate... return errors;
         }
 
     });

@@ -85,6 +85,10 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         }
 
 
+        /**
+         *
+         * @param {Object} options
+         */
         , render: function (options) {
             var FormView = Backbone.Siren.FormView || Backbone.Siren.settings.formView
             , defaults = {title: this.name, id: ''}
@@ -115,20 +119,21 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         }
 
 
-        , call: function (options) {
-            options = options || {};
-            options.url = this.href;
-            options.actionName = this.name;
-            options.validate = true;
+        /**
+         *
+         * @param {Object} options
+         */
+        , execute: function (options) {
+            var defaults = {
+                url: this.href
+                , actionName: this.name
+                , method: this.method
+                , type: this.type
+                , validate: true
+                , patch: true
+            };
 
-            if (this.method) {
-                options.method = this.method;
-            }
-
-            if (this.type) {
-                options.type = this.type;
-            }
-
+            options = _.extend(defaults, options);
             return this.parent.save(this.parent.getAllByAction(this.name), options);
         }
 
@@ -417,7 +422,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
     /**
      *
-     * @param {Object} options
      * @return {Array}
      */
     function parseActions() {
@@ -428,7 +432,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             var bbSirenAction = new Backbone.Siren.Action(action, self);
 
             _actions.push(bbSirenAction);
-            self[toCamelCase(action.name)] = Backbone.Siren.Action.prototype.call;
+            self[toCamelCase(action.name)] = _.bind(bbSirenAction.execute, bbSirenAction);
         });
 
         self._actions = _actions;
