@@ -68,5 +68,5 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-rigger');
 
     grunt.registerTask('test', ['jshint', 'buster']);
-    grunt.registerTask('build', ['jshint', 'buster', 'rig']);
+    grunt.registerTask('build', ['jshint', 'buster', 'rig', 'uglify']);
 };
