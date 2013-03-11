@@ -25,19 +25,19 @@ Here's a breakdown of the test files:
 
 [Travis CI](travis-ci.org/kiva/backbone.siren) will run these tests on each push to github.
 
-Useful Commands:
+####Useful Commands
 
-Run jshint + buster tests
+Run jshint + buster tests:
 ```
 > grunt test
 ```
 
-Run jshint only
+Run jshint only:
 ```
 > grunt jshint
 ```
 
-Run buster tests only
+Run buster tests only:
 ```
 > grunt buster
 ```
