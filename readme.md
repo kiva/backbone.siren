@@ -13,9 +13,34 @@ A client side adapter that converts resource representations from [Siren JSON](h
 
 3. Develop
 
-### Unit tests
+### Specs and Testing
 
-@todo
+Specs are written using [rspec](http://rspec.info/) style "expectations" with [BusterJs](http://docs.busterjs.org/en/latest/) as the testing framework, toolkit & libray.
+
+Here's a breakdown of the test files:
+
+`test/spec/*` are all the spec files.
+`test/buster.js` is the BusterJs configuration file
+`coverage.lcov` is a breakdown of unit test coverage. It's automatically generated when unit tests are run.
+
+[Travis CI](travis-ci.org/kiva/backbone.siren) will run these tests on each push to github.
+
+Useful Commands:
+
+Run jshint + buster tests
+```
+> grunt test
+```
+
+Run jshint only
+```
+> grunt jshint
+```
+
+Run buster tests only
+```
+> grunt buster
+```
 
 ### Code quality
 
