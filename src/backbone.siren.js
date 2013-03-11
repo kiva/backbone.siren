@@ -437,7 +437,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
              */
             , resolveEntities: function (sirenObj, options) {
                 var self = this
-                    , resolvedEntities = [];
+                , resolvedEntities = [];
 
                 _.each(sirenObj.entities, function(entity) {
                     if ((entity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
@@ -493,9 +493,9 @@ Backbone.Siren = (function (_, Backbone, undefined) {
              */
             , entities: function (filters) {
                 var self = this
-                    , entities = _.filter(this, function (val, name) {
-                        return _.indexOf(self._entities, name) > -1;
-                    });
+                , entities = _.filter(this, function (val, name) {
+                    return _.indexOf(self._entities, name) > -1;
+                });
 
                 if (filters) {
                     entities = filter(entities, filters);

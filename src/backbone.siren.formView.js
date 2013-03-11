@@ -30,7 +30,7 @@
                     <label for="<%= field.id %>"><%= field.label %></label> \
                     <input type="<%= field.type %>" name="<%= field.name %>" id="<%= field.id %>"/> \
                 </div> \
-            <% }); %> <input type="submit" />';
+            <% }); %> <input type="submit" class="submitButton" />';
 
             return  _.template(tpl)(data);
         }
