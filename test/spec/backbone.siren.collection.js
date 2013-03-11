@@ -100,6 +100,13 @@ describe('Siren Collection: ', function () {
             var mySirenCollection = new Backbone.Siren.Collection({rel:["http://x.io/rels/order-items"]});
             expect(mySirenCollection.rel()).toBe('order-items');
         });
+
+
+        it('returns undefined if there is no rel', function () {
+            var mySirenCollection = new Backbone.Siren.Collection({});
+
+            expect(mySirenCollection.rel()).not.toBeDefined();
+        });
     });
 
 
@@ -108,6 +115,13 @@ describe('Siren Collection: ', function () {
             var mySirenCollection = new Backbone.Siren.Collection({title: 'Blame it on my ADD'});
 
             expect(mySirenCollection.title()).toBe('Blame it on my ADD');
+        });
+
+
+        it('returns undefined if there is no title', function () {
+            var mySirenCollection = new Backbone.Siren.Collection({});
+
+            expect(mySirenCollection.title()).not.toBeDefined();
         });
     });
 
@@ -172,6 +186,7 @@ describe('Siren Collection: ', function () {
             _.each(actions, function (action) {
                 expect(action instanceof Backbone.Siren.Action).toBeTrue();
             });
+
             expect(actions[0].name).toBe('do-stuff');
         });
     });

@@ -102,6 +102,13 @@ describe('Siren Model: ', function () {
 
             expect(mySirenModel.rel()).toBe('order-items');
         });
+
+
+        it('returns undefined if there is no rel', function () {
+            var mySirenModel = new Backbone.Siren.Model({});
+
+            expect(mySirenModel.rel()).not.toBeDefined();
+        });
     });
 
 
@@ -110,6 +117,13 @@ describe('Siren Model: ', function () {
             var mySirenModel = new Backbone.Siren.Model({title: 'Blame it on my ADD'});
 
             expect(mySirenModel.title()).toBe('Blame it on my ADD');
+        });
+
+
+        it('returns undefined if there is no title', function () {
+            var mySirenModel = new Backbone.Siren.Model({});
+
+            expect(mySirenModel.title()).not.toBeDefined();
         });
     });
 
@@ -186,12 +200,6 @@ describe('Siren Model: ', function () {
 
 
     it('sets a Backbone Model\'s "attributes" hash to the siren "properties"', function () {
-        var expectedProperties = {
-            orderNumber: 42
-            , itemCount: 3
-            , status: "pending"
-        };
-
-        expect(sirenModel.attributes).toMatch(expectedProperties);
+        expect(sirenModel.attributes).toMatch(settingsModelSiren.properties);
     });
 });
