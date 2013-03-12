@@ -47,9 +47,9 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      * @type {Object}
      * @private
      */
-    , warn = function (msg) {
+    , warn = function () {
         if (Backbone.Siren.settings.showWarnings && console) {
-            console.warn(msg);
+            console.warn.apply(console, arguments);
         }
     };
 
@@ -398,7 +398,12 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             var bbSirenAction = new Backbone.Siren.Action(action, self);
 
             _actions.push(bbSirenAction);
-            self[toCamelCase(action.name)] = _.bind(bbSirenAction.execute, bbSirenAction);
+
+            if (action.name) {
+                self[toCamelCase(action.name)] = _.bind(bbSirenAction.execute, bbSirenAction);
+            } else {
+                warn('Action is missing a name, unable to add top level method', action);
+            }
         });
 
         self._actions = _actions;
