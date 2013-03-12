@@ -189,6 +189,10 @@ describe('Siren Collection: ', function () {
 
             expect(actions[0].name).toBe('do-stuff');
         });
+
+
+        it('//warns if an action does not have the *required* "name" property', function () {
+        });
     });
 
 

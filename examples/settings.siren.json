@@ -20,6 +20,15 @@
             , "links": [
                 {"rel": ["self"], "href": "api.kiva.org/lenders/gabrielcastillo/address"}
             ]
+            , "actions": [
+                {
+                    "name": "edit"
+                    , "fields": [
+                        {"name": "city", "type": "text"}
+                        , {"name": "state", "type": "text"}
+                    ]
+                }
+            ]
         }
         , {
             "class": ["demo", "example"]

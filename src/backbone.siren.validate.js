@@ -35,10 +35,23 @@
 
         /**
          *
+         * @return {Object} An HTML ValidityState object https://developer.mozilla.org/en-US/docs/DOM/ValidityState
          */
-        , validateOne: function (/*val, field, options*/) {
-            // @todo
-            return '';
+        , validateOne: function (field, val, options) {
+            var validity = {
+                valueMissing: false
+                , typeMismatch: false
+                , patternMismatch: false
+                , tooLong: false
+                , rangeUnderflow: false
+                , rangeOverflow: false
+                , stepMismatch: false
+                , badInput: false
+                , customError: true
+                , valid: false
+            };
+
+            return validity;
         }
 
 
@@ -47,34 +60,43 @@
          *
          * @param {Object} attributes
          * @param {Object} options
+         * @return {Object} An keyed mapping of HTML ValidityState objects by name.
          */
+        // @todo - there's still some funkyness to be worked out wrt the validation state of nested models.
         , validate: function (attributes, options) {
-            var self = this
-                , errors = this.errors = {};
+            var action
+            , self = this
+            , errors = {};
 
-            if (_.isEmpty(attributes)) {
-                return errors['non-writable-fields'] = 'There were no writable fields, check your siren action. @todo better messaging';
-            }
-
-            // @todo actionName is not camelcase, unlike the action method that corresponds to the given action.  I don't think this is a big deal but it may throw some people off.
-            var action = this.getActionByName(options.actionName);
+            action = this.getActionByName(options.actionName);
             if (!action) {
-                return errors['non-writable-fields'] = 'There were no writable fields, check your siren action. @todo better messaging';
+                errors['no-actions'] = 'Malformed Siren: There are no actions matching the name, "' + options.actionName + '"';
+            } else if (_.isEmpty(attributes)) {
+                errors['no-writable-fields'] = 'Malformed Siren: There were no writable fields for action "' +  options.actionName + '"';
             }
 
             _.each(attributes, function (val, name) {
+                var field, fieldActionName, validityState;
+
                 if (val instanceof Backbone.Model) {
-                    // @todo iterate through and validate sub-entity actions.
-                    console.log('@todo');
+                    field = action.getFieldByName(name);
+                    fieldActionName = field.action;
+
+                    validityState = val.validate(val.getAllByAction(fieldActionName), {actionName: fieldActionName});
+                    if (validityState) {
+                        errors[name] = validityState;
+                    }
                 } else {
-                    var errorMsg = self.validateOne(val, action.getFieldByName(name), options);
-                    if (errorMsg) {
-                        errors[name] = errorMsg;
+                    validityState = self.validateOne(action.getFieldByName(name), val, options);
+                    if (! validityState.valid) {
+                        errors[name] = validityState;
                     }
                 }
             });
 
-//            @todo for now, always let it validate... return errors;
+            if (! _.isEmpty(errors)) {
+                return errors;
+            }
         }
 
     });

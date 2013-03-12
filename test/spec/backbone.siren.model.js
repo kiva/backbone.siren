@@ -196,6 +196,10 @@ describe('Siren Model: ', function () {
 
             expect(actions[0].name).toBe('add-item');
         });
+
+
+        it('//warns if an action does not have the *required* "name" property', function () {
+        });
     });
 
 
