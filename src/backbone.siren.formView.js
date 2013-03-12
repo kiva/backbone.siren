@@ -19,6 +19,10 @@
 
 
         , handleFormElementChange: function (event) {
+            if (! this.validateOnChange) {
+                return;
+            }
+
             var $target = $(event.target);
             var data = {};
             data[$target.attr('name')] = $target.val();
@@ -67,12 +71,12 @@
             var fields = action.fields;
             var dataFields = data.fields;
             _.each(fields, function (field) {
-                if (field.type != 'entity') {
+                if (data.fieldAttributes && field.type != 'entity') {
                     var fieldName = field.name;
                     dataFields.push(_.extend({value: action.parent.get(fieldName)}, field, data.fieldAttributes[fieldName]));
-                } else {
+                } else if (field.type == 'entity') {
                     // @todo, how to handle the view for sub-entities...?
-                    console.log('@todo');
+                    console.log('@todo - how to handle sub-entity views?');
                 }
             });
             this.render(data);
@@ -93,11 +97,14 @@
          * @param {Object} data
          */
         , constructor: function (data) {
-            if (data.action) {
-                this.action = data.action;
-                delete data.action;
-            } else {
-                throw 'Missing required "action"';
+            if (data) {
+                this.validateOnChange = data.validateOnChange;
+                if (data.action) {
+                    this.action = data.action;
+                    delete data.action;
+                } else {
+                    throw 'Missing required property: "action"';
+                }
             }
 
             Backbone.View.call(this, data);
