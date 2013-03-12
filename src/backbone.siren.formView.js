@@ -49,6 +49,7 @@
                 , method: data.method || action.method
                 , action: data.action || action.href
                 , title: data.title || action.title
+                , novalidate: !data.validation
             });
 
             _.each(data.fieldAttributes, function (fieldAttributes, fieldName) {
@@ -61,7 +62,7 @@
         }
 
         /**
-         * Override if you wanna get fancy
+         * Override if you wanna get fancy.
          *
          * @param {Object} data
          */
@@ -75,8 +76,12 @@
          * @param {Object} data
          */
         , constructor: function (data) {
-            this.action = data.action;
-            delete data.action;
+            if (data.action) {
+                this.action = data.action;
+                delete data.action;
+            } else {
+                throw 'Missing required "action"';
+            }
 
             Backbone.View.call(this, data);
             this._render(data);
