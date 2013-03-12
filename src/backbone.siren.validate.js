@@ -62,7 +62,6 @@
          * @param {Object} options
          * @return {Object} An keyed mapping of HTML ValidityState objects by name.
          */
-        // @todo - there's still some funkyness to be worked out wrt the validation state of nested models.
         , validate: function (attributes, options) {
             var action
             , self = this
@@ -76,15 +75,16 @@
             }
 
             _.each(attributes, function (val, name) {
-                var field, fieldActionName, validityState;
+                var field, fieldActionName, validityState, nestedErrors;
 
                 if (val instanceof Backbone.Model) {
                     field = action.getFieldByName(name);
                     fieldActionName = field.action;
 
-                    validityState = val.validate(val.getAllByAction(fieldActionName), {actionName: fieldActionName});
-                    if (validityState) {
-                        errors[name] = validityState;
+                    val._validate(val.getAllByAction(fieldActionName), {validate: true, actionName: fieldActionName});
+                    nestedErrors = val.validationError;
+                    if (nestedErrors) {
+                        errors[name] = nestedErrors;
                     }
                 } else {
                     validityState = self.validateOne(action.getFieldByName(name), val, options);
