@@ -8,7 +8,7 @@ config['development'] = {
         , 'components/underscore/underscore.js'
         , 'components/backbone/backbone.js'
     ]
-    , sources: ['src/backbone.siren.js']
+    , sources: ['src/backbone.siren.js', 'src/backbone.siren.formView.js']
     , specs: ['test/spec/**/*.js']
     , extensions: [ require('buster-coverage') ]
     , "buster-coverage": {
