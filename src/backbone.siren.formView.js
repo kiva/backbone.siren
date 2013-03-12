@@ -52,13 +52,15 @@
                 , novalidate: !data.validation
             });
 
-            _.each(data.fieldAttributes, function (fieldAttributes, fieldName) {
-                _.each(fieldAttributes, function (value, attribute) {
-                    action.getFieldByName(fieldName)[attribute] = value;
-                });
+            data.fields = [];
+            var fields = action.fields;
+            var dataFields = data.fields;
+            _.each(fields, function (field) {
+                var fieldName = field.name;
+                dataFields.push(_.extend({}, field, data.fieldAttributes[fieldName]));
             });
 
-            this.render(action);
+            this.render(data);
         }
 
         /**
