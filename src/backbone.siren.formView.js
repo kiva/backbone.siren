@@ -8,12 +8,23 @@
 
         , events: {
             'submit': 'handleFormSubmit'
+            , 'change input, select': 'handleFormElementChange'
         }
 
 
         , handleFormSubmit: function (event) {
             event.preventDefault();
             this.action.parent.getActionByName(this.action.name).execute();
+        }
+
+
+        , handleFormElementChange: function (event) {
+            var $target = $(event.target);
+            var data = {};
+            data[$target.attr('name')] = $target.val();
+
+            // @todo what if the parent is a collection?
+            this.action.parent.set(data);
         }
 
 
@@ -28,7 +39,7 @@
             var tpl = '<% _.each(fields, function (field) { %> \
                 <div> \
                     <label for="<%= field.id %>"><%= field.label %></label> \
-                    <input type="<%= field.type %>" name="<%= field.name %>" id="<%= field.id %>"/> \
+                    <input type="<%= field.type %>" name="<%= field.name %>" id="<%= field.id %>" value="<%= field.value %>"/> \
                 </div> \
             <% }); %> <input type="submit" class="submitButton" />';
 
@@ -56,10 +67,13 @@
             var fields = action.fields;
             var dataFields = data.fields;
             _.each(fields, function (field) {
-                var fieldName = field.name;
-                dataFields.push(_.extend({}, field, data.fieldAttributes[fieldName]));
+                if (field.type != 'entity') {
+                    var fieldName = field.name;
+                    dataFields.push(_.extend({value: action.parent.get(fieldName)}, field, data.fieldAttributes[fieldName]));
+                } else {
+                    // @todo, how to handle the view for sub-entities...?
+                }
             });
-
             this.render(data);
         }
 
