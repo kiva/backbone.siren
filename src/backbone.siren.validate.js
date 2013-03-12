@@ -37,7 +37,7 @@
          *
          * @return {Object} An HTML ValidityState object https://developer.mozilla.org/en-US/docs/DOM/ValidityState
          */
-        , validateOne: function (field, val, options) {
+        , validateOne: function (/*field, val, options*/) {
             var validity = {
                 valueMissing: false
                 , typeMismatch: false

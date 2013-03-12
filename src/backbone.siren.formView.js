@@ -72,6 +72,7 @@
                     dataFields.push(_.extend({value: action.parent.get(fieldName)}, field, data.fieldAttributes[fieldName]));
                 } else {
                     // @todo, how to handle the view for sub-entities...?
+                    console.log('@todo');
                 }
             });
             this.render(data);
