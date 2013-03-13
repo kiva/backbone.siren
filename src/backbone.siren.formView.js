@@ -14,7 +14,7 @@
 
         , handleFormSubmit: function (event) {
             event.preventDefault();
-            this.action.parent.getActionByName(this.action.name).execute();
+            this.model.getActionByName(this.action.name).execute();
         }
 
 
@@ -28,7 +28,7 @@
             data[$target.attr('name')] = $target.val();
 
             // @todo what if the parent is a collection?
-            this.action.parent.set(data);
+            this.model.set(data);
         }
 
 
@@ -40,14 +40,58 @@
         , template: function (data) {
             /*jshint multistr:true */
 
-            var tpl = '<% _.each(fields, function (field) { %> \
+            var tpl = '<% _.each(fieldAttributes, function (field, fieldName) { %> \
                 <div> \
                     <label for="<%= field.id %>"><%= field.label %></label> \
-                    <input type="<%= field.type %>" name="<%= field.name %>" id="<%= field.id %>" value="<%= field.value %>"/> \
+                    <input type="<%= field.type %>" name="<%= field.name %>" id="<%= field.id %>" value="<%= model.get(field.name) %>" /> \
                 </div> \
             <% }); %> <input type="submit" class="submitButton" />';
 
             return  _.template(tpl)(data);
+        }
+
+
+        , parseAction: function (data) {
+            var action, attributes, fields, dataFields, formAttributes
+            , fieldAttributes = [];
+
+            if (! (data && data.action)) {
+                throw 'Missing required property: "action"';
+            }
+
+            action = data.action;
+            if (! (action.parent instanceof Backbone.Model)) {
+                throw 'Action object either missing required "parent" or "parent" is not a Backbone Model';
+            }
+
+            formAttributes = data.formAttributes || {};
+            attributes = {
+                id: formAttributes.id || action.name + '-form'
+                , enctype: formAttributes.enctype || action.type
+                , method: formAttributes.method || action.method
+                , action: formAttributes.action || action.href
+                , title: formAttributes.title || action.title
+                , novalidate: !formAttributes.validation
+            };
+
+            fields = action.fields;
+            _.each(fields, function (field) {
+                var fieldName;
+
+                if (field.type != 'entity') {
+                    fieldName = field.name;
+                    fieldAttributes.push(_.extend({value: action.parent.get(fieldName)}, field, data.fieldAttributes[fieldName]));
+                } else if (field.type == 'entity') {
+                    // @todo, how to handle the view for sub-entities...?
+                    console.log('@todo - how to handle sub-entity views?');
+                }
+            });
+
+            return {
+                attributes: attributes
+                , fieldAttributes: fieldAttributes
+                , model: action.parent
+            };
         }
 
 
@@ -56,39 +100,17 @@
          * @param {Object} data
          */
         , _render: function (data) {
-            var action = this.action;
-
-            this.$el.attr({
-                id: data.id || action.name + '-form'
-                , enctype: data.enctype || action.type
-                , method: data.method || action.method
-                , action: data.action || action.href
-                , title: data.title || action.title
-                , novalidate: !data.validation
-            });
-
-            data.fields = [];
-            var fields = action.fields;
-            var dataFields = data.fields;
-            _.each(fields, function (field) {
-                if (data.fieldAttributes && field.type != 'entity') {
-                    var fieldName = field.name;
-                    dataFields.push(_.extend({value: action.parent.get(fieldName)}, field, data.fieldAttributes[fieldName]));
-                } else if (field.type == 'entity') {
-                    // @todo, how to handle the view for sub-entities...?
-                    console.log('@todo - how to handle sub-entity views?');
-                }
-            });
-            this.render(data);
+            return this.render(data)
         }
+
 
         /**
          * Override if you wanna get fancy.
          *
          * @param {Object} data
          */
-        , render: function (action) {
-            this.$el.html(this.template(action));
+        , render: function (data) {
+            return this.$el.html(this.template(data));
         }
 
 
@@ -97,18 +119,11 @@
          * @param {Object} data
          */
         , constructor: function (data) {
-            if (data) {
-                this.validateOnChange = data.validateOnChange;
-                if (data.action) {
-                    this.action = data.action;
-                    delete data.action;
-                } else {
-                    throw 'Missing required property: "action"';
-                }
-            }
+            var parsedData = this.parseAction(data);
 
-            Backbone.View.call(this, data);
-            this._render(data);
+            Backbone.View.call(this, parsedData);
+            this._render(parsedData);
+            this.action = data.action;
         }
 
     });
