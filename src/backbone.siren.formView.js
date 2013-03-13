@@ -39,11 +39,11 @@
          */
         , template: function (data) {
             /*jshint multistr:true */
-
+            console.log(data);
             var tpl = '<% _.each(fieldAttributes, function (field, fieldName) { %> \
                 <div> \
                     <label for="<%= field.id %>"><%= field.label %></label> \
-                    <input type="<%= field.type %>" name="<%= field.name %>" id="<%= field.id %>" value="<%= model.get(field.name) %>" /> \
+                    <input type="<%= field.type %>" name="<%= field.name %>" id="<%= field.id %>" value="<%= field.value %>" /> \
                 </div> \
             <% }); %> <input type="submit" class="submitButton" />';
 
