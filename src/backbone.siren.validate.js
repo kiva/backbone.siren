@@ -56,17 +56,13 @@
          * @param {Object} field A Siren action field
          */
         , validateType: function (val, field) {
-            var regExp
-            , validity = {}
+            var validity = {}
             , patterns = Backbone.Siren.validate.patterns
             , pattern = patterns[field.type]; // @todo allow for additional ways of specifying validation type (?) Or are html5 types enough?
 
-            if (pattern) {
-                regExp = new RegExp('^(?:' + pattern + ')$');
-                if (! regExp.test(val)) {
-                    validity.valid = false;
-                    validity.typeMismatch = true;
-                }
+            if (pattern && !pattern.test(val)) {
+                validity.valid = false;
+                validity.typeMismatch = true;
             }
 
             return validity;
@@ -103,7 +99,7 @@
                     validity.stepMismatch = true;
                 }
             } else {
-                if (field.maxlength && field.maxlength > val.length) {
+                if (field.maxlength && field.maxlength < val.length) {
                     validity.valid = false;
                     validity.tooLong = true;
                 }
@@ -118,7 +114,7 @@
          *
          * @return {Object} An HTML ValidityState object https://developer.mozilla.org/en-US/docs/DOM/ValidityState
          */
-        , validateOne: function (field, val /*, options*/) {
+        , validateOne: function (val, field /*, options*/) {
             var validity = {
                 valueMissing: false
                 , typeMismatch: false
