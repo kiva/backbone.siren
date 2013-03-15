@@ -3,9 +3,9 @@
 
 
     Backbone.Siren.validate = {
-        patterns: {}
+        customPatterns: {}
 
-        , inputTypes: {}
+        , standardPatterns: {}
 
         /**
          *
@@ -21,9 +21,9 @@
 
             _.each(patterns, function (pattern, name) {
                 if (validInputTypes.indexOf(name) == -1) {
-                    self.patterns[name] = pattern;
+                    self.customPatterns[name] = pattern;
                 } else {
-                    self.inputTypes[name] = pattern;
+                    self.standardPatterns[name] = pattern;
                 }
             });
         }
@@ -68,8 +68,7 @@
          */
         , validateType: function (val, field) {
             var validity = {}
-            , patterns = Backbone.Siren.validate.inputTypes
-            , pattern = patterns[field.type]; // @todo allow for additional ways of specifying validation type (?) Or are html5 types enough?
+            , pattern = Backbone.Siren.validate.customPatterns[field.customType] || Backbone.Siren.validate.standardPatterns[field.type];
 
             if (pattern) {
                 if (!pattern.test(val)) {
