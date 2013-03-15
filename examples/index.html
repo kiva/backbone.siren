@@ -8,6 +8,7 @@
     <script src="/src/backbone.siren.js"></script>
     <script src="/src/backbone.siren.validate.js"></script>
     <script src="/src/backbone.siren.formView.js"></script>
+    <script src="/src/patternLibrary.js"></script>
 </head>
 
 <body>
@@ -18,6 +19,9 @@
         var settings, sirenUrl = 'settings.siren.json';
         var alps, alpsUrl = 'http://siren-alps.herokuapp.com/';
         var formView;
+
+        // set the pattern library
+        Backbone.Siren.validate.setPatterns(patternLibrary);
 
         $.getJSON(sirenUrl, function (results) {
             settings = new Backbone.Siren.Model(results);

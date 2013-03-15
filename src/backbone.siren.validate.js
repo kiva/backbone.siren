@@ -2,6 +2,23 @@
     'use strict';
 
 
+    Backbone.Siren.validate = {
+        patterns: {}
+
+        /**
+         *
+         * @param {Object} patterns
+         */
+        , setPatterns: function (patterns) {
+            if (typeof patterns != 'object') {
+                throw 'Argument must be an object';
+            }
+
+            _.extend(this.patterns, patterns);
+        }
+    };
+
+
     _.extend(Backbone.Siren.Model.prototype, {
 
 
@@ -35,9 +52,73 @@
 
         /**
          *
+         * @param {String} val
+         * @param {Object} field A Siren action field
+         */
+        , validateType: function (val, field) {
+            var regExp
+            , validity = {}
+            , patterns = Backbone.Siren.validate.patterns
+            , pattern = patterns[field.type]; // @todo allow for additional ways of specifying validation type (?) Or are html5 types enough?
+
+            if (pattern) {
+                regExp = new RegExp('^(?:' + pattern + ')$');
+                if (! regExp.test(val)) {
+                    validity.valid = false;
+                    validity.typeMismatch = true;
+                }
+            }
+
+            return validity;
+        }
+
+
+        /**
+         *
+         * @param {String} val
+         * @param {Object} field A Siren action field
+         */
+        , validateConstraints: function (val, field) {
+            var validity = {};
+            var type = field.type;
+
+            if (field.pattern && !field.pattern.test(val)) {
+                validity.valid = false;
+                validity.patternMismatch = true;
+            }
+
+            if (type == 'number' || type == 'range') {
+                if (field.min && field.min > val) {
+                    validity.valid = false;
+                    validity.rangeUnderflow = true;
+                }
+
+                if (field.max && field.max < val) {
+                    validity.valid = false;
+                    validity.rangeOverflow = true;
+                }
+
+                if (field.step && val%field.step) {
+                    validity.valid = false;
+                    validity.stepMismatch = true;
+                }
+            } else {
+                if (field.maxlength && field.maxlength > val.length) {
+                    validity.valid = false;
+                    validity.tooLong = true;
+                }
+            }
+
+
+            return validity;
+        }
+
+
+        /**
+         *
          * @return {Object} An HTML ValidityState object https://developer.mozilla.org/en-US/docs/DOM/ValidityState
          */
-        , validateOne: function (/*field, val, options*/) {
+        , validateOne: function (field, val /*, options*/) {
             var validity = {
                 valueMissing: false
                 , typeMismatch: false
@@ -47,9 +128,19 @@
                 , rangeOverflow: false
                 , stepMismatch: false
                 , badInput: false
-                , customError: true
-                , valid: false
+                , customError: false
+                , valid: true
             };
+
+            if (!val) {
+                if (field.required) {
+                    validity.valid = false;
+                    validity.valueMissing = true;
+                }
+            } else {
+                _.extend(validity, this.validateType(val, field));
+                _.extend(validity, this.validateConstraints(val, field));
+            }
 
             return validity;
         }
@@ -87,7 +178,7 @@
                         errors[name] = nestedErrors;
                     }
                 } else {
-                    validityState = self.validateOne(action.getFieldByName(name), val, options);
+                    validityState = self.validateOne(val, action.getFieldByName(name), options);
                     if (! validityState.valid) {
                         errors[name] = validityState;
                     }
