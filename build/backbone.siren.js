@@ -1,5 +1,5 @@
 /*
-* Backbone.Siren v0.0.3
+* Backbone.Siren v0.0.5
 *
 * Copyright (c) 2013 Kiva Microfunds
 * Licensed under the MIT license.
@@ -104,6 +104,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 , type: this.type
                 , validate: true
                 , patch: true
+                , content: 'application/vnd.siren+json'
             };
 
             options = _.extend(defaults, options);
@@ -424,6 +425,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         }
 
         , store: store
+        , warn: warn
         , Action: Action
 
 
@@ -678,6 +680,34 @@ Backbone.Siren = (function (_, Backbone, undefined) {
     'use strict';
 
 
+    Backbone.Siren.validate = {
+        customPatterns: {}
+
+        , standardPatterns: {}
+
+        /**
+         *
+         * @param {Object} patterns
+         */
+        , setPatterns: function (patterns) {
+            var self = this
+            , validInputTypes = 'color date datetime datetime-local email month number range search tel time url week';
+
+            if (typeof patterns != 'object') {
+                throw 'Argument must be an object';
+            }
+
+            _.each(patterns, function (pattern, name) {
+                if (validInputTypes.indexOf(name) == -1) {
+                    self.customPatterns[name] = pattern;
+                } else {
+                    self.standardPatterns[name] = pattern;
+                }
+            });
+        }
+    };
+
+
     _.extend(Backbone.Siren.Model.prototype, {
 
 
@@ -711,9 +741,72 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
         /**
          *
+         * @param {String} val
+         * @param {Object} field A Siren action field
+         */
+        , validateType: function (val, field) {
+            var validity = {}
+            , pattern = Backbone.Siren.validate.customPatterns[field.customType] || Backbone.Siren.validate.standardPatterns[field.type];
+
+            if (pattern) {
+                if (!pattern.test(val)) {
+                    validity.valid = false;
+                    validity.typeMismatch = true;
+                }
+            } else if (field.type != 'text') {
+                Backbone.Siren.warn('Unrecognized input type: ' + field.type);
+            }
+
+            return validity;
+        }
+
+
+        /**
+         *
+         * @param {String} val
+         * @param {Object} field A Siren action field
+         */
+        , validateConstraints: function (val, field) {
+            var validity = {};
+            var type = field.type;
+
+            if (field.pattern && !field.pattern.test(val)) {
+                validity.valid = false;
+                validity.patternMismatch = true;
+            }
+
+            if (type == 'number' || type == 'range') {
+                if (field.min && field.min > val) {
+                    validity.valid = false;
+                    validity.rangeUnderflow = true;
+                }
+
+                if (field.max && field.max < val) {
+                    validity.valid = false;
+                    validity.rangeOverflow = true;
+                }
+
+                if (field.step && val%field.step) {
+                    validity.valid = false;
+                    validity.stepMismatch = true;
+                }
+            } else {
+                if (field.maxlength && field.maxlength < val.length) {
+                    validity.valid = false;
+                    validity.tooLong = true;
+                }
+            }
+
+
+            return validity;
+        }
+
+
+        /**
+         *
          * @return {Object} An HTML ValidityState object https://developer.mozilla.org/en-US/docs/DOM/ValidityState
          */
-        , validateOne: function (/*field, val, options*/) {
+        , validateOne: function (val, field /*, options*/) {
             var validity = {
                 valueMissing: false
                 , typeMismatch: false
@@ -723,9 +816,19 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 , rangeOverflow: false
                 , stepMismatch: false
                 , badInput: false
-                , customError: true
-                , valid: false
+                , customError: false
+                , valid: true
             };
+
+            if (!val) {
+                if (field.required) {
+                    validity.valid = false;
+                    validity.valueMissing = true;
+                }
+            } else {
+                _.extend(validity, this.validateType(val, field));
+                _.extend(validity, this.validateConstraints(val, field));
+            }
 
             return validity;
         }
@@ -763,7 +866,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                         errors[name] = nestedErrors;
                     }
                 } else {
-                    validityState = self.validateOne(action.getFieldByName(name), val, options);
+                    validityState = self.validateOne(val, action.getFieldByName(name), options);
                     if (! validityState.valid) {
                         errors[name] = validityState;
                     }
