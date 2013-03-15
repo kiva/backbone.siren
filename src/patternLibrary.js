@@ -1,8 +1,8 @@
 /*jshint unused: false*/
 
 // Ripped out from jquery.h5validate
-var patternLibrary = { //** TODO: Test the new regex patterns. Should I apply these to the new input types?
-    // **TODO: password
+var patternLibrary = {
+
     phone: /([\+][0-9]{1,3}([ \.\-])?)?([\(]{1}[0-9]{3}[\)])?([0-9A-Z \.\-]{1,32})((x|ext|extension)?[0-9]{1,4}?)/,
 
     // Shamelessly lifted from Scott Gonzalez via the Bassistance Validation plugin http://projects.scottsplayground.com/email_address_validation/

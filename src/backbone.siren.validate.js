@@ -5,16 +5,27 @@
     Backbone.Siren.validate = {
         patterns: {}
 
+        , inputTypes: {}
+
         /**
          *
          * @param {Object} patterns
          */
         , setPatterns: function (patterns) {
+            var self = this
+            , validInputTypes = 'color date datetime datetime-local email month number range search tel time url week';
+
             if (typeof patterns != 'object') {
                 throw 'Argument must be an object';
             }
 
-            _.extend(this.patterns, patterns);
+            _.each(patterns, function (pattern, name) {
+                if (validInputTypes.indexOf(name) == -1) {
+                    self.patterns[name] = pattern;
+                } else {
+                    self.inputTypes[name] = pattern;
+                }
+            });
         }
     };
 
@@ -57,12 +68,16 @@
          */
         , validateType: function (val, field) {
             var validity = {}
-            , patterns = Backbone.Siren.validate.patterns
+            , patterns = Backbone.Siren.validate.inputTypes
             , pattern = patterns[field.type]; // @todo allow for additional ways of specifying validation type (?) Or are html5 types enough?
 
-            if (pattern && !pattern.test(val)) {
-                validity.valid = false;
-                validity.typeMismatch = true;
+            if (pattern) {
+                if (!pattern.test(val)) {
+                    validity.valid = false;
+                    validity.typeMismatch = true;
+                }
+            } else if (field.type != 'text') {
+                Backbone.Siren.warn('Unrecognized input type: ' + field.type);
             }
 
             return validity;

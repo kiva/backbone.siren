@@ -418,6 +418,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         }
 
         , store: store
+        , warn: warn
         , Action: Action
 
 
