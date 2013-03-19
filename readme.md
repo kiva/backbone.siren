@@ -5,47 +5,6 @@ A client side adapter that converts resource representations from [Siren JSON](h
 
 ## This project is still in the design phase.  Things will break.
 
-## Development
-
-1. Clone this repo
-
-2. Run `npm install`
-
-3. Develop
-
-### Specs and Testing
-
-Specs are written using [rspec](http://rspec.info/) style "expectations" with [BusterJs](http://docs.busterjs.org/en/latest/) as the testing framework, toolkit & libray.
-
-Here's a breakdown of the test files:
-
-`test/spec/*` are all the spec files.
-`test/buster.js` is the BusterJs configuration file
-`coverage.lcov` is a breakdown of unit test coverage. It's automatically generated when unit tests are run.
-
-[Travis CI](travis-ci.org/kiva/backbone.siren) will run these tests on each push to github.
-
-####Useful Commands
-
-Run jshint + buster tests:
-```
-> grunt test
-```
-
-Run jshint only:
-```
-> grunt jshint
-```
-
-Run buster tests only:
-```
-> grunt buster
-```
-
-### Code quality
-
-Changes should follow existing patterns and pass jshint.
-
 ## Use
 
 To use Backbone.Siren:
@@ -111,4 +70,62 @@ bbSirenInstance.actionName();
     autoFetch: ''   // Will automatically fetch sub-entities if enabled. Can be set to 'linked' or 'all'.
 }
 ```
+
+## Development
+
+1. Clone this repo
+
+2. Run `npm install`
+
+3. Develop
+
+### Specs and Testing
+
+Specs are written using [rspec](http://rspec.info/) style "expectations" with [BusterJs](http://docs.busterjs.org/en/latest/) as the testing framework, toolkit & libray.
+
+Here's a breakdown of the test files:
+
+`test/spec/*` are all the spec files.
+`test/buster.js` is the BusterJs configuration file
+`coverage.lcov` is a breakdown of unit test coverage. It's automatically generated when unit tests are run.
+
+[Travis CI](travis-ci.org/kiva/backbone.siren) will run these tests on each push to github.
+
+####Useful Commands
+
+Run jshint + buster tests:
+```
+> grunt test
+```
+
+Run jshint only:
+```
+> grunt jshint
+```
+
+Run buster tests only:
+```
+> grunt buster
+```
+
+#### Generating [lcov]() coverage reports
+
+You can generate your own, updated, visual lcov reports.
+
+[buster-coverage](https://github.com/ebi/buster-coverage) will automatically generate a static coverage report in either xml or lcov format.
+By default, this project is set to generate lcov reports.  There are different ways of generating a visual report from this a lcov file, here is how I've done it:
+
+Install [genhtml](http://linux.die.net/man/1/genhtml)
+```
+> brew install genhtml
+```
+
+Parse the coverage report and Generate an html file.  Save it to `test/coverage`:
+```
+> genhtml test/coverage.lcov -o test/coverage
+```
+
+### Code quality
+
+Changes should follow existing patterns and pass jshint.
 
