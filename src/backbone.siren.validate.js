@@ -15,10 +15,6 @@
             var self = this
             , validInputTypes = 'color date datetime datetime-local email month number range search tel time url week';
 
-            if (typeof patterns != 'object') {
-                throw 'Argument must be an object';
-            }
-
             _.each(patterns, function (pattern, name) {
                 if (validInputTypes.indexOf(name) == -1) {
                     self.customPatterns[name] = pattern;
@@ -51,7 +47,9 @@
 
             // This is the line that we are removing from the default implementation
             // attrs = _.extend({}, this.attributes, attrs);
-            error = this.validationError = this.validate(attrs, options) || null;
+
+            // We are also removing the "attributes" parameter and only passing in an options parameter
+            error = this.validationError = this.validate(options.actionName, options) || null;
             if (!error) {
                 return true;
             }
@@ -149,7 +147,18 @@
                 }
             } else {
                 _.extend(validity, this.validateType(val, field));
-                _.extend(validity, this.validateConstraints(val, field));
+
+                if (!validity.typeMismatch) {
+                    if (val instanceof Backbone.Model) {
+                        if (! val._validate({}, {validate: true, actionName: field.action})) {
+                            validity.customError = true;
+                            validity.valid = false;
+                        }
+                    } else {
+                        _.extend(validity, this.validateConstraints(val, field));
+                    }
+
+                }
             }
 
             return validity;
@@ -158,42 +167,34 @@
 
         /**
          * See http://backbonejs.org/#Model-validate
+         * Note that we are changing the signature and passing in an "actionName" instead of attribute values.
+         * This is because passing in attribute values is redundant, being that the "action" already knows what attributes
+         * to validate.
          *
-         * @param {Object} attributes
-         * @param {Object} options
-         * @return {Object} An keyed mapping of HTML ValidityState objects by name.
+         * @param {String} actionName
+         * @param {Object} [options]
+         * @return {Object|undefined} A keyed mapping of HTML ValidityState objects by name, undefined if there are no errors
          */
-        , validate: function (attributes, options) {
+        , validate: function (actionName, options) {
+            options = options || {};
+
             var action
             , self = this
             , errors = {};
 
-            action = this.getActionByName(options.actionName);
-            if (!action) {
-                errors['no-actions'] = 'Malformed Siren: There are no actions matching the name, "' + options.actionName + '"';
-            } else if (_.isEmpty(attributes)) {
-                errors['no-writable-fields'] = 'Malformed Siren: There were no writable fields for action "' +  options.actionName + '"';
-            }
+            action = this.getActionByName(actionName);
+            if (action) {
+                _.each(action.fields, function (field) {
+                    var attributeName = field.name
+                    , validityState = self.validateOne(self.get(attributeName), field, options);
 
-            _.each(attributes, function (val, name) {
-                var field, fieldActionName, validityState, nestedErrors;
-
-                if (val instanceof Backbone.Model) {
-                    field = action.getFieldByName(name);
-                    fieldActionName = field.action;
-
-                    val._validate(val.getAllByAction(fieldActionName), {validate: true, actionName: fieldActionName});
-                    nestedErrors = val.validationError;
-                    if (nestedErrors) {
-                        errors[name] = nestedErrors;
-                    }
-                } else {
-                    validityState = self.validateOne(val, action.getFieldByName(name), options);
                     if (! validityState.valid) {
-                        errors[name] = validityState;
+                        errors[attributeName] = validityState;
                     }
-                }
-            });
+                });
+            } else {
+                errors['no-actions'] = 'There are no actions matching the name, "' + actionName + '"';
+            }
 
             if (! _.isEmpty(errors)) {
                 return errors;
