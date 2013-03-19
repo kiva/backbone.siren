@@ -122,7 +122,7 @@ Install [genhtml](http://linux.die.net/man/1/genhtml)
 
 Parse the coverage report and Generate an html file.  Save it to `test/coverage`:
 ```
-> genhtml test/coverage.lcov -o test/coverage
+> genhtml test/coverage/coverage.lcov -o test/coverage
 ```
 
 ### Code quality
