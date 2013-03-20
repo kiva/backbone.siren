@@ -79,7 +79,7 @@
             var data = {};
             data[$target.attr('name')] = $target.val();
 
-            this.model.set(data, {validate: !!this.options.validateOnChange, actionName: this.action.name});
+            this.model.set(data, {validate: !!this.options.validateOnChange, actionName: this.action.name, forceUpdate: true});
         }
 
 
