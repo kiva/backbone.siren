@@ -56,6 +56,22 @@ describe('Siren Validate: ', function () {
             expect(bbSirenModel.validationError).toBe('Validation Failed');
             expect(invalidHandlerSpy).toHaveBeenCalledWith(bbSirenModel, 'Validation Failed', options);
         });
+
+
+        it('returns true and fires an "invalid" event even if validation fails when the "forceUpdate" flag is set', function () {
+            this.stub(Backbone.Siren.Model.prototype, 'validate').returns('Validation Failed');
+
+            var invalidHandlerSpy = this.spy();
+            var options = {validate: true, forceUpdate: true};
+            var bbSirenModel = new Backbone.Siren.Model({properties: {prop1: 'uno', prop2: 'dos'}});
+
+            bbSirenModel.on('invalid', invalidHandlerSpy);
+            var _validateResponse = bbSirenModel._validate({prop1: 'newVal'}, options);
+
+            expect(_validateResponse).toBe(true);
+            expect(bbSirenModel.validationError).toBe('Validation Failed');
+            expect(invalidHandlerSpy).toHaveBeenCalledWith(bbSirenModel, 'Validation Failed', options);
+        });
     });
 
 

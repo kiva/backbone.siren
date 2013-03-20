@@ -45,16 +45,12 @@
                 return true;
             }
 
-            // This is the line that we are removing from the default implementation
-            // attrs = _.extend({}, this.attributes, attrs);
-
             error = this.validationError = this.validate(attrs, options) || null;
-            if (!error) {
-                return true;
+            if (error) {
+                this.trigger('invalid', this, error, options || {});
             }
 
-            this.trigger('invalid', this, error, options || {});
-            return false;
+            return !(error && !options.forceUpdate);
         }
 
 
@@ -189,7 +185,7 @@
          * This is because passing in attribute values is redundant, being that the "action" already knows what attributes
          * to validate.
          *
-         * @param {String} actionName
+         * @param {Object} attributes
          * @param {Object} [options]
          * @return {Object|undefined} A keyed mapping of HTML ValidityState objects by name, undefined if there are no errors
          */
