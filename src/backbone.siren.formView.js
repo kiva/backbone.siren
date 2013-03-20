@@ -79,7 +79,7 @@
             var data = {};
             data[$target.attr('name')] = $target.val();
 
-            this.model.set(data);
+            this.model.set(data, {validate: !!this.options.validateOnChange, actionName: this.action.name});
         }
 
 
@@ -154,7 +154,7 @@
             var parsedData = this.parseAction(data);
 
             // Set our parsed data as top level properties to our view + pass them directly to our template
-            Backbone.View.call(this, parsedData);
+            Backbone.View.call(this, _.extend({}, data, parsedData));
             this.action = parsedData.action;
             this._render(parsedData);
         }
