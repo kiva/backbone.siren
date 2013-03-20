@@ -151,6 +151,7 @@
          * @param {Object} data
          */
         , constructor: function (data) {
+            data = _.extend({}, data, {validateOnChange: true});
             var parsedData = this.parseAction(data);
 
             // Set our parsed data as top level properties to our view + pass them directly to our template

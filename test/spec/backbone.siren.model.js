@@ -198,7 +198,15 @@ describe('Siren Model: ', function () {
         });
 
 
-        it('//warns if an action does not have the *required* "name" property', function () {
+        it('warns if an action does not have the *required* "name" property', function () {
+            var warnStub = this.stub(console, 'warn');
+            var temp = sirenModel._data.actions[0].name;
+
+            sirenModel._data.actions[0].name = undefined;
+            sirenModel.parseActions();
+            sirenModel._data.actions[0].name = temp;
+
+            expect(warnStub).toHaveBeenCalled();
         });
     });
 
