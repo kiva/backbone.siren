@@ -41,7 +41,7 @@
         _validate: function (attrs, options) {
             var error;
 
-            if (!options.validate || !this.validate) {
+            if (! (options.validate && this.validate)) {
                 return true;
             }
 
