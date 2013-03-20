@@ -48,8 +48,7 @@
             // This is the line that we are removing from the default implementation
             // attrs = _.extend({}, this.attributes, attrs);
 
-            // We are also removing the "attributes" parameter and only passing in an options parameter
-            error = this.validationError = this.validate(options.actionName, options) || null;
+            error = this.validationError = this.validate(attrs, options) || null;
             if (!error) {
                 return true;
             }
@@ -76,7 +75,8 @@
          * @param {Object} field
          */
         , validateSubEntity: function (subEntity, field) {
-            return subEntity._validate({}, {validate: true, actionName: field.action})
+            var actionName = field.action;
+            return subEntity._validate(subEntity.getAllByAction(actionName), {validate: true, actionName: actionName})
                 ? {}
                 : {customError: true, valid: false};
         }
@@ -193,18 +193,19 @@
          * @param {Object} [options]
          * @return {Object|undefined} A keyed mapping of HTML ValidityState objects by name, undefined if there are no errors
          */
-        , validate: function (actionName, options) {
+        , validate: function (attributes, options) {
             options = options || {};
 
-            var action
-            , self = this
+            var self = this
+            , actionName = options.actionName
+            , action = this.getActionByName(actionName)
             , errors = {};
 
-            action = this.getActionByName(actionName);
             if (action) {
                 _.each(action.fields, function (field) {
                     var attributeName = field.name
-                    , validityState = self.validateOne(self.get(attributeName), field, options);
+                    , attribute = attributes[attributeName]
+                    , validityState = self.validateOne(attribute, field, options);
 
                     if (! validityState.valid) {
                         errors[attributeName] = validityState;

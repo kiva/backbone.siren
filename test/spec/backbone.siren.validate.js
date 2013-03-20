@@ -26,8 +26,8 @@ describe('Siren Validate: ', function () {
             var bbSirenModel = new Backbone.Siren.Model({properties: {prop1: 'uno', prop2: 'dos'}});
             bbSirenModel._validate({prop1: 'newVal'}, {validate: true, actionName: 'someAction'});
 
-            // This is significant b/c the standard ._validate() method calls .validate() with all properties, not the actionName.
-            expect(Backbone.Siren.Model.prototype.validate).toHaveBeenCalledWith('someAction', {validate: true, actionName: 'someAction'});
+            // This is significant b/c the standard ._validate() method calls .validate() with all properties, not just those that are passed in.
+            expect(Backbone.Siren.Model.prototype.validate).toHaveBeenCalledWith({prop1: 'newVal'}, {validate: true, actionName: 'someAction'});
         });
 
 
@@ -69,17 +69,17 @@ describe('Siren Validate: ', function () {
 
 
         it('returns undefined if there is no error', function () {
-            expect(bbSirenModel.validate('doStuff')).not.toBeDefined();
+            expect(bbSirenModel.validate(sirenObject.properties, {actionName: 'doStuff'})).not.toBeDefined();
         });
 
 
         it('fails if no action is found matching the actionName (or if actionName is omitted)', function () {
             var result;
 
-            result = bbSirenModel.validate('nonExistentAction');
+            result = bbSirenModel.validate(sirenObject.properties, {actionName: 'nonExistentAction'});
             expect(result['no-actions']).toBeDefined();
 
-            result = bbSirenModel.validate('');
+            result = bbSirenModel.validate(sirenObject.properties);
             expect(result['no-actions']).toBeDefined();
         });
 
@@ -89,7 +89,7 @@ describe('Siren Validate: ', function () {
             var failedValidityState1 = _.extend({}, validityState, {valid: false, customError: true});
 
             this.stub(Backbone.Siren.Model.prototype, 'validateOne').returns(failedValidityState1);
-            result = bbSirenModel.validate('doStuff');
+            result = bbSirenModel.validate(sirenObject.properties, {actionName: 'doStuff'});
             expect(result).toEqual({prop1: failedValidityState1});
         });
     });
