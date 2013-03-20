@@ -1,3 +1,4 @@
+/*global patternLibrary */
 buster.spec.expose();
 
 describe('Siren Validate: ', function () {
@@ -104,7 +105,7 @@ describe('Siren Validate: ', function () {
 
         it('returns a validation object', function () {
             result = bbSirenModel.validateOne('newVal', sirenObject.actions[0].fields[0]);
-            expect(result).toEqual(validityState)
+            expect(result).toEqual(validityState);
         });
 
 
@@ -174,7 +175,7 @@ describe('Siren Validate: ', function () {
            bbSirenModel.validateType('notANumber', field);
 
            expect(warnStub).toHaveBeenCalled();
-       })
+       });
     });
 
 

@@ -61,6 +61,29 @@
 
         /**
          *
+         * @param {Object} field
+         */
+        , validateEmptyField: function (field) {
+            return field.required
+                ? {valid: false, valueMissing: true}
+                : {};
+        }
+
+
+        /**
+         *
+         * @param {Backbone.Siren.Model} subEntity
+         * @param {Object} field
+         */
+        , validateSubEntity: function (subEntity, field) {
+            return subEntity._validate({}, {validate: true, actionName: field.action})
+                ? {}
+                : {customError: true, valid: false};
+        }
+
+
+        /**
+         *
          * @param {String} val
          * @param {Object} field A Siren action field
          */
@@ -142,19 +165,13 @@
             };
 
             if (!val) {
-                if (field.required) {
-                    validity.valid = false;
-                    validity.valueMissing = true;
-                }
+                validity = _.extend(validity, this.validateEmptyField(field));
             } else {
                 _.extend(validity, this.validateType(val, field));
 
                 if (!validity.typeMismatch) {
                     if (val instanceof Backbone.Model) {
-                        if (! val._validate({}, {validate: true, actionName: field.action})) {
-                            validity.customError = true;
-                            validity.valid = false;
-                        }
+                        _.extend(validity, this.validateSubEntity(val, field));
                     } else {
                         _.extend(validity, this.validateConstraints(val, field));
                     }
