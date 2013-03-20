@@ -66,15 +66,16 @@
          */
         , validateType: function (val, field) {
             var validity = {}
-            , pattern = Backbone.Siren.validate.customPatterns[field.customType] || Backbone.Siren.validate.standardPatterns[field.type];
+            , type = field.type
+            , pattern = Backbone.Siren.validate.customPatterns[type] || Backbone.Siren.validate.standardPatterns[type];
 
             if (pattern) {
                 if (!pattern.test(val)) {
                     validity.valid = false;
                     validity.typeMismatch = true;
                 }
-            } else if (field.type != 'text') {
-                Backbone.Siren.warn('Unrecognized input type: ' + field.type);
+            } else if (type && type != 'text' && type != 'entity') {
+                Backbone.Siren.warn('Unable to validate type, "' + type + '" as it does not have a matching validation rule.');
             }
 
             return validity;
@@ -110,7 +111,7 @@
                     validity.valid = false;
                     validity.stepMismatch = true;
                 }
-            } else {
+            } else if ('text email search password tel url'.indexOf(type) > -1) {
                 if (field.maxlength && field.maxlength < val.length) {
                     validity.valid = false;
                     validity.tooLong = true;
