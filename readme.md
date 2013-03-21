@@ -105,6 +105,20 @@ You can also overwrite the `.handleFormSubmit()` and `.formElementChange()` meth
 
 ## Development
 
+### Dependencies
+
+[Bower](https://github.com/twitter/bower) for managing client side dependencies
+```
+npm install -g bower
+```
+
+[Grunt](http://gruntjs.com/) for managing various "tasks"
+```
+npm install -g grunt-cli
+```
+
+### Get started
+
 1. Clone this repo
 
 2. Run `npm install`
