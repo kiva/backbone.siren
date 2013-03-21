@@ -107,6 +107,10 @@ You can also overwrite the `.handleFormSubmit()` and `.formElementChange()` meth
 
 ### Dependencies
 
+[nodejs](http://nodejs.org/) required by all the development tools.
+
+[npm](https://npmjs.org/) for managing server side, development, dependencies
+
 [Bower](https://github.com/twitter/bower) for managing client side dependencies
 ```
 npm install -g bower
@@ -137,7 +141,7 @@ Here's a breakdown of the test files:
 
 [Travis CI](travis-ci.org/kiva/backbone.siren) will run these tests on each push to github.
 
-####Useful Commands
+#### Useful Commands
 
 Run jshint + buster tests:
 ```
