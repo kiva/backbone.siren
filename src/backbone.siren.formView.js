@@ -114,8 +114,8 @@
             }
 
             action = data.action;
-            if (! (action.parent instanceof Backbone.Model)) {
-                throw 'Action object either missing required "parent" or "parent" is not a Backbone Model';
+            if (! (action.parent instanceof Backbone.Siren.Model)) {
+                throw 'Action object either missing required "parent" or "parent" is not a Backbone.Siren Model';
             }
 
             return {

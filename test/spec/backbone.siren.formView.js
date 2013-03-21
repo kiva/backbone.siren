@@ -27,6 +27,13 @@ describe('Siren FormView: ', function () {
     });
 
 
+    it('throws if action.parent is not an instance of Backbone.Siren.Model', function () {
+        expect(function () {
+            new Backbone.Siren.FormView({action: {parent: new Backbone.Model({})}});
+        }).toThrow();
+    });
+
+
     describe('On form submit', function () {
         it('blocks the default submit and executes the form\'s siren-action', function () {
             var executeSpy = this.stub(Backbone.Siren.Action.prototype, 'execute');
