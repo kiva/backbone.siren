@@ -45,10 +45,5 @@ describe('Siren Action: ', function () {
             expect(bbSirenAction.execute()).not.toBeDefined();
         });
     });
-
-
-    it('gets an action\'s field by name using .getFieldByName', function () {
-        expect(bbSirenAction.getFieldByName('orderNumber')).toEqual({ "name": "orderNumber", "type": "hidden", "value": "42" });
-    });
 });
 
