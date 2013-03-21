@@ -47,13 +47,13 @@ describe('Siren Validate: ', function () {
         it('by default, validates on action.execute() but not on .set()', function () {
             this.stub(Backbone.Siren.Model.prototype, 'validate');
 
-            var bbSirenModel = new Backbone.Siren.Model({properties: {prop1: 'uno', prop2: 'dos'}, actions: [{name: 'someAction', fields: [{name: 'prop1', type: 'text'}]}]});
+            var bbSirenModel = new Backbone.Siren.Model({properties: {prop1: 'uno', prop2: 'dos'}, actions: [{name: 'someAction', fields: [{name: 'prop1', type: 'text'}]}], links: [{rel: ['self'], href: 'http://link.com'}]});
 
             bbSirenModel.set('prop1', 'updateVal');
             expect(Backbone.Siren.Model.prototype.validate).not.toHaveBeenCalled();
 
             bbSirenModel.getActionByName('someAction').execute();
-            expect(Backbone.Siren.Model.prototype.validate).toHaveBeenCalledWith(sinon.match({prop1: 'updateVal'}, {validate: true, actionName: 'someAction'}));
+            expect(Backbone.Siren.Model.prototype.validate).toHaveBeenCalledWith({prop1: 'updateVal'});
         });
 
 

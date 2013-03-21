@@ -10,48 +10,48 @@ A client side adapter that converts resource representations from [Siren JSON](h
 To use Backbone.Siren:
 
 ```
-bbSirenInstance = new Backbone.Siren.Model(sirenObject);
+bbSirenModel = new Backbone.Siren.Model(sirenObject);
+
+// or
+
+bbSirenCollection = new Backbone.Siren.Collection(sirenObject);
 ```
 
-Now in addition to your standard set of Backbone.Model methods, you have few extra methods that help you interact with your Siren representation.
+In addition to your standard set of Backbone.Model and Backbone.Collection methods, you have few extra methods that help you interact with your Siren representations.
 
 ### Working with Models
 
 ```
-bbSirenInstance = new Backbone.Siren.Model(sirenObject);
+bbSirenModel = new Backbone.Siren.Model(sirenObject);
 
-bbSirenInstance.classes();
-bbSirenInstance.hasClass();
-bbSirenInstance.title();
-bbSirenInstance.rel();
-bbSirenInstance.actions();
-bbSirenInstance.getActionByName();
-bbSirenInstance.getAllByAction();
-bbSirenInstance.request();
-bbSirenInstance.links();
-bbSirenInstance.entities();
+bbSirenModel.classes();
+bbSirenModel.hasClass();
+bbSirenModel.title();
+bbSirenModel.rel();
+bbSirenModel.actions();
+bbSirenModel.getActionByName();
+bbSirenModel.getAllByAction();
+bbSirenModel.request();
+bbSirenModel.links();
+bbSirenModel.entities();
+
+Backbone.Siren will parse all nested and linked entities, if the entity is a Collection (has a class of "collection") Backbone.Siren will know to parse it as a Backbone.Siren.Collection.
 ```
 
 ### Working with collections
 
-Backbone.Siren determines if your entity is a collection by checking for a "collections" class.
-
-If the "collection" class is found, Backbone.Siren will create a Backbone.Collection instance instead of a Backbone.Model instance and nest all entities as models under the collection.
-From there on out you can use any Backbone.Collection.
-
-To work with a collection:
 ```
-bbSirenInstance = new Backbone.Siren.Collection(sirenObject);
+bbSirenCollection = new Backbone.Siren.Collection(sirenObject);
 
-bbSirenInstance.classes();
-bbSirenInstance.hasClass();
-bbSirenInstance.title();
-bbSirenInstance.rel();
-bbSirenInstance.actions();
-bbSirenInstance.getActionByName();
-bbSirenInstance.getAllByAction();
-bbSirenInstance.request();
-bbSirenInstance.links();
+bbSirenCollection.classes();
+bbSirenCollection.hasClass();
+bbSirenCollection.title();
+bbSirenCollection.rel();
+bbSirenCollection.actions();
+bbSirenCollection.getActionByName();
+bbSirenCollection.getAllByAction();
+bbSirenCollection.request();
+bbSirenCollection.links();
 ```
 
 ### Siren Actions
@@ -59,8 +59,14 @@ bbSirenInstance.links();
 Siren actions are set directly as properties to your Model or Collection.
 
 ```
-bbSirenInstance = new Backbone.Siren.Collection(sirenObject);
-bbSirenInstance.actionName();
+var editUserAction = bbSirenModel.getActionByName('edit-user');
+
+// Get a specific field
+var firstNameField = editUserAction.getFieldByName('firstName');
+
+// Execute the action
+var jqXhrResult = editUserAction.execute();
+
 ```
 
 ### Options
@@ -70,6 +76,23 @@ bbSirenInstance.actionName();
     autoFetch: ''   // Will automatically fetch sub-entities if enabled. Can be set to 'linked' or 'all'.
 }
 ```
+
+## Extras
+
+### Backbone.Siren.Validate
+
+Backbone.Siren.Validate will automatically validate your Model's attributes.
+It does this by parsing your Siren object and expecting fields to follow the [Siren-Validation @todo submit spec + add link] spec.
+
+By Default, Siren.Validate will always validate on `save`, but only validate on `set` if `{validate: true}` is set in the options parameter.
+
+All standard actions/events will happen when validating a Backbone.Siren model. [http://backbonejs.org/#Model-validate]
+This means that .validate() won't return anything on success but will return a mapping of field name to [ValidityState](https://developer.mozilla.org/en-US/docs/DOM/ValidityState) objects on failure.
+
+### Backbone.Siren.FormView
+
+Backbone.Siren.FormView will generate a default form if passed a bbSiren Model (does not work with bbSiren Collections).
+
 
 ## Development
 
