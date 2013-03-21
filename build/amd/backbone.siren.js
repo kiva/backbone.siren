@@ -695,10 +695,6 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                 var self = this
                 , validInputTypes = 'color date datetime datetime-local email month number range search tel time url week';
     
-                if (typeof patterns != 'object') {
-                    throw 'Argument must be an object';
-                }
-    
                 _.each(patterns, function (pattern, name) {
                     if (validInputTypes.indexOf(name) == -1) {
                         self.customPatterns[name] = pattern;
@@ -725,19 +721,40 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
             _validate: function (attrs, options) {
                 var error;
     
-                if (!options.validate || !this.validate) {
+                if (! (options.validate && this.validate)) {
                     return true;
                 }
     
-                // This is the line that we are removing from the default implementation
-                // attrs = _.extend({}, this.attributes, attrs);
                 error = this.validationError = this.validate(attrs, options) || null;
-                if (!error) {
-                    return true;
+                if (error) {
+                    this.trigger('invalid', this, error, options || {});
                 }
     
-                this.trigger('invalid', this, error, options || {});
-                return false;
+                return !(error && !options.forceUpdate);
+            }
+    
+    
+            /**
+             *
+             * @param {Object} field
+             */
+            , validateEmptyField: function (field) {
+                return field.required
+                    ? {valid: false, valueMissing: true}
+                    : {};
+            }
+    
+    
+            /**
+             *
+             * @param {Backbone.Siren.Model} subEntity
+             * @param {Object} field
+             */
+            , validateSubEntity: function (subEntity, field) {
+                var actionName = field.action;
+                return subEntity._validate(subEntity.getAllByAction(actionName), {validate: true, actionName: actionName})
+                    ? {}
+                    : {customError: true, valid: false};
             }
     
     
@@ -748,15 +765,16 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
              */
             , validateType: function (val, field) {
                 var validity = {}
-                , pattern = Backbone.Siren.validate.customPatterns[field.customType] || Backbone.Siren.validate.standardPatterns[field.type];
+                , type = field.type
+                , pattern = Backbone.Siren.validate.customPatterns[type] || Backbone.Siren.validate.standardPatterns[type];
     
                 if (pattern) {
                     if (!pattern.test(val)) {
                         validity.valid = false;
                         validity.typeMismatch = true;
                     }
-                } else if (field.type != 'text') {
-                    Backbone.Siren.warn('Unrecognized input type: ' + field.type);
+                } else if (type && type != 'text' && type != 'entity') {
+                    Backbone.Siren.warn('Unable to validate type, "' + type + '" as it does not have a matching validation rule.');
                 }
     
                 return validity;
@@ -772,7 +790,7 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                 var validity = {};
                 var type = field.type;
     
-                if (field.pattern && !field.pattern.test(val)) {
+                if (field.pattern && ! new RegExp(field.pattern).test(val)) {
                     validity.valid = false;
                     validity.patternMismatch = true;
                 }
@@ -792,7 +810,7 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                         validity.valid = false;
                         validity.stepMismatch = true;
                     }
-                } else {
+                } else if ('text email search password tel url'.indexOf(type) > -1) {
                     if (field.maxlength && field.maxlength < val.length) {
                         validity.valid = false;
                         validity.tooLong = true;
@@ -823,13 +841,18 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                 };
     
                 if (!val) {
-                    if (field.required) {
-                        validity.valid = false;
-                        validity.valueMissing = true;
-                    }
+                    validity = _.extend(validity, this.validateEmptyField(field));
                 } else {
                     _.extend(validity, this.validateType(val, field));
-                    _.extend(validity, this.validateConstraints(val, field));
+    
+                    if (!validity.typeMismatch) {
+                        if (val instanceof Backbone.Model) {
+                            _.extend(validity, this.validateSubEntity(val, field));
+                        } else {
+                            _.extend(validity, this.validateConstraints(val, field));
+                        }
+    
+                    }
                 }
     
                 return validity;
@@ -838,42 +861,35 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
     
             /**
              * See http://backbonejs.org/#Model-validate
+             * Note that we are changing the signature and passing in an "actionName" instead of attribute values.
+             * This is because passing in attribute values is redundant, being that the "action" already knows what attributes
+             * to validate.
              *
              * @param {Object} attributes
-             * @param {Object} options
-             * @return {Object} An keyed mapping of HTML ValidityState objects by name.
+             * @param {Object} [options]
+             * @return {Object|undefined} A keyed mapping of HTML ValidityState objects by name, undefined if there are no errors
              */
             , validate: function (attributes, options) {
-                var action
-                , self = this
+                options = options || {};
+    
+                var self = this
+                , actionName = options.actionName
+                , action = this.getActionByName(actionName)
                 , errors = {};
     
-                action = this.getActionByName(options.actionName);
-                if (!action) {
-                    errors['no-actions'] = 'Malformed Siren: There are no actions matching the name, "' + options.actionName + '"';
-                } else if (_.isEmpty(attributes)) {
-                    errors['no-writable-fields'] = 'Malformed Siren: There were no writable fields for action "' +  options.actionName + '"';
-                }
+                if (action) {
+                    _.each(action.fields, function (field) {
+                        var attributeName = field.name
+                        , attribute = attributes[attributeName]
+                        , validityState = self.validateOne(attribute, field, options);
     
-                _.each(attributes, function (val, name) {
-                    var field, fieldActionName, validityState, nestedErrors;
-    
-                    if (val instanceof Backbone.Model) {
-                        field = action.getFieldByName(name);
-                        fieldActionName = field.action;
-    
-                        val._validate(val.getAllByAction(fieldActionName), {validate: true, actionName: fieldActionName});
-                        nestedErrors = val.validationError;
-                        if (nestedErrors) {
-                            errors[name] = nestedErrors;
-                        }
-                    } else {
-                        validityState = self.validateOne(val, action.getFieldByName(name), options);
                         if (! validityState.valid) {
-                            errors[name] = validityState;
+                            errors[attributeName] = validityState;
                         }
-                    }
-                });
+                    });
+                } else {
+                    errors['no-actions'] = 'There are no actions matching the name, "' + actionName + '"';
+                }
     
                 if (! _.isEmpty(errors)) {
                     return errors;
@@ -974,7 +990,7 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                 var data = {};
                 data[$target.attr('name')] = $target.val();
     
-                this.model.set(data);
+                this.model.set(data, {validate: !!this.options.validateOnChange, actionName: this.action.name, forceUpdate: true});
             }
     
     
@@ -1009,8 +1025,8 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                 }
     
                 action = data.action;
-                if (! (action.parent instanceof Backbone.Model)) {
-                    throw 'Action object either missing required "parent" or "parent" is not a Backbone Model';
+                if (! (action.parent instanceof Backbone.Siren.Model)) {
+                    throw 'Action object either missing required "parent" or "parent" is not a Backbone.Siren Model';
                 }
     
                 return {
@@ -1046,10 +1062,11 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
              * @param {Object} data
              */
             , constructor: function (data) {
+                data = _.extend({}, data, {validateOnChange: true});
                 var parsedData = this.parseAction(data);
     
                 // Set our parsed data as top level properties to our view + pass them directly to our template
-                Backbone.View.call(this, parsedData);
+                Backbone.View.call(this, _.extend({}, data, parsedData));
                 this.action = parsedData.action;
                 this._render(parsedData);
             }
