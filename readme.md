@@ -11,9 +11,7 @@ To use Backbone.Siren:
 
 ```
 bbSirenModel = new Backbone.Siren.Model(sirenObject);
-
 // or
-
 bbSirenCollection = new Backbone.Siren.Collection(sirenObject);
 ```
 
@@ -34,9 +32,8 @@ bbSirenModel.getAllByAction();
 bbSirenModel.request();
 bbSirenModel.links();
 bbSirenModel.entities();
-
-Backbone.Siren will parse all nested and linked entities, if the entity is a Collection (has a class of "collection") Backbone.Siren will know to parse it as a Backbone.Siren.Collection.
 ```
+Backbone.Siren will parse all nested and linked entities, if the entity is a Collection (has a class of "collection") Backbone.Siren will know to parse it as a Backbone.Siren.Collection.
 
 ### Working with collections
 
@@ -73,11 +70,10 @@ var jqXhrResult = editUserAction.execute();
 
 ```
 {
-    autoFetch: ''   // Will automatically fetch sub-entities if enabled. Can be set to 'linked' or 'all'.
+    autoFetch: 'linked'   // Will automatically fetch sub-entities if enabled. Can be set to 'linked' or 'all'.
+    , forceUpdate: false  // Pass forceUpdate as an option into your .set() method and it will update the model, even if it fails validation
 }
 ```
-
-## Extras
 
 ### Backbone.Siren.Validate
 
@@ -93,6 +89,19 @@ This means that .validate() won't return anything on success but will return a m
 
 Backbone.Siren.FormView will generate a default form if passed a bbSiren Model (does not work with bbSiren Collections).
 
+The methods `.template()` and `.render()` can be overwritten to customize the look of your form.
+You can also overwrite the `.handleFormSubmit()` and `.formElementChange()` methods which will, by default, submit the form and set model attributes respectively.
+
+#### Options
+
+```
+{
+    action: bbSirenAction       // Required, a bbSiren Action.
+    , validateOnChange: true    // Optional, Whether or not to validate ui changes.  Default is true
+    , formAttributes: {}        // Optional, A mapping of html attribute properties to their values
+    , fieldAttributes: {}       // Optional, A mapping of field names to html attribute properties
+}
+```
 
 ## Development
 
@@ -131,7 +140,7 @@ Run buster tests only:
 > grunt buster
 ```
 
-#### Generating [lcov]() coverage reports
+#### Generating [lcov](http://ltp.sourceforge.net/coverage/lcov.php) coverage reports
 
 You can generate your own, updated, visual lcov reports.
 
