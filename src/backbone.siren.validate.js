@@ -110,7 +110,7 @@
             var validity = {};
             var type = field.type;
 
-            if (field.pattern && !field.pattern.test(val)) {
+            if (field.pattern && ! new RegExp(field.pattern).test(val)) {
                 validity.valid = false;
                 validity.patternMismatch = true;
             }

@@ -241,7 +241,7 @@ describe('Siren Validate: ', function () {
 
 
         it('sets .patternMismatch', function () {
-            field.pattern = /abc/;
+            field.pattern = 'abc';
 
             result = bbSirenModel.validateConstraints('abc', field);
             expect(result).toEqual({});
