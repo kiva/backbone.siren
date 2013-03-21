@@ -15,7 +15,7 @@ describe('Siren Model: ', function () {
 
     describe('.url()', function () {
         it('returns a model\'s url, getting it from the href', function () {
-            var mySirenModel = new Backbone.Siren.Model({"href": "http://api.x.io/blah"});
+            var mySirenModel = new Backbone.Siren.Model({href: 'http://api.x.io/blah'});
             expect(mySirenModel.url()).toEqual('http://api.x.io/blah');
         });
 

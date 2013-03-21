@@ -20,7 +20,7 @@ describe('Siren Validate: ', function () {
 
 
     describe('._validate()', function () {
-        it('overrides the default Backbone.Model.prototype._validate method, ignoring the attributes and instead validating by actionName', function () {
+        it('overrides the default Backbone.Model.prototype._validate method, validating only those attributes that are specified in the Siren action', function () {
             this.stub(Backbone.Siren.Model.prototype, 'validate');
 
             var bbSirenModel = new Backbone.Siren.Model({properties: {prop1: 'uno', prop2: 'dos'}});
@@ -28,6 +28,32 @@ describe('Siren Validate: ', function () {
 
             // This is significant b/c the standard ._validate() method calls .validate() with all properties, not just those that are passed in.
             expect(Backbone.Siren.Model.prototype.validate).toHaveBeenCalledWith({prop1: 'newVal'}, {validate: true, actionName: 'someAction'});
+        });
+
+
+        it('only validates when {validate: true} is set as an option', function () {
+            this.stub(Backbone.Siren.Model.prototype, 'validate');
+
+            var bbSirenModel = new Backbone.Siren.Model({properties: {prop1: 'uno', prop2: 'dos'}});
+            bbSirenModel._validate({prop1: 'newVal'}, {actionName: 'someAction'});
+
+            expect(Backbone.Siren.Model.prototype.validate).not.toHaveBeenCalled();
+
+            bbSirenModel._validate({prop1: 'newVal'}, {validate: true, actionName: 'someAction'});
+            expect(Backbone.Siren.Model.prototype.validate).toHaveBeenCalledWith({prop1: 'newVal'}, {validate: true, actionName: 'someAction'});
+        });
+
+
+        it('by default, validates on action.execute() but not on .set()', function () {
+            this.stub(Backbone.Siren.Model.prototype, 'validate');
+
+            var bbSirenModel = new Backbone.Siren.Model({properties: {prop1: 'uno', prop2: 'dos'}, actions: [{name: 'someAction', fields: [{name: 'prop1', type: 'text'}]}]});
+
+            bbSirenModel.set('prop1', 'updateVal');
+            expect(Backbone.Siren.Model.prototype.validate).not.toHaveBeenCalled();
+
+            bbSirenModel.getActionByName('someAction').execute();
+            expect(Backbone.Siren.Model.prototype.validate).toHaveBeenCalledWith(sinon.match({prop1: 'updateVal'}, {validate: true, actionName: 'someAction'}));
         });
 
 
