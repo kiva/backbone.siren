@@ -121,6 +121,11 @@ npm install -g bower
 npm install -g grunt-cli
 ```
 
+[Buster](http://docs.busterjs.org) for running unit tests
+```
+npm install -g buster
+```
+
 ### Get started
 
 1. Clone this repo
