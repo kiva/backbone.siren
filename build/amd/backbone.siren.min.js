@@ -1,5 +1,5 @@
 /*
-* Backbone.Siren v0.0.5
+* Backbone.Siren v0.1.0
 *
 * Copyright (c) 2013 Kiva Microfunds
 * Licensed under the MIT license.
