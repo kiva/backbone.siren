@@ -1,0 +1,9 @@
+## Customize the test machine
+machine:
+  node:
+    version: 0.6.18
+
+## Customize checkout
+checkout:
+  pre:
+    - npm install -g bower
