@@ -93,11 +93,10 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             var defaults = {
                 url: this.href
                 , actionName: this.name
-                , method: this.method
-                , type: this.type
+                , type: this.method
+                , contentType: this.type
                 , validate: true
                 , patch: true
-                , content: 'application/vnd.siren+json'
             };
 
             options = _.extend(defaults, options);
