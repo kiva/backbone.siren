@@ -96,7 +96,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 , type: this.method
                 , contentType: this.type
                 , validate: true
-                , patch: true
+                , patch: true       // Force BB to only send those attributes we specify
             };
 
             options = _.extend(defaults, options);

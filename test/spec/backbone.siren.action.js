@@ -4,7 +4,7 @@ buster.spec.expose();
 describe('Siren Action: ', function () {
     'use strict';
 
-    var sirenAction = {"name": "add-item","title": "Add Item","method": "POST","href": "http://api.x.io/orders/42/items","type": "application/x-www-form-urlencoded","fields": [{ "name": "orderNumber", "type": "hidden", "value": "42" },{ "name": "productCode", "type": "text" },{ "name": "quantity", "type": "number" }]}
+    var sirenAction = {name: 'add-item', title: 'Add Item', method: 'FANCY', href: 'http://api.x.io/orders/42/items', type: 'application/x-fancy-stuff', fields: [{name: 'orderNumber', type: 'hidden', value: '42'}, {name: 'productCode', type: 'text'}, {name: 'quantity', type: 'number' }]}
     , bbSirenAction;
 
 
@@ -38,6 +38,23 @@ describe('Siren Action: ', function () {
             var jqXhr = myBbSirenModel.getActionByName('add-item').execute();
             expect($.ajax).toHaveBeenCalled();
             expect(jqXhr).toBe('jqXhr');
+        });
+
+
+        it('sets default ajax settings that can be overriden', function () {
+            var jqXhr
+            , mySirenModel = {href: 'test', actions: [sirenAction]}
+            , myBbSirenModel = new Backbone.Siren.Model(mySirenModel);
+
+            // Defaults
+            jqXhr = myBbSirenModel.getActionByName('add-item').execute();
+            expect($.ajax).toHaveBeenCalledWith(sinon.match({url: 'http://api.x.io/orders/42/items', type: 'FANCY', contentType: 'application/x-fancy-stuff', patch: true, validate: true}));
+
+            $.ajax.reset();
+
+            // Override
+            jqXhr = myBbSirenModel.getActionByName('add-item').execute({type: 'FANCIER', contentType: 'application/x-aaah-shite'});
+            expect($.ajax).toHaveBeenCalledWith(sinon.match({url: 'http://api.x.io/orders/42/items', type: 'FANCIER', contentType: 'application/x-aaah-shite'}));
         });
 
 
