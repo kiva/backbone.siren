@@ -441,15 +441,15 @@ Backbone.Siren = (function (_, Backbone, undefined) {
              * @param {Object} sirenObj
              * @param {Object} options
              */
-            , resolveEntities: function (sirenObj, options) {
+            , resolveEntities: function (options) {
                 var self = this
                 , resolvedEntities = [];
 
-                _.each(sirenObj.entities, function(entity) {
+                _.each(this._data.entities, function(entity) {
                     if ((entity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
                         resolvedEntities.push(self.fetchEntity(entity, options));
                     } else {
-                        resolvedEntities.push(self.addEntity(entity, options));
+                        resolvedEntities.push(self.setEntity(entity, options));
                     }
                 });
 
@@ -468,7 +468,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 this._data = sirenObj; // Stores the entire siren object in raw json
                 this._entities = [];
 
-                this.resolveEntities(sirenObj, options);
+                this.resolveEntities(options);
                 this.parseActions(options);
 
                 return sirenObj.properties;
@@ -519,7 +519,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 var self = this;
 
                 return $.getJSON(getUrl(entity), function (resolvedEntity) {
-                    self.addEntity(resolvedEntity);
+                    self.setEntity(resolvedEntity);
                 });
             }
 
@@ -549,7 +549,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
              *
              * @param {Object} entity
              */
-            , addEntity: function (entity) {
+            , setEntity: function (entity) {
                 var bbSiren = this.parseEntity(entity)
                 , rel = bbSiren.rel();
 
