@@ -499,7 +499,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
              */
             , entities: function (filters) {
                 var self = this
-                , entities = _.filter(this, function (val, name) {
+                , entities = _.filter(this.attributes, function (val, name) {
                     return _.indexOf(self._entities, name) > -1;
                 });
 
