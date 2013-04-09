@@ -181,9 +181,6 @@
 
         /**
          * See http://backbonejs.org/#Model-validate
-         * Note that we are changing the signature and passing in an "actionName" instead of attribute values.
-         * This is because passing in attribute values is redundant, being that the "action" already knows what attributes
-         * to validate.
          *
          * @param {Object} attributes
          * @param {Object} [options]
