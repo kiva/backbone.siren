@@ -351,10 +351,18 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         if (action) {
             values = {};
             _.each(action.fields, function (field) {
-                if (self instanceof Backbone.Model) {
-                    values[field.name] = self.get(field.name);
+                var val;
+
+                if (self instanceof Backbone.Siren.Model) {
+                    val = self.get(field.name);
                 } else {
-                    values[field.name] = self.meta(field.name);
+                    val = self.meta(field.name);
+                }
+
+                if (val instanceof Backbone.Siren.Model) {
+                    values[field.name] = val.getAllByAction(field.action);
+                } else {
+                    values[field.name] = val;
                 }
 
             });
