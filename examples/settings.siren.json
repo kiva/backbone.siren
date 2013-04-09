@@ -148,7 +148,7 @@
         , "method": "PUT"
         , "href": "api.edit-lender-kiva.org/lenders/gabrielcastillo"
         , "fields": [
-        {"name": "username", "type": "text", "pattern": ".{5,10}", "required": true}
+        {"name": "username", "type": "text", "pattern": ".{4,10}", "required": true}
         , { "name": "firstName", "type": "text", "maxlength": 30}
         , { "name": "lastName", "type": "text", "maxlength": 30}
         , { "name": "email", "type": "email"}
