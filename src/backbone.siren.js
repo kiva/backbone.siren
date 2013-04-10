@@ -90,10 +90,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             var parent = this.parent
             , presets = {
                 url: this.href
-                , type: this.method
-                , contentType: this.type
                 , actionName: this.name
-                , patch: true       // Force BB to only send those attributes we specify
             };
 
             if (! parent) {
@@ -102,12 +99,26 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
             if (arguments.length < 2) {
                 options = attributes;
-                attributes = parent.getAllByAction(this.name, true);
-            } else {
-                attributes = _.extend(parent.getAllByAction(this.name, true), attributes);
+                attributes = undefined;
             }
 
-            return parent.save(attributes, _.defaults(presets, options));
+            options = _.defaults(presets, options);
+
+            if (this.method) {
+                options.type  = this.method;
+            }
+
+            if (this.type) {
+                options.contentType = this.type
+            }
+
+            if (attributes) {
+                attributes = _.extend(parent.getAllByAction(this.name), attributes);
+            } else {
+                attributes = parent.getAllByAction(this.name);
+            }
+
+            return parent.save(attributes, options);
         }
 
     };
@@ -489,14 +500,32 @@ Backbone.Siren = (function (_, Backbone, undefined) {
              *
              * @param {Object} options
              */
-            , toJSON: function () {
-                var json = {};
+            , toJSON: function (options) {
+                var action, json = {}, self = this;
 
-                _.each(this.attributes, function (val, name) {
-                    json[name] = (val instanceof Backbone.Siren.Model) || (val instanceof Backbone.Siren.Collection)
-                        ? val.toJSON()
-                        : val;
-                });
+                if (options && options.actionName) {
+                    action = this.getActionByName(options.actionName);
+                    if (action) {
+                        _.each(action.fields, function (field) {
+                            var val = self instanceof Backbone.Siren.Model
+                                ? self.get(field.name)
+                                : self.meta(field.name);
+
+                            json[field.name] = val instanceof Backbone.Siren.Model
+                                ? val.toJSON({actionName: field.action})
+                                : val;
+                        });
+                    } else {
+                        // @todo
+                    }
+
+                } else {
+                    _.each(this.attributes, function (val, name) {
+                        json[name] = (val instanceof Backbone.Siren.Model) || (val instanceof Backbone.Siren.Collection)
+                            ? val.toJSON(options)
+                            : val;
+                    });
+                }
 
                 return json;
             }
