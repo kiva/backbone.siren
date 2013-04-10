@@ -97,20 +97,20 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 return;
             }
 
+            if (this.method) {
+                presets.type  = this.method;
+            }
+
+            if (this.type) {
+                presets.contentType = this.type
+            }
+
             if (arguments.length < 2) {
                 options = attributes;
                 attributes = undefined;
             }
 
-            options = _.defaults(presets, options);
-
-            if (this.method) {
-                options.type  = this.method;
-            }
-
-            if (this.type) {
-                options.contentType = this.type
-            }
+            options = _.extend(presets, options);
 
             if (attributes) {
                 attributes = _.extend(parent.getAllByAction(this.name), attributes);
@@ -363,7 +363,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      * @return {Object}
      */
     function getAllByAction(actionName, asJson) {
-        var values = {}
+        var values
         , action = this.getActionByName(actionName)
         , self = this;
 

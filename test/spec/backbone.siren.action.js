@@ -48,7 +48,7 @@ describe('Siren Action: ', function () {
 
             // Defaults
             jqXhr = myBbSirenModel.getActionByName('add-item').execute();
-            expect($.ajax).toHaveBeenCalledWith(sinon.match({url: 'http://api.x.io/orders/42/items', type: 'FANCY', contentType: 'application/x-fancy-stuff', patch: true, validate: true}));
+            expect($.ajax).toHaveBeenCalledWith(sinon.match({url: 'http://api.x.io/orders/42/items', type: 'FANCY', contentType: 'application/x-fancy-stuff', validate: true}));
 
             $.ajax.reset();
 
