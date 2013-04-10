@@ -21,7 +21,9 @@
         var formView;
 
         // set the pattern library
-        Backbone.Siren.validate.setPatterns(patternLibrary);
+        if (Backbone.Siren.validate) {
+            Backbone.Siren.validate.setPatterns(patternLibrary);
+        }
 
         $.getJSON(sirenUrl, function (results) {
             settings = new Backbone.Siren.Model(results);
