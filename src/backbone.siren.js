@@ -102,7 +102,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             }
 
             if (this.type) {
-                presets.contentType = this.type
+                presets.contentType = this.type;
             }
 
             options = _.extend(presets, options);
@@ -511,10 +511,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                                 ? val.toJSON({actionName: field.action})
                                 : val;
                         });
-                    } else {
-                        // @todo
                     }
-
                 } else {
                     _.each(this.attributes, function (val, name) {
                         json[name] = (val instanceof Backbone.Siren.Model) || (val instanceof Backbone.Siren.Collection)
