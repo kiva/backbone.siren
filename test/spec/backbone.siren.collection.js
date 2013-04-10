@@ -95,17 +95,17 @@ describe('Siren Collection: ', function () {
     });
 
 
-    describe('.rel()', function () {
-        it('returns a collection\'s rel', function () {
+    describe('.name()', function () {
+        it('returns a collection\'s name', function () {
             var mySirenCollection = new Backbone.Siren.Collection({rel:["http://x.io/rels/order-items"]});
-            expect(mySirenCollection.rel()).toBe('order-items');
+            expect(mySirenCollection.name()).toBe('order-items');
         });
 
 
-        it('returns undefined if there is no rel', function () {
+        it('returns undefined if there is no name', function () {
             var mySirenCollection = new Backbone.Siren.Collection({});
 
-            expect(mySirenCollection.rel()).not.toBeDefined();
+            expect(mySirenCollection.name()).not.toBeDefined();
         });
     });
 

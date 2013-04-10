@@ -96,18 +96,18 @@ describe('Siren Model: ', function () {
     });
 
 
-    describe('.rel()', function () {
-        it('returns a model\'s rel', function () {
+    describe('.name()', function () {
+        it('returns a model\'s name', function () {
             var mySirenModel = new Backbone.Siren.Model({rel:["http://x.io/rels/order-items"]});
 
-            expect(mySirenModel.rel()).toBe('order-items');
+            expect(mySirenModel.name()).toBe('order-items');
         });
 
 
-        it('returns undefined if there is no rel', function () {
+        it('returns undefined if there is no name', function () {
             var mySirenModel = new Backbone.Siren.Model({});
 
-            expect(mySirenModel.rel()).not.toBeDefined();
+            expect(mySirenModel.name()).not.toBeDefined();
         });
     });
 

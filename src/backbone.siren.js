@@ -210,7 +210,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         }
 
         if (filters.rel) {
-            _hasProperties = bbSiren.rel() == filters.rel;
+            _hasProperties = bbSiren.hasRel(filters.rel);
         }
 
         return _hasProperties;
@@ -257,6 +257,16 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      */
     function hasClass(className) {
         return _hasClass(this._data, className);
+    }
+
+
+    /**
+     *
+     * @param rel
+     * @return {Boolean}
+     */
+    function hasRel(rel) {
+        return _.indexOf(this.rels(), rel) > -1;
     }
 
 
@@ -310,15 +320,24 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
     /**
      *
+     * @return {Array}
+     */
+    function rels() {
+        return this._data.rel || [];
+    }
+
+
+    /**
+     *
      * @static
      * @param sirenObj
      * @return {String}
      */
-    function getRel(sirenObj) {
+    function getRelAsName(sirenObj) {
         var rel = sirenObj.rel;
 
         if (rel) {
-            rel = rel[0]; // @todo, arbitrarily grabbing the first rel might be bad but I still don't understand the use case for many rels...
+            rel = rel[0];
             rel = rel.slice(rel.lastIndexOf('/') + 1, rel.length);
         }
 
@@ -330,8 +349,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      *
      * @return {String}
      */
-    function rel() {
-        return getRel(this._data);
+    function name() {
+        return this._data.name || getRelAsName(this._data);
     }
 
 
@@ -442,7 +461,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             url: url
             , classes: classes
             , hasClass: hasClass
-            , rel: rel
+            , hasRel: hasRel
+            , rels: rels
             , title: title
             , actions: actions
             , links: links
@@ -450,6 +470,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , getAllByAction: getAllByAction
             , parseActions: parseActions
             , request: request
+            , name: name
 
 
             /**
@@ -583,7 +604,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
              */
             , setEntity: function (entity) {
                 var bbSiren = this.parseEntity(entity)
-                , rel = bbSiren.rel();
+                , rel = bbSiren.name();
 
                 this.set(rel, bbSiren);
                 this._entities.push(rel);
@@ -612,14 +633,16 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             url: url
             , classes: classes
             , hasClass: hasClass
+            , hasRel: hasRel
             , title: title
-            , rel: rel
+            , rels: rels
             , links: links
             , actions: actions
             , getActionByName: getActionByName
             , getAllByAction: getAllByAction
             , parseActions: parseActions
             , request: request
+            , name: name
 
 
             /**
