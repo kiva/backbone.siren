@@ -489,11 +489,14 @@ Backbone.Siren = (function (_, Backbone, undefined) {
              * @param {Object} options
              */
             , toJSON: function () {
-                var json = _.clone(this.attributes)
-                , entities = this.entities();
+                var json = {};
 
-                _.each(entities, function (entity) {
-                    json[entity.rel()] = entity;
+                _.each(this.attributes, function (val, name) {
+                    if (val instanceof Backbone.Siren.Model) {
+                        json[name] = val.toJSON();
+                    } else {
+                        json[name] = val;
+                    }
                 });
 
                 return json;
