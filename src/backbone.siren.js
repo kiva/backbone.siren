@@ -82,12 +82,12 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
         /**
          *
-         * @param {Object} [attributes] Overrides model attributes or sets attributes that don't exist on the model
-         * @param {Object} [options] Sets options
+         * @param {Object} options
          * @return {$.Deferred|undefined}
          */
-        , execute: function (attributes, options) {
-            var parent = this.parent
+        , execute: function (options) {
+            var attributes
+            , parent = this.parent
             , presets = {
                 url: this.href
                 , actionName: this.name
@@ -105,14 +105,11 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 presets.contentType = this.type
             }
 
-            if (arguments.length < 2) {
-                options = attributes;
-                attributes = undefined;
-            }
-
             options = _.extend(presets, options);
 
+            attributes = options.attributes;
             if (attributes) {
+                delete options.attributes;
                 attributes = _.extend(parent.getAllByAction(this.name), attributes);
             } else {
                 attributes = parent.getAllByAction(this.name);
@@ -120,7 +117,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
             return parent.save(attributes, options);
         }
-
     };
 
 

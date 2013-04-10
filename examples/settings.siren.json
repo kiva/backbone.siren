@@ -153,6 +153,7 @@
         , { "name": "lastName", "type": "text", "maxlength": 30}
         , { "name": "email", "type": "email"}
         , { "name": "address", "type": "entity", "action": "edit"}
+        , { "name": "extra", "type": "number"}
     ]
     }
 ]
