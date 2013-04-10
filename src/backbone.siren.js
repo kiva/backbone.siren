@@ -492,11 +492,9 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 var json = {};
 
                 _.each(this.attributes, function (val, name) {
-                    if (val instanceof Backbone.Siren.Model) {
-                        json[name] = val.toJSON();
-                    } else {
-                        json[name] = val;
-                    }
+                    json[name] = val instanceof Backbone.Siren.Model
+                        ? val.toJSON()
+                        : val
                 });
 
                 return json;
