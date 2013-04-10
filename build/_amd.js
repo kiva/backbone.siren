@@ -1,4 +1,4 @@
-define(['jquery', '.', 'backbone'], function ($, _, Backbone) {
+define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
 
     //= _core.js
 
