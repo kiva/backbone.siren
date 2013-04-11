@@ -571,8 +571,12 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , fetchEntity: function (entity) {
                 var self = this;
 
-                return $.getJSON(getUrl(entity), function (resolvedEntity) {
-                    self.setEntity(resolvedEntity);
+                return Backbone.ajax({
+                    url: getUrl(entity)
+                    , dataType: 'json'
+                    , success: function (resolvedEntity) {
+                        self.setEntity(resolvedEntity);
+                    }
                 });
             }
 
