@@ -334,14 +334,17 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      * @return {String}
      */
     function getRelAsName(sirenObj) {
-        var rel = sirenObj.rel;
+        var name
+        , regex = /name:(.*)/
+        , relName = _.find(sirenObj.rel, function(i) {return regex.test(i);});
 
-        if (rel) {
-            rel = rel[0];
-            rel = rel.slice(rel.lastIndexOf('/') + 1, rel.length);
+        if(relName) {
+          name = _.last(regex.exec(relName));
+        } else {
+          warn('entity does not have a "name:" rel', sirenObj);
         }
 
-        return rel;
+        return name;
     }
 
 

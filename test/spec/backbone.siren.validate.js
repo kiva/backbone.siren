@@ -161,7 +161,7 @@ describe('Siren Validate: ', function () {
             var entitiesObject = {entities:
                     [{
                         properties: {cat: 'smelly'}
-                        , rel: ['pet']
+                        , rel: ['name:pet']
                         , links: [
                             {rel: ['self'], href: 'http://someurl'}
                         ]
