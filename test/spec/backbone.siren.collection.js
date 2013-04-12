@@ -97,7 +97,7 @@ describe('Siren Collection: ', function () {
 
     describe('.name()', function () {
         it('returns a collection\'s name', function () {
-            var mySirenCollection = new Backbone.Siren.Collection({rel:["http://x.io/rels/order-items"]});
+            var mySirenCollection = new Backbone.Siren.Collection({rel:["name:order-items"]});
             expect(mySirenCollection.name()).toBe('order-items');
         });
 
