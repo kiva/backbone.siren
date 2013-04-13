@@ -96,9 +96,20 @@ describe('Siren Collection: ', function () {
 
 
     describe('.name()', function () {
-        it('returns a collection\'s name', function () {
-            var mySirenCollection = new Backbone.Siren.Collection({rel:["name:order-items"]});
-            expect(mySirenCollection.name()).toBe('order-items');
+        it('returns a collection\'s name, using the "name" property if there is one', function () {
+            var mySirenCollection = new Backbone.Siren.Collection({name: "order-item", rel:["name:this-name-is-not-used", "jolly-rancher", "laffy-taffy"]});
+            expect(mySirenCollection.name()).toBe('order-item');
+
+            // We're not picky
+            mySirenCollection = new Backbone.Siren.Model({name: '   '});
+            expect(mySirenCollection.name()).toBe('   ');
+        });
+
+
+        it('returns a collection\'s name, using the rel name value of the rel array if there is no "name" property', function () {
+            var mySirenCollection = new Backbone.Siren.Model({rel:["name:order-item", "jolly-rancher", "laffy-taffy"]});
+
+            expect(mySirenCollection.name()).toBe('order-item');
         });
 
 

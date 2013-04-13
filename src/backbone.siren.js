@@ -334,17 +334,14 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      * @return {String}
      */
     function getRelAsName(sirenObj) {
-        var name
-        , regex = /name:(.*)/
-        , relName = _.find(sirenObj.rel, function(i) {return regex.test(i);});
+        var name;
 
-        if(relName) {
-          name = _.last(regex.exec(relName));
-        } else {
-          warn('entity does not have a "name:" rel', sirenObj);
-        }
+        _.find(sirenObj.rel, function(rel) {
+            name = /name:(.*)/.exec(rel);
+            return name;
+        });
 
-        return name;
+        return _.last(name);
     }
 
 
@@ -569,7 +566,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
             /**
              *
-             * @todo add .fetch() (aka .update()) method for each individual entity. (may already exist?)
              * @param {Object} entity
              */
             , fetchEntity: function (entity) {
@@ -614,11 +610,10 @@ Backbone.Siren = (function (_, Backbone, undefined) {
              */
             , setEntity: function (entity) {
                 var bbSiren = this.parseEntity(entity)
-                , rel = bbSiren.name();
+                , name = bbSiren.name();
 
-                this.set(rel, bbSiren);
-                this._entities.push(rel);
-
+                this.set(name, bbSiren);
+                this._entities.push(name);
                 return bbSiren;
             }
 

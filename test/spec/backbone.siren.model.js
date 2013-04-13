@@ -97,16 +97,27 @@ describe('Siren Model: ', function () {
 
 
     describe('.name()', function () {
-        it('returns a model\'s name', function () {
-            var mySirenModel = new Backbone.Siren.Model({rel:["name:order-items"]});
+        it('returns a model\'s name, using the "name" property if there is one', function () {
+            var mySirenModel = new Backbone.Siren.Model({name: "order-item", rel:["name:this-name-is-not-used", "jolly-rancher", "laffy-taffy"]});
+            expect(mySirenModel.name()).toBe('order-item');
 
-            expect(mySirenModel.name()).toBe('order-items');
+            // We're not picky
+            mySirenModel = new Backbone.Siren.Model({name: '   '});
+            expect(mySirenModel.name()).toBe('   ');
+        });
+
+
+        it('returns a model\'s name, using the rel name value of the rel array if there is no "name" property', function () {
+            var mySirenModel = new Backbone.Siren.Model({rel:["name:order-item", "jolly-rancher", "laffy-taffy"]});
+
+            expect(mySirenModel.name()).toBe('order-item');
         });
 
 
         it('returns undefined if there is no name', function () {
-            var mySirenModel = new Backbone.Siren.Model({});
+            var mySirenModel;
 
+            mySirenModel = new Backbone.Siren.Model({});
             expect(mySirenModel.name()).not.toBeDefined();
         });
     });
