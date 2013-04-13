@@ -601,7 +601,12 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                     warn('@todo - errors');
                 } else {
                     bbSiren = new Backbone.Siren.Model(entity);
-                    store.add(bbSiren);
+
+                    // Only store if we have the complete entity
+                    // According to the spec, linked entities have an href, nested entities have a "self" link.
+                    if (entity.links && !entity.href) {
+                        store.add(bbSiren);
+                    }
                 }
 
                 return bbSiren;
