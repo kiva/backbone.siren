@@ -569,6 +569,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
             /**
              *
+             * @todo add .fetch() (aka .update()) method for each individual entity. (may already exist?)
              * @param {Object} entity
              */
             , fetchEntity: function (entity) {
@@ -578,6 +579,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                     url: getUrl(entity)
                     , dataType: 'json'
                     , success: function (resolvedEntity) {
+                        resolvedEntity.rel = entity.rel;
+                        resolvedEntity.name = entity.name;
                         self.setEntity(resolvedEntity);
                     }
                 });
