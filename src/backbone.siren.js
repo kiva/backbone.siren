@@ -576,7 +576,11 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                     , dataType: 'json'
                     , success: function (resolvedEntity) {
                         resolvedEntity.rel = entity.rel;
-                        resolvedEntity.name = entity.name;
+
+                        if (entity.name) {
+                            resolvedEntity.name = entity.name;
+                        }
+
                         self.setEntity(resolvedEntity);
                     }
                 });
