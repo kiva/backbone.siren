@@ -653,8 +653,11 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 var bbSiren = Backbone.Siren.parseEntity(entity)
                 , name = bbSiren.name();
 
-                this.set(name, bbSiren);
-                this._entities.push(name);
+                if (name) {
+                    this.set(name, bbSiren);
+                    this._entities.push(name);
+                }
+
                 return bbSiren;
             }
 

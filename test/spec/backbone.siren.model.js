@@ -222,6 +222,23 @@ describe('Siren Model: ', function () {
     });
 
 
+    describe('.setEntity', function () {
+
+        it ('sets a raw Siren object as a model on the parent entity', function () {
+            sirenModel.setEntity({properties: {one: 'uno'}, name: 'testEntity'});
+
+            expect(sirenModel.get('testEntity')).toBeDefined();
+        });
+
+
+        it ('does not set the model if the sub-entity does not have a "name"', function () {
+            sirenModel.setEntity({properties: {one: 'uno'}});
+
+            expect(sirenModel.get('testEntity')).not.toBeDefined();
+        });
+    });
+
+
     it('sets a Backbone Model\'s "attributes" hash to the siren "properties"', function () {
         expect(sirenModel.attributes).toMatch(settingsModelSiren.properties);
     });
