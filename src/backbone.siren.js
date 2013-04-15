@@ -560,9 +560,9 @@ Backbone.Siren = (function (_, Backbone, undefined) {
              */
             , resolveEntity: function (entity, options) {
                 if ((entity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
-                    return self.fetchEntity(entity, options);
+                    return this.fetchEntity(entity, options);
                 } else {
-                    return self.setEntity(entity, options);
+                    return this.setEntity(entity, options);
                 }
             }
 
