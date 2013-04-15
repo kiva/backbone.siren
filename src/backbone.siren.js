@@ -23,13 +23,18 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         }
 
 
+        , get: function (modelOrUrl) {
+            return _store[typeof modelOrUrl == 'object'? modelOrUrl.url() : modelOrUrl];
+        }
+
+
         /**
          *
          * @param {Backbone.Siren.Model} model
          * @return {Boolean}
          */
-        , exists: function (model) {
-            return !!_store[model.url()];
+        , exists: function (modelOrUrl) {
+            return !!this.get(modelOrUrl);
         }
 
 
@@ -39,6 +44,11 @@ Backbone.Siren = (function (_, Backbone, undefined) {
          */
         , all: function () {
             return _store;
+        }
+
+
+        , clear: function () {
+            _store = {};
         }
     }
 
@@ -306,13 +316,12 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      * @return {Array} An array of jqXhr objects.
      */
     function request(rel) {
-        var self = this
-        , requests = []
+        var requests = []
         , links = this.links(rel);
 
         _.each(links, function (link) {
             requests.push($.getJSON(link.href, function (sirenResponse) {
-                self.parseEntity(sirenResponse);
+                Backbone.Siren.parseEntity(sirenResponse);
             }));
         });
 
@@ -458,6 +467,32 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         , Action: Action
 
 
+        /**
+         *
+         * @param {Object} entity
+         */
+        , parseEntity: function (entity) {
+            var bbSiren;
+
+            if (_hasClass(entity, 'collection')) {
+                bbSiren = new Backbone.Siren.Collection(entity);
+            } else if (_hasClass(entity, 'error')) {
+                // @todo how should we represent errors?
+                warn('@todo - errors');
+            } else {
+                bbSiren = new Backbone.Siren.Model(entity);
+
+                // Only store if we have the complete entity
+                // According to the spec, linked entities have an href, nested entities have a "self" link.
+                if (entity.links && !entity.href) {
+                    store.add(bbSiren);
+                }
+            }
+
+            return bbSiren;
+        }
+
+
         , Model: Backbone.Model.extend({
 
             url: url
@@ -593,34 +628,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
              *
              * @param {Object} entity
              */
-            , parseEntity: function (entity) {
-                var bbSiren;
-
-                if (_hasClass(entity, 'collection')) {
-                    bbSiren = new Backbone.Siren.Collection(entity);
-                } else if (_hasClass(entity, 'error')) {
-                    // @todo how should we represent errors?
-                    warn('@todo - errors');
-                } else {
-                    bbSiren = new Backbone.Siren.Model(entity);
-
-                    // Only store if we have the complete entity
-                    // According to the spec, linked entities have an href, nested entities have a "self" link.
-                    if (entity.links && !entity.href) {
-                        store.add(bbSiren);
-                    }
-                }
-
-                return bbSiren;
-            }
-
-
-            /**
-             *
-             * @param {Object} entity
-             */
             , setEntity: function (entity) {
-                var bbSiren = this.parseEntity(entity)
+                var bbSiren = Backbone.Siren.parseEntity(entity)
                 , name = bbSiren.name();
 
                 this.set(name, bbSiren);
