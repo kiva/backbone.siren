@@ -299,6 +299,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
 
     /**
+     * @todo remove this? It assumes you want to fetch a link,
+     * however, the link maybe be to an image, or other resource that we don't need to request, but rather just link to.
      *
      * @param {String} rel
      * @return {Array} An array of jqXhr objects.
