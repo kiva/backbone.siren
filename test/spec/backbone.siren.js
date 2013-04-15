@@ -27,4 +27,14 @@ describe('Backbone.Siren: ', function () {
         });
     });
 
+
+    describe('.fetchEntity', function () {
+
+        it('wraps Backbone.ajax', function () {
+            this.stub(Backbone, 'ajax');
+
+            Backbone.Siren.fetchEntity({href: 'http://test'});
+            expect(Backbone.ajax).toHaveBeenCalled();
+        });
+    });
 });

@@ -363,10 +363,21 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
     /**
      *
+     * @static
+     * @param sirenObj
+     * @return {String}
+     */
+    function getName (sirenObj) {
+        return sirenObj.name || getRelAsName(sirenObj);
+    }
+
+
+    /**
+     *
      * @return {String}
      */
     function name() {
-        return this._data.name || getRelAsName(this._data);
+        return getName(this._data);
     }
 
 
@@ -498,6 +509,14 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         }
 
 
+        , fetchEntity: function (entity) {
+            return Backbone.ajax({
+                url: getUrl(entity)
+                , dataType: 'json'
+            });
+        }
+
+
         , Model: Backbone.Model.extend({
 
             url: url
@@ -613,10 +632,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , fetchEntity: function (entity) {
                 var self = this;
 
-                return Backbone.ajax({
-                    url: getUrl(entity)
-                    , dataType: 'json'
-                    , success: function (resolvedEntity) {
+                Backbone.Siren.fetchEntity(entity)
+                    .done(function (resolvedEntity) {
                         resolvedEntity.rel = entity.rel;
 
                         if (entity.name) {
@@ -624,8 +641,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                         }
 
                         self.setEntity(resolvedEntity);
-                    }
-                });
+                    });
             }
 
 
