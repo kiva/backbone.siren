@@ -23,18 +23,23 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         }
 
 
-        , get: function (modelOrUrl) {
-            return _store[typeof modelOrUrl == 'object'? modelOrUrl.url() : modelOrUrl];
+        /**
+         *
+         * @param {String}
+         * @return {Backbone.Siren.Model}
+         */
+        , get: function (url) {
+            return _store[url];
         }
 
 
         /**
          *
-         * @param {Backbone.Siren.Model} model
+         * @param {Backbone.Siren.Model|String} model
          * @return {Boolean}
          */
         , exists: function (modelOrUrl) {
-            return !!this.get(modelOrUrl);
+            return !!this.get(typeof modelOrUrl == 'object'? modelOrUrl.url() : modelOrUrl);
         }
 
 
