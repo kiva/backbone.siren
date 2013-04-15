@@ -544,16 +544,26 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 , resolvedEntities = [];
 
                 _.each(this._data.entities, function(entity) {
-                    if ((entity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
-                        resolvedEntities.push(self.fetchEntity(entity, options));
-                    } else {
-                        resolvedEntities.push(self.setEntity(entity, options));
-                    }
+                    resolvedEntities.push(self.resolveEntity(entity, options));
                 });
 
                 return $.when(resolvedEntities).done(function () {
                     self.trigger('resolve', self);
                 });
+            }
+
+
+            /**
+             *
+             * @param {Object} entity
+             * @param {Object} options
+             */
+            , resolveEntity: function (entity, options) {
+                if ((entity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
+                    return self.fetchEntity(entity, options);
+                } else {
+                    return self.setEntity(entity, options);
+                }
             }
 
 
