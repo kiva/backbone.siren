@@ -602,6 +602,16 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
 
             /**
+             *
+             * @params {Array} names
+             * @returns {$.Deferred}
+             */
+            , resolveChain: function (names) {
+                return this.resolveEntity(this.get(names.shift())).resolveChain(names);
+            }
+
+
+            /**
              * http://backbonejs.org/#Model-parse
              *
              * @param {Object} sirenObj
