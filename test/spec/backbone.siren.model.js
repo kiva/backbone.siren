@@ -9,6 +9,7 @@ describe('Siren Model: ', function () {
 
 
     beforeEach(function () {
+        Backbone.Siren.store.clear();
         sirenModel = new Backbone.Siren.Model(settingsModelSiren);
     });
 
@@ -218,6 +219,62 @@ describe('Siren Model: ', function () {
             sirenModel._data.actions[0].name = temp;
 
             expect(warnStub).toHaveBeenCalled();
+        });
+    });
+
+
+    describe('.resolveEntity', function () {
+
+        it ('returns the bbSiren object wrapped in a Deferred object', function () {
+            var subEntity = {href: 'http://test.com', name: 'mySubEntity'}
+            , deferredEntity = sirenModel.resolveEntity(subEntity);
+
+            deferredEntity.done(function (bbSiren) {
+                console.log(bbSiren);
+                expect(bbSiren.name()).toEqual(subEntity.name);
+                expect(bbSiren.url()).toEqual(subEntity.href);
+            });
+        });
+
+
+        it('returns the bbSiren object from the store if it\'s already cached', function () {
+            this.stub($, 'ajax').returns(new $.Deferred().promise());
+
+            var subEntity = {
+                name: 'testEntity'
+                , links: [
+                    {rel: [self], href: 'http://boston.com'}
+                ]
+            };
+
+            sirenModel.resolveEntity(subEntity);
+
+            $.ajax.reset();
+            sirenModel.resolveEntity(subEntity, {autoFetch: 'all'});
+            expect($.ajax).not.toHaveBeenCalled();
+        });
+
+
+        it('returns the bbSiren object from the store if it\'s already cached plus sets it on the parent if it\'s not already there', function () {
+            this.stub($, 'ajax').returns(new $.Deferred().promise());
+
+            var subEntity = {
+                name: 'testEntity'
+                , links: [
+                    {rel: [self], href: 'http://boston.com'}
+                ]
+            };
+
+            sirenModel.resolveEntity(subEntity);
+
+            // Remove the entities name from the _entities array
+            sirenModel.unset(subEntity.name);
+            expect(sirenModel.get(subEntity.name)).not.toBeDefined();
+
+
+            // Resolving again should add the entity name back in
+            sirenModel.resolveEntity(subEntity, {autoFetch: 'all'});
+            expect(sirenModel.get(subEntity.name)).toBeDefined();
         });
     });
 

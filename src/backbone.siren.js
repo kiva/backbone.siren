@@ -484,8 +484,10 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
 
         /**
+         * Creates a Backbone.Siren model, collection, or error from a Siren object, then saves it to the store
          *
          * @param {Object} entity
+         * @returns {Backbone.Siren.Model|Backbone.Siren.Collection|Backbone.Siren.Error}
          */
         , parseEntity: function (entity) {
             var bbSiren;
@@ -554,16 +556,47 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
 
             /**
+             * @todo this is a mess
              *
              * @param {Object} entity
              * @param {Object} options
+             * @returns {$.Deferred}
              */
             , resolveEntity: function (entity, options) {
-                if ((entity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
-                    return this.fetchEntity(entity, options);
+                options = options || {};
+
+                var bbSiren, bbSirenPromise
+                , deferred = new $.Deferred();
+
+                if (options.forceFetch) {
+                    if ((entity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
+                        bbSirenPromise = this.fetchEntity(entity, options).done(function (resolvedEntity) {
+                            bbSirenPromise.resolve(resolvedEntity);
+                        });
+                    } else {
+                        bbSirenPromise = deferred.resolve(this.setEntity(entity));
+                    }
                 } else {
-                    return this.setEntity(entity, options);
+                    bbSiren = store.get(entity);
+                    if (!bbSiren) {
+                        if ((entity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
+                            bbSirenPromise = this.fetchEntity(entity, options).done(function (resolvedEntity) {
+                                bbSirenPromise.resolve(resolvedEntity);
+                            });
+                        } else {
+                            bbSirenPromise = deferred.resolve(this.setEntity(entity));
+                        }
+                    } else {
+                        // It may exist in the store but not yet exist on the bbSiren object
+                        if (this.get(bbSiren.name())) {
+                            bbSirenPromise = deferred.resolve(bbSiren);
+                        } else {
+                            bbSirenPromise = deferred.resolve(this.setEntity(entity));
+                        }
+                    }
                 }
+
+                return bbSirenPromise;
             }
 
 
@@ -642,7 +675,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , fetchEntity: function (entity) {
                 var self = this;
 
-                Backbone.Siren.fetchEntity(entity)
+                return Backbone.Siren.fetchEntity(entity)
                     .done(function (resolvedEntity) {
                         resolvedEntity.rel = entity.rel;
 
@@ -658,6 +691,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             /**
              *
              * @param {Object} entity
+             * @return {Backbone.Siren.Model|Backbone.Siren.Collection|Backbone.Model.Error}
              */
             , setEntity: function (entity) {
                 var bbSiren = Backbone.Siren.parseEntity(entity)
