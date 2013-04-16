@@ -29,7 +29,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
          * @return {Backbone.Siren.Model}
          */
         , get: function (sirenObjOrUrl) {
-            return this.get(typeof sirenObjOrUrl == 'object'? getUrl(sirenObjOrUrl): sirenObjOrUrl);
+            return _store[typeof sirenObjOrUrl == 'object'? getUrl(sirenObjOrUrl): sirenObjOrUrl];
         }
 
 
