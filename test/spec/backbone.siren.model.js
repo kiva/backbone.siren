@@ -230,7 +230,6 @@ describe('Siren Model: ', function () {
             , deferredEntity = sirenModel.resolveEntity(subEntity);
 
             deferredEntity.done(function (bbSiren) {
-                console.log(bbSiren);
                 expect(bbSiren.name()).toEqual(subEntity.name);
                 expect(bbSiren.url()).toEqual(subEntity.href);
             });
@@ -243,7 +242,7 @@ describe('Siren Model: ', function () {
             var subEntity = {
                 name: 'testEntity'
                 , links: [
-                    {rel: [self], href: 'http://boston.com'}
+                    {rel: ['self'], href: 'http://boston.com'}
                 ]
             };
 
@@ -261,7 +260,7 @@ describe('Siren Model: ', function () {
             var subEntity = {
                 name: 'testEntity'
                 , links: [
-                    {rel: [self], href: 'http://boston.com'}
+                    {rel: ['self'], href: 'http://boston.com'}
                 ]
             };
 

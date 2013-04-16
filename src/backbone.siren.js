@@ -569,6 +569,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 , deferred = new $.Deferred();
 
                 if (options.forceFetch) {
+                    // @todo haven't actually tested this yet
                     if ((entity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
                         bbSirenPromise = this.fetchEntity(entity, options).done(function (resolvedEntity) {
                             bbSirenPromise.resolve(resolvedEntity);
