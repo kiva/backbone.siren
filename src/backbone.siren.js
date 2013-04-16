@@ -25,21 +25,21 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
         /**
          *
-         * @param {String}
+         * @param {String} sirenObjOrUrl
          * @return {Backbone.Siren.Model}
          */
-        , get: function (url) {
-            return _store[url];
+        , get: function (sirenObjOrUrl) {
+            return this.get(typeof sirenObjOrUrl == 'object'? getUrl(sirenObjOrUrl): sirenObjOrUrl);
         }
 
 
         /**
          *
-         * @param {Backbone.Siren.Model|String} model
+         * @param {Backbone.Siren.Model|Object|String} ModelOrSirenObjOrUrl
          * @return {Boolean}
          */
-        , exists: function (modelOrUrl) {
-            return !!this.get(typeof modelOrUrl == 'object'? modelOrUrl.url() : modelOrUrl);
+        , exists: function (ModelOrSirenObjOrUrl) {
+            return !!this.get((ModelOrSirenObjOrUrl instanceof Backbone.Siren.Model) ? ModelOrSirenObjOrUrl.url() : ModelOrSirenObjOrUrl);
         }
 
 
