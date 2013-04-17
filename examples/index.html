@@ -25,8 +25,10 @@
             Backbone.Siren.validate.setPatterns(patternLibrary);
         }
 
-        $.getJSON(sirenUrl, function (results) {
-            settings = new Backbone.Siren.Model(results);
+        Backbone.Siren.resolve(sirenUrl).done(function (bbSiren) {
+//        $.getJSON(sirenUrl, function (results) {
+//            settings = new Backbone.Siren.Model(results);
+            settings = bbSiren;
 
             var action = settings.getActionByName('edit-lender');
             var data = {
@@ -52,9 +54,9 @@
             $('.wrap').html(formView.$el);
         });
 
-        $.getJSON(alpsUrl, function (results) {
-            alps = new Backbone.Siren.Model(results);
-        });
+//        $.getJSON(alpsUrl, function (results) {
+//            alps = new Backbone.Siren.Model(results);
+//        });
 
     </script>
 </body>

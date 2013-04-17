@@ -367,7 +367,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      * @param sirenObj
      * @return {String}
      */
-    function getName (sirenObj) {
+    function getName(sirenObj) {
         return sirenObj.name || getRelAsName(sirenObj);
     }
 
@@ -473,6 +473,15 @@ Backbone.Siren = (function (_, Backbone, undefined) {
     }
 
 
+    function parseChain(chain) {
+        if (typeof chain == 'string') {
+            chain.replace(/^#/, '').split('#');
+        }
+
+        return chain;
+    }
+
+
     return {
         settings: {
             showWarnings: true
@@ -489,7 +498,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
          * @param {Object} entity
          * @returns {Backbone.Siren.Model|Backbone.Siren.Collection|Backbone.Siren.Error}
          */
-        , parseEntity: function (entity) {
+        , parse: function (entity) {
             var bbSiren;
 
             if (_hasClass(entity, 'collection')) {
@@ -511,11 +520,36 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         }
 
 
-        , fetchEntity: function (entity) {
-            return Backbone.ajax({
-                url: getUrl(entity)
-                , dataType: 'json'
-            });
+        /**
+         *
+         * @param {String} url
+         */
+        , ajax: function (url, options) {
+            options = _.extend({url: url, dataType: 'json'}, options);
+            return Backbone.ajax(options);
+        }
+
+
+        /**
+         *
+         * @param {String} url
+         * @param {Object} options
+         */
+        , resolve: function (url, options) {
+            options = options || {};
+
+            var bbSiren
+            , deferred = new $.Deferred();
+
+            if (options.forceFetch || !(bbSiren = store.get(url))) {
+                Backbone.Siren.ajax(url, options).done(function (entity) {
+                    deferred.resolve(Backbone.Siren.parse(entity));
+                });
+            } else {
+                deferred.resolve(bbSiren);
+            }
+
+            return deferred;
         }
 
 
@@ -565,36 +599,23 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , resolveEntity: function (entity, options) {
                 options = options || {};
 
-                var bbSiren, bbSirenPromise
+                var bbSirenPromise
+                , self = this
                 , deferred = new $.Deferred();
 
-                if (options.forceFetch) {
-                    // @todo haven't actually tested this yet
-                    if ((entity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
-                        bbSirenPromise = this.fetchEntity(entity, options).done(function (resolvedEntity) {
-                            bbSirenPromise.resolve(resolvedEntity);
+                if ((entity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
+                    Backbone.Siren.resolve(getUrl(entity), options)
+                        .done(function (bbSiren) {
+                            bbSiren._data.rel = entity.rel;
+
+                            if (entity.name) {
+                                bbSiren._data.name = entity.name;
+                            }
+
+                            deferred.resolve(self.setEntity(bbSiren));
                         });
-                    } else {
-                        bbSirenPromise = deferred.resolve(this.setEntity(entity));
-                    }
                 } else {
-                    bbSiren = store.get(entity);
-                    if (!bbSiren) {
-                        if ((entity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
-                            bbSirenPromise = this.fetchEntity(entity, options).done(function (resolvedEntity) {
-                                bbSirenPromise.resolve(resolvedEntity);
-                            });
-                        } else {
-                            bbSirenPromise = deferred.resolve(this.setEntity(entity));
-                        }
-                    } else {
-                        // It may exist in the store but not yet exist on the bbSiren object
-                        if (this.get(bbSiren.name())) {
-                            bbSirenPromise = deferred.resolve(bbSiren);
-                        } else {
-                            bbSirenPromise = deferred.resolve(this.setEntity(entity));
-                        }
-                    }
+                    bbSirenPromise = deferred.resolve(this.setEntity(entity));
                 }
 
                 return bbSirenPromise;
@@ -603,11 +624,45 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
             /**
              *
-             * @params {Array} names
+             * @param {Object} entity
+             * @return {Backbone.Siren.Model|Backbone.Siren.Collection|Backbone.Model.Error}
+             */
+            , setEntity: function (entity) {
+                var bbSiren = typeof entity.initialize == 'function' // hacky BBSiren detection
+                        ? entity
+                        : Backbone.Siren.parse(entity)
+                , name = bbSiren.name();
+
+                if (name) {
+                    this.set(name, bbSiren);
+                    this._entities.push(name);
+                }
+
+                return bbSiren;
+            }
+
+
+            /**
+             *
+             * @params {Array} chain
              * @returns {$.Deferred}
              */
-            , resolveChain: function (names) {
-                return this.resolveEntity(this.get(names.shift())).resolveChain(names);
+            , resolveChain: function (chain) {
+                chain = parseChain();
+
+                return this.resolveEntity(this.get(chain.shift()))
+                    .then(
+                        // Success...
+                        function (bbSiren) {
+                            bbSiren.resolveChain(chain);
+                        }
+
+                        // Failure...
+                        , function (data) {
+                            // @TODO - failure
+                            warn(data, chain);
+                        }
+                    );
             }
 
 
@@ -676,44 +731,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 }
 
                 return entities;
-            }
-
-
-            /**
-             *
-             * @param {Object} entity
-             */
-            , fetchEntity: function (entity) {
-                var self = this;
-
-                return Backbone.Siren.fetchEntity(entity)
-                    .done(function (resolvedEntity) {
-                        resolvedEntity.rel = entity.rel;
-
-                        if (entity.name) {
-                            resolvedEntity.name = entity.name;
-                        }
-
-                        self.setEntity(resolvedEntity);
-                    });
-            }
-
-
-            /**
-             *
-             * @param {Object} entity
-             * @return {Backbone.Siren.Model|Backbone.Siren.Collection|Backbone.Model.Error}
-             */
-            , setEntity: function (entity) {
-                var bbSiren = Backbone.Siren.parseEntity(entity)
-                , name = bbSiren.name();
-
-                if (name) {
-                    this.set(name, bbSiren);
-                    this._entities.push(name);
-                }
-
-                return bbSiren;
             }
 
 
