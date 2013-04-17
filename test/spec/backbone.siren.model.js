@@ -97,29 +97,11 @@ describe('Siren Model: ', function () {
     });
 
 
-    describe('.name()', function () {
-        it('returns a model\'s name, using the "name" property if there is one', function () {
-            var mySirenModel = new Backbone.Siren.Model({name: "order-item", rel:["name:this-name-is-not-used", "jolly-rancher", "laffy-taffy"]});
-            expect(mySirenModel.name()).toBe('order-item');
+    describe('.entities', function () {
+        // @TODO this a crappy test, revisit once there is a decent .filter() or .find() method
 
-            // We're not picky
-            mySirenModel = new Backbone.Siren.Model({name: '   '});
-            expect(mySirenModel.name()).toBe('   ');
-        });
-
-
-        it('returns a model\'s name, using the rel name value of the rel array if there is no "name" property', function () {
-            var mySirenModel = new Backbone.Siren.Model({rel:["name:order-item", "jolly-rancher", "laffy-taffy"]});
-
-            expect(mySirenModel.name()).toBe('order-item');
-        });
-
-
-        it('returns undefined if there is no name', function () {
-            var mySirenModel;
-
-            mySirenModel = new Backbone.Siren.Model({});
-            expect(mySirenModel.name()).not.toBeDefined();
+        it('returns an array of the model\'s sub-entities', function () {
+            expect(sirenModel.entities().length).toBe(settingsModelSiren.entities.length);
         });
     });
 
@@ -230,7 +212,6 @@ describe('Siren Model: ', function () {
             , deferredEntity = sirenModel.resolveEntity(subEntity);
 
             deferredEntity.done(function (bbSiren) {
-                expect(bbSiren.name()).toEqual(subEntity.name);
                 expect(bbSiren.url()).toEqual(subEntity.href);
             });
         });
@@ -288,7 +269,7 @@ describe('Siren Model: ', function () {
     describe('.setEntity', function () {
 
         it ('sets a raw Siren object as a model on the parent entity', function () {
-            sirenModel.setEntity({properties: {one: 'uno'}, name: 'testEntity'});
+            sirenModel.setEntity(new Backbone.Siren.Model({properties: {one: 'uno'}, name: 'testEntity'}), [], 'testEntity');
 
             expect(sirenModel.get('testEntity')).toBeDefined();
         });

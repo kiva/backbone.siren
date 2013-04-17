@@ -338,8 +338,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      *
      * @return {Array}
      */
-    function rels() {
-        return this._data.rel || [];
+    function getRel(sirenObj) {
+        return sirenObj.rel || [];
     }
 
 
@@ -352,7 +352,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
     function getRelAsName(sirenObj) {
         var name;
 
-        _.find(sirenObj.rel, function(rel) {
+        _.find(getRel(sirenObj), function(rel) {
             name = /name:(.*)/.exec(rel);
             return name;
         });
@@ -369,15 +369,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      */
     function getName(sirenObj) {
         return sirenObj.name || getRelAsName(sirenObj);
-    }
-
-
-    /**
-     *
-     * @return {String}
-     */
-    function name() {
-        return getName(this._data);
     }
 
 
@@ -559,7 +550,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , classes: classes
             , hasClass: hasClass
             , hasRel: hasRel
-            , rels: rels
             , title: title
             , actions: actions
             , links: links
@@ -567,7 +557,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , getAllByAction: getAllByAction
             , parseActions: parseActions
             , request: request
-            , name: name
 
 
             /**
@@ -599,23 +588,18 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , resolveEntity: function (entity, options) {
                 options = options || {};
 
-                var bbSirenPromise
+                var bbSiren, bbSirenPromise
                 , self = this
                 , deferred = new $.Deferred();
 
                 if ((entity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
                     Backbone.Siren.resolve(getUrl(entity), options)
                         .done(function (bbSiren) {
-                            bbSiren._data.rel = entity.rel;
-
-                            if (entity.name) {
-                                bbSiren._data.name = entity.name;
-                            }
-
-                            deferred.resolve(self.setEntity(bbSiren));
+                            deferred.resolve(self.setEntity(bbSiren, getRel(entity), getName(entity)));
                         });
                 } else {
-                    bbSirenPromise = deferred.resolve(this.setEntity(entity));
+                    bbSiren = Backbone.Siren.parse(entity);
+                    bbSirenPromise = deferred.resolve(this.setEntity(bbSiren, getRel(entity), getName(entity)));
                 }
 
                 return bbSirenPromise;
@@ -624,19 +608,22 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
             /**
              *
-             * @param {Object} entity
+             * @param {Backbone.Siren.Model} bbSiren
+             * @param {Array} rel
+             * @param {String} name
              * @return {Backbone.Siren.Model|Backbone.Siren.Collection|Backbone.Model.Error}
              */
-            , setEntity: function (entity) {
-                var bbSiren = typeof entity.initialize == 'function' // hacky BBSiren detection
-                        ? entity
-                        : Backbone.Siren.parse(entity)
-                , name = bbSiren.name();
+            , setEntity: function (bbSiren, rel, name) {
+                var entityItem = {
+                    rel: rel
+                    , entity: bbSiren
+                };
 
                 if (name) {
                     this.set(name, bbSiren);
-                    this._entities.push(name);
+                    entityItem.name = name;
                 }
+                this._entities.push(entityItem);
 
                 return bbSiren;
             }
@@ -721,9 +708,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
              * @return {Array}
              */
             , entities: function (filters) {
-                var self = this
-                , entities = _.filter(this.attributes, function (val, name) {
-                    return _.indexOf(self._entities, name) > -1;
+                var entities = _.map(this._entities, function (entityItem){
+                    return entityItem.entity;
                 });
 
                 if (filters) {
@@ -756,14 +742,12 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , hasClass: hasClass
             , hasRel: hasRel
             , title: title
-            , rels: rels
             , links: links
             , actions: actions
             , getActionByName: getActionByName
             , getAllByAction: getAllByAction
             , parseActions: parseActions
             , request: request
-            , name: name
 
 
             /**
