@@ -499,12 +499,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 warn('@todo - errors');
             } else {
                 bbSiren = new Backbone.Siren.Model(entity);
-
-                // Only store if we have the complete entity
-                // According to the spec, linked entities have an href, nested entities have a "self" link.
-                if (entity.links && !entity.href) {
-                    store.add(bbSiren);
-                }
             }
 
             return bbSiren;
@@ -668,6 +662,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 }
 
                 // @todo funky that we pass in the _data object
+                // @TODO can this all be replaced with a .fetch()?
+                // .fetch() needs to be updated such that it adds results to the store...probably need to modify .parse()
                 this.resolveEntity(this.get(chain.shift())._data)
                     .then(
                         // Success...
@@ -697,6 +693,12 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
                 this.resolveEntities(options);
                 this.parseActions(options);
+
+                // Only store if we have the complete entity
+                // According to the spec, linked entities have an href, nested entities have a "self" link.
+                if (sirenObj.links && !sirenObj.href) {
+                    store.add(this);
+                }
 
                 return sirenObj.properties;
             }
@@ -808,9 +810,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
                 var models = [];
                 _.each(sirenObj.entities, function (entity) {
-                    var model = new Backbone.Siren.Model(entity);
-                    models.push(model);
-                    store.add(model);
+                    models.push(new Backbone.Siren.Model(entity));
                 });
 
                 this.parseActions(options);
