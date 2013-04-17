@@ -37,4 +37,17 @@ describe('Backbone.Siren: ', function () {
             expect(Backbone.ajax).toHaveBeenCalled();
         });
     });
+
+
+    describe('.resolveChain', function () {
+
+        it('//Uses the first chain item as the root url to the chained request', function () {
+            var chainedRequest = Backbone.Siren.resolveChain('http://bbsiren/examples/settings.siren.json');
+
+            chainedRequest.done(function (bbsiren) {
+                console.log('hioijlkkjlkj');
+                console.log(bbsiren);
+            });
+        });
+    });
 });

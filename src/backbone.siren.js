@@ -466,7 +466,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
     function parseChain(chain) {
         if (typeof chain == 'string') {
-            chain.replace(/^#/, '').split('#');
+            chain = chain.replace(/^#/, '').split('#');
         }
 
         return chain;
@@ -539,6 +539,27 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             } else {
                 deferred.resolve(bbSiren);
             }
+
+            return deferred;
+        }
+
+
+        /**
+         *
+         * @param {String|Array}
+         * @returns {$.Deferred}
+         */
+        , resolveChain: function (chain, options) {
+            chain = parseChain(chain);
+
+            // The first item in the chain must be a url
+            var rootUrl = chain.shift()
+            , deferred = new $.Deferred();
+
+            Backbone.Siren.resolve(rootUrl, options)
+                .done(function (bbSiren) {
+                    bbSiren.resolveChain(chain, deferred);
+                });
 
             return deferred;
         }
@@ -632,16 +653,26 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             /**
              *
              * @params {Array} chain
+             * @param {$.Deferred} [deferred]
              * @returns {$.Deferred}
              */
-            , resolveChain: function (chain) {
-                chain = parseChain();
+            , resolveChain: function (chain, deferred) {
+                chain = parseChain(chain);
 
-                return this.resolveEntity(this.get(chain.shift()))
+                if (! deferred) {
+                    deferred = new $.Deferred();
+                }
+
+                if (_.isEmpty(chain)) {
+                    return deferred.resolve(this);
+                }
+
+                // @todo funky that we pass in the _data object
+                this.resolveEntity(this.get(chain.shift())._data)
                     .then(
                         // Success...
                         function (bbSiren) {
-                            bbSiren.resolveChain(chain);
+                            bbSiren.resolveChain(chain, deferred);
                         }
 
                         // Failure...
@@ -650,6 +681,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                             warn(data, chain);
                         }
                     );
+
+                return deferred;
             }
 
 
