@@ -642,6 +642,30 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
 
             /**
+             * Wrapper for .fetch(), adds the following:
+             * 1) Checks the local store
+             * 2) The deferred is resolved with the parsed Siren object
+             */
+            , resolve: function (options) {
+                options = options || {};
+
+                var deferred = new $.Deferred();
+
+                this.once('sync', function (bbSiren) {
+                    deferred.resolve(bbSiren);
+                });
+
+                if (options.forceFetch || (this._data.href && !this._data.links)) {
+                    this.fetch(options);
+                } else {
+                    deferred.resolve(this);
+                }
+
+                return deferred.promise();
+            }
+
+
+            /**
              *
              * @params {Array} chain
              * @param {$.Deferred} [deferred]
@@ -658,10 +682,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                     return deferred.resolve(this);
                 }
 
-                // @todo funky that we pass in the _data object
-                // @TODO can this all be replaced with a .fetch()?
-                // .fetch() needs to be updated such that it adds results to the store...probably need to modify .parse()
-                this.resolveEntity(this.get(chain.shift())._data)
+                this.get(chain.shift()).resolve()
                     .then(
                         // Success...
                         function (bbSiren) {
