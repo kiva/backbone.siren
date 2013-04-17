@@ -11,15 +11,16 @@
     {
         "class": ["test", "trial"]
         , "rel": ["api.kiva.org/rels/address"]
+        , "name": "address"
         , "properties": {
-        "city": "Oakland"
-        , "state": "CA"
-        , "zip": "94602"
-        , "country": "USA"
-    }
+            "city": "Oakland"
+            , "state": "CA"
+            , "zip": "94602"
+            , "country": "USA"
+        }
         , "links": [
-        {"rel": ["self"], "href": "api.kiva.org/lenders/gabrielcastillo/address"}
-    ]
+            {"rel": ["self"], "href": "api.kiva.org/lenders/gabrielcastillo/address"}
+        ]
         , "actions": [
         {
             "name": "edit"
@@ -33,6 +34,7 @@
     , {
         "class": ["demo", "example"]
         , "rel": ["api.kiva.org/rels/profile"]
+        , "name": "profile"
         , "properties": {
             "name": "gcastillo"
             , "city": "Oakland"
@@ -49,7 +51,8 @@
         ]
     }
     , {
-        "rel": ["api.kiva.org/rels/facebook"]
+        "name": "facebook"
+        , "rel": ["api.kiva.org/rels/facebook"]
         , "properties": {
             "automaticallPostToWall": ["loans", "repayments"]
             , "facebookConnected": true
@@ -60,7 +63,8 @@
         ]
     }
     , {
-        "rel": ["api.kiva.org/rels/credit-settings"]
+        "name": "creditSettings"
+        , "rel": ["api.kiva.org/rels/credit-settings"]
         , "properties": {
             "repayment": "deposit"
             , "inactivity": "donate"
@@ -74,6 +78,7 @@
     }
     , {
         "rel": ["api.kiva.org/rels/autolending-settings"]
+        , "name": "autolending"
         , "properties": {
             "when": "never"
             , "criteria": []
@@ -82,16 +87,17 @@
         }
         , "entities": [
             {
-                "rel": ["api.kiva.org/rels/conf"]
+                "name": "conf"
+                , "rel": ["api.kiva.org/rels/conf"]
                 , "properties": {
-                "when": "never"
-                , "criteria": []
-                , "limit": 45
-                , "donation": 10
-            }
+                    "when": "never"
+                    , "criteria": []
+                    , "limit": 45
+                    , "donation": 10
+                }
                 , "links": [
-                {"rel": ["self"], "href": "api.kiva.org/conf/222"}
-            ]
+                    {"rel": ["self"], "href": "api.kiva.org/conf/222"}
+                ]
             }
             , {
                 "class": ["collection"]
@@ -100,13 +106,13 @@
                     {
                         "rel": ["api.kiva.org/rels/loan"]
                         , "properties": {
-                        "location": "far away"
-                        , "loan_amount": 300
-                        , "id": 101
-                    }
+                            "location": "far away"
+                            , "loan_amount": 300
+                            , "id": 101
+                        }
                         , "links": [
-                        {"rel": ["self"], "href": "api.kiva.org/loan/123"}
-                    ]
+                            {"rel": ["self"], "href": "api.kiva.org/loan/123"}
+                        ]
                     }
                     , {
                         "rel": ["api.kiva.org/rels/loan"]
@@ -142,21 +148,21 @@
     }
 ]
     , "actions": [
-    {
-        "class": ["edit"]
-        , "name": "edit-lender"
-        , "method": "PUT"
-        , "href": "api.edit-lender-kiva.org/lenders/gabrielcastillo"
-        , "fields": [
-        {"name": "username", "type": "text", "pattern": ".{4,10}", "required": true}
-        , { "name": "firstName", "type": "text", "maxlength": 30}
-        , { "name": "lastName", "type": "text", "maxlength": 30}
-        , { "name": "email", "type": "email"}
-        , { "name": "address", "type": "entity", "action": "edit"}
-        , { "name": "extra", "type": "number"}
+        {
+            "class": ["edit"]
+            , "name": "edit-lender"
+            , "method": "PUT"
+            , "href": "api.edit-lender-kiva.org/lenders/gabrielcastillo"
+            , "fields": [
+                {"name": "username", "type": "text", "pattern": ".{4,10}", "required": true}
+                , { "name": "firstName", "type": "text", "maxlength": 30}
+                , { "name": "lastName", "type": "text", "maxlength": 30}
+                , { "name": "email", "type": "email"}
+                , { "name": "address", "type": "entity", "action": "edit"}
+                , { "name": "extra", "type": "number"}
+            ]
+        }
     ]
-    }
-]
 
     , "links": [
     {"rel": ["self"], "href": "api.kiva.org/lenders/gabrielcastillo"}
