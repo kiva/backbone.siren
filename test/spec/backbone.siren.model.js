@@ -273,7 +273,14 @@ describe('Siren Model: ', function () {
 
             // Resolving again should add the entity name back in
             sirenModel.resolveEntity(subEntity, {autoFetch: 'all'});
-//            expect(sirenModel.get(subEntity.name)).toBeDefined();
+            expect(sirenModel.get(subEntity.name)).toBeDefined();
+        });
+
+
+        it('throws if called with an invalid entity', function () {
+            expect(function () {
+                sirenModel.resolveEntity();
+            }).toThrow();
         });
     });
 
