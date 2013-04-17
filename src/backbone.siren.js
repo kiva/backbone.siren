@@ -523,39 +523,36 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         , resolve: function (url, options) {
             options = options || {};
 
+
+            /**
+             * Resolves the chain
+             * @todo this probably only works with models
+             *
+             * @param {Backbone.Siren.Model|Backbone.Siren.Collection|Backbone.Siren.Error} resolvedRoot
+             */
+            function handlleResolvedRoot(resolvedRoot) {
+                if (_.isEmpty(chain)) {
+                    deferred.resolve(resolvedRoot);
+                } else {
+                    resolvedRoot.resolveChain(chain, deferred);
+                }
+            }
+
             var bbSiren
+            , chain = parseChain(url)
             , deferred = new $.Deferred();
+
+            url = chain.shift();
 
             if (options.forceFetch || !(bbSiren = store.get(url))) {
                 Backbone.Siren.ajax(url, options).done(function (entity) {
-                    deferred.resolve(Backbone.Siren.parse(entity));
+                    handlleResolvedRoot(Backbone.Siren.parse(entity));
                 });
             } else {
-                deferred.resolve(bbSiren);
+                handlleResolvedRoot(bbSiren);
             }
 
-            return deferred;
-        }
-
-
-        /**
-         *
-         * @param {String|Array}
-         * @returns {$.Deferred}
-         */
-        , resolveChain: function (chain, options) {
-            chain = parseChain(chain);
-
-            // The first item in the chain must be a url
-            var rootUrl = chain.shift()
-            , deferred = new $.Deferred();
-
-            Backbone.Siren.resolve(rootUrl, options)
-                .done(function (bbSiren) {
-                    bbSiren.resolveChain(chain, deferred);
-                });
-
-            return deferred;
+            return deferred.promise();
         }
 
 
