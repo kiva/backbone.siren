@@ -26,19 +26,19 @@
     /**
      *
      * @param action
-     * @param formAttributes
+     * @param attributes
      * @return {Object}
      */
-    function parseFormAttributes(action, formAttributes) {
-        formAttributes = formAttributes || {};
+    function parseAttributes(action, attributes) {
+        attributes = attributes || {};
 
         return {
-            id: formAttributes.id || action.name + '-form'
-            , enctype: formAttributes.enctype || action.type
-            , method: formAttributes.method || action.method
-            , action: formAttributes.action || action.href
-            , title: formAttributes.title || action.title
-            , novalidate: !formAttributes.validation
+            id: attributes.id || action.name + '-form'
+            , enctype: attributes.enctype || action.type
+            , method: attributes.method || action.method
+            , action: attributes.action || action.href
+            , title: attributes.title || action.title
+            , novalidate: !attributes.validation
         };
     }
 
@@ -52,7 +52,7 @@
     function parseFieldAttributes(action, fieldAttributes) {
         fieldAttributes = fieldAttributes || {};
 
-        var parsedFieldAttributes = []
+        var parsedFieldAttributes = {}
         , fields = action.fields;
 
         _.each(fields, function (field) {
@@ -60,7 +60,7 @@
 
             if (field.type != 'entity') {
                 fieldName = field.name;
-                parsedFieldAttributes.push(_.extend({value: getSirenProperty(action, fieldName), type: 'text'}, field, fieldAttributes[fieldName]));
+                parsedFieldAttributes[fieldName] = (_.extend({value: getSirenProperty(action, fieldName), type: 'text'}, field, fieldAttributes[fieldName]));
             } else if (field.type == 'entity') {
                 // @todo, how to handle the view for sub-entities...?
                 console.log('@todo - how to handle sub-entity views?');
@@ -115,7 +115,7 @@
             var tpl = '<% _.each(fieldAttributes, function (field, fieldName) { %> \
                 <div> \
                     <label for="<%= field.id %>"><%= field.label %></label> \
-                    <input type="<%= field.type %>" name="<%= field.name %>" id="<%= field.id %>" value="<%= field.value %>" /> \
+                    <input type="<%= field.type %>" name="<%= fieldName %>" id="<%= field.id %>" value="<%= field.value %>" /> \
                 </div> \
             <% }); %> <input type="submit" class="submitButton" />';
 
@@ -140,7 +140,7 @@
             }
 
             return {
-                attributes: parseFormAttributes(action, data.formAttributes)
+                attributes: parseAttributes(action, data.attributes)
                 , fieldAttributes: parseFieldAttributes(action, data.fieldAttributes)
                 , model: action.parent
                 , action: action
@@ -149,21 +149,13 @@
 
 
         /**
-         * Override if you wanna get fancy.
          *
          * @param {Object} data
-         */
-        , render: function (data) {
-            return this.$el.html(this.template(data));
-        }
-
-
-        /**
-         *
-         * @param {Object} data
+         * @returns {Backbone.Siren.FormView}
          */
         , _render: function (data) {
-            return this.render(data);
+            this.$el.html(this.template(data));
+            return this;
         }
 
 
@@ -172,15 +164,19 @@
          * @param {Object} data
          */
         , constructor: function (data) {
-            data = _.extend({}, data, {validateOnChange: true});
+            data = _.extend({}, {validateOnChange: true}, data);
             var parsedData = this.parseAction(data);
+
+            this.action = parsedData.action;
+            this.fieldAttributes = parsedData.fieldAttributes;
 
             // Set our parsed data as top level properties to our view + pass them directly to our template
             Backbone.View.call(this, _.extend({}, data, parsedData));
-            this.action = parsedData.action;
-            this._render(parsedData);
-        }
 
+            if (this.render && this.render.toString().replace(/\s/g,'').length < 24) { // @todo hacky way to see if render has been overwritten
+                this._render(parsedData);
+            }
+        }
     });
 
 }(_, Backbone));
