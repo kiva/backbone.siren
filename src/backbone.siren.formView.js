@@ -15,7 +15,7 @@
         var namesArray = fieldName.split('_')
         , value = action.parent.get(namesArray.shift());
 
-        if (namesArray.length) {
+        if (namesArray.length && value) {
             return drillDown(namesArray, value);
         } else {
             return value;
@@ -60,7 +60,7 @@
 
             if (field.type != 'entity') {
                 fieldName = field.name;
-                parsedFieldAttributes.push(_.extend({value: getSirenProperty(action, fieldName), type: "text"}, field, fieldAttributes[fieldName]));
+                parsedFieldAttributes.push(_.extend({value: getSirenProperty(action, fieldName), type: 'text'}, field, fieldAttributes[fieldName]));
             } else if (field.type == 'entity') {
                 // @todo, how to handle the view for sub-entities...?
                 console.log('@todo - how to handle sub-entity views?');
