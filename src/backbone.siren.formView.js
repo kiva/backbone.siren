@@ -2,6 +2,27 @@
     'use strict';
 
 
+    function drillDown(namesArray, value) {
+        value = value[namesArray.shift()];
+        if (namesArray.length) {
+            return drillDown(namesArray, value);
+        } else {
+            return value;
+        }
+    }
+
+    function getSirenProperty(action, fieldName) {
+        var namesArray = fieldName.split('_')
+        , value = action.parent.get(namesArray.shift());
+
+        if (namesArray.length) {
+            return drillDown(namesArray, value);
+        } else {
+            return value;
+        }
+    }
+
+
     /**
      *
      * @param action
@@ -39,7 +60,7 @@
 
             if (field.type != 'entity') {
                 fieldName = field.name;
-                parsedFieldAttributes.push(_.extend({value: action.parent.get(fieldName)}, field, fieldAttributes[fieldName]));
+                parsedFieldAttributes.push(_.extend({value: getSirenProperty(action, fieldName)}, field, fieldAttributes[fieldName]));
             } else if (field.type == 'entity') {
                 // @todo, how to handle the view for sub-entities...?
                 console.log('@todo - how to handle sub-entity views?');
