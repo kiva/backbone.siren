@@ -12,7 +12,7 @@
     }
 
     function getSirenProperty(action, fieldName) {
-        var namesArray = fieldName.split('_')
+        var namesArray = fieldName.split('.')
         , value = action.parent.get(namesArray.shift());
 
         if (namesArray.length && value) {
