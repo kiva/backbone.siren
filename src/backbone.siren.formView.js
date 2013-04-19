@@ -112,14 +112,14 @@
         , template: function (data) {
             /*jshint multistr:true */
 
-            var tpl = '<% _.each(fieldAttributes, function (field, fieldName) { %> \
-                <div> \
-                    <label for="<%= field.id %>"><%= field.label %></label> \
-                    <input type="<%= field.type %>" name="<%= fieldName %>" id="<%= field.id %>" value="<%= field.value %>" /> \
-                </div> \
-            <% }); %> <input type="submit" class="submitButton" />';
+            var tpl = '<% _.each(data.fieldAttributes, function (field, fieldName) { %> \
+                    <div> \
+                        <% if (field.label) { %><label for="<%= field.id %>"><%= field.label %></label><% } %> \
+                        <input type="<%= field.type %>" name="<%= fieldName %>" id="<%= field.id %>" value="<%= field.value %>" /> \
+                    </div> \
+                <% }); %> <input type="submit" class="submitButton" />';
 
-            return  _.template(tpl)(data);
+            return  _.template(tpl, data, {variable: 'data'});
         }
 
 
