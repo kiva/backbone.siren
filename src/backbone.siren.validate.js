@@ -93,7 +93,7 @@
                     validity.valid = false;
                     validity.typeMismatch = true;
                 }
-            } else if (type && type != 'text' && type != 'entity') {
+            } else if (type && type != 'text' && type != 'entity' && type != 'file') {
                 Backbone.Siren.warn('Unable to validate type, "' + type + '" as it does not have a matching validation rule.');
             }
 
