@@ -117,23 +117,21 @@
             }
 
             var fileReader
-            , data = {}
             , $target = $(event.target)
             , name = $target.attr('name')
-            , model = this.model;
+            , model = this.model
+            , file = $target[0].files
+                ? $target[0].files[0]
+                : undefined;
 
             // Is this change event adding a file?
-            if ($target[0].files) {
+            if (file) {
                 fileReader = new FileReader();
                 fileReader.onload = handleFileOnLoad;
-                fileReader.readAsDataURL($target[0].files[0]); // @todo not supporting multiple images...yet...
+                fileReader.readAsDataURL(file); // @todo not supporting multiple images...yet...
             } else {
-                data[name] = $target.val();
+                model.set(name, $target.val(), {validate: !!this.options.validateOnChange, actionName: this.action.name, forceUpdate: true});
             }
-
-
-
-            model.set(data, {validate: !!this.options.validateOnChange, actionName: this.action.name, forceUpdate: true});
         }
 
 
