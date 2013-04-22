@@ -820,6 +820,33 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
 
             /**
+             * @TODO fix
+             *  - currently, collections do not get cached by the store
+             *
+             * Wrapper for .fetch(), adds the following:
+             * 1) Checks the local store
+             * 2) The deferred is resolved with the parsed Siren object
+             */
+            , resolve: function (options) {
+                options = options || {};
+
+                var deferred = new $.Deferred();
+
+                this.once('sync', function (bbSiren) {
+                    deferred.resolve(bbSiren);
+                });
+
+                if (options.forceFetch || (this._data.href && !this._data.links)) {
+                    this.fetch(options);
+                } else {
+                    deferred.resolve(this);
+                }
+
+                return deferred.promise();
+            }
+
+
+            /**
              * http://backbonejs.org/#Collection-parse
              *
              * @param {Object} sirenObj
