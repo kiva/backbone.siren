@@ -93,7 +93,7 @@
                     validity.valid = false;
                     validity.typeMismatch = true;
                 }
-            } else if (type && type != 'text' && type != 'entity' && type != 'file') {
+            } else if (type && type != 'text' && type != 'entity') {
                 Backbone.Siren.warn('Unable to validate type, "' + type + '" as it does not have a matching validation rule.');
             }
 
@@ -134,6 +134,11 @@
                 if (field.maxlength && field.maxlength < val.length) {
                     validity.valid = false;
                     validity.tooLong = true;
+                }
+            } else if (type == 'file') {
+                if (field.maxSize && field.maxSize < val.length) { // @todo @hack - base64 encoded images are ~30% larger when encoded
+                    validity.valid = false;
+                    validity.customError = true;
                 }
             }
 
