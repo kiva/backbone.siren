@@ -184,14 +184,6 @@
             // Set our parsed data as top level properties to our view + pass them directly to our template
             Backbone.View.call(this, _.extend({}, data, parsedData));
 
-            this.model.on('change', function (model, options) {
-                var attrs = model.changedAttributes();
-
-                _.each(attrs, function (value, name) {
-                    self.$('[name=' + name + ']').val(value);
-                });
-            });
-
             if (this.render && this.render.toString().replace(/\s/g,'').length < 24) { // @todo hacky way to see if render has been overwritten
                 this._render(parsedData);
             }
