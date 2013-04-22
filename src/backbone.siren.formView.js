@@ -56,20 +56,25 @@
         , fields = action.fields;
 
         _.each(fields, function (field) {
-            var fieldName;
+            var fieldName
+            , bools = [];
 
             if (field.type != 'entity') {
                 fieldName = field.name;
                 parsedFieldAttributes[fieldName] = _.extend({value: getSirenProperty(action, fieldName), type: 'text'}, field, fieldAttributes[fieldName]);
                 if (parsedFieldAttributes[fieldName].type == 'checkbox') {
                     if (parsedFieldAttributes[fieldName].value) {
-                        parsedFieldAttributes[fieldName].bools = ['checked'];
+                        bools.push('checked');
                     }
                     delete parsedFieldAttributes[fieldName].value;
                 }
 
-                if (parsedFieldAttributes[fieldName].bools) {
-                    parsedFieldAttributes[fieldName].bools = parsedFieldAttributes[fieldName].bools.join(' ');
+                if (parsedFieldAttributes[fieldName].required) {
+                    bools.push('required');
+                }
+
+                if (bools.length) {
+                    parsedFieldAttributes[fieldName].bools = bools.join(' ');
                 }
             } else if (field.type == 'entity') {
                 // @todo, how to handle the view for sub-entities...?
