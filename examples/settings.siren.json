@@ -168,6 +168,7 @@
                 , { "name": "extra", "type": "number"}
                 , { "name": "info_i1_n1"}
                 , { "name": "info_i2", "type": "text"}
+                , { "name": "info_i2", "type": "checkbox", "value": true}
             ]
         }
     ]

@@ -60,7 +60,17 @@
 
             if (field.type != 'entity') {
                 fieldName = field.name;
-                parsedFieldAttributes[fieldName] = (_.extend({value: getSirenProperty(action, fieldName), type: 'text'}, field, fieldAttributes[fieldName]));
+                parsedFieldAttributes[fieldName] = _.extend({value: getSirenProperty(action, fieldName), type: 'text'}, field, fieldAttributes[fieldName]);
+                if (parsedFieldAttributes[fieldName].type == 'checkbox') {
+                    if (parsedFieldAttributes[fieldName].value) {
+                        parsedFieldAttributes[fieldName].bools = ['checked'];
+                    }
+                    delete parsedFieldAttributes[fieldName].value;
+                }
+
+                if (parsedFieldAttributes[fieldName].bools) {
+                    parsedFieldAttributes[fieldName].bools = parsedFieldAttributes[fieldName].bools.join(' ');
+                }
             } else if (field.type == 'entity') {
                 // @todo, how to handle the view for sub-entities...?
                 console.log('@todo - how to handle sub-entity views?');
@@ -115,7 +125,7 @@
             var tpl = '<% _.each(data.fieldAttributes, function (field, fieldName) { %> \
                     <div> \
                         <% if (field.label) { %><label for="<%= field.id %>"><%= field.label %></label><% } %> \
-                        <input type="<%= field.type %>" name="<%= fieldName %>" id="<%= field.id %>" value="<%= field.value %>" /> \
+                        <input type="<%= field.type %>" name="<%= fieldName %>" id="<%= field.id %>" <% if (field.value) { %> value="<%= field.value %>" <% } %>  <%= field.bools %> /> \
                     </div> \
                 <% }); %> <input type="submit" class="submitButton" />';
 
