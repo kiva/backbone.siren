@@ -121,7 +121,7 @@
                 model.set(name, event.target.result);
             }
 
-            var fileReader
+            var fileReader, data
             , $target = $(event.target)
             , name = $target.attr('name')
             , model = this.model
@@ -135,7 +135,9 @@
                 fileReader.onload = handleFileOnLoad;
                 fileReader.readAsDataURL(file); // @todo not supporting multiple images...yet...
             } else {
-                model.set(name, $target.val(), {validate: !!this.options.validateOnChange, actionName: this.action.name, forceUpdate: true});
+                data = {};
+                data[name] = $target.val();
+                model.set(data, {validate: !!this.options.validateOnChange, actionName: this.action.name, forceUpdate: true});
             }
         }
 
@@ -163,7 +165,7 @@
          *
          * @param {Object} data
          */
-        , parseAction: function (data) {
+        , parseData: function (data) {
             var action;
 
             if (! (data && data.action)) {
@@ -201,8 +203,7 @@
          */
         , constructor: function (data) {
             data = _.extend({}, {validateOnChange: true}, data);
-            var self= this
-            , parsedData = this.parseAction(data);
+            var parsedData = this.parseData(data);
 
             this.action = parsedData.action;
             this.fieldAttributes = parsedData.fieldAttributes;
