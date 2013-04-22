@@ -126,7 +126,7 @@
             if ($target[0].files) {
                 fileReader = new FileReader();
                 fileReader.onload = handleFileOnLoad;
-                fileReader.readAsDataURL($target[0].files[0])
+                fileReader.readAsDataURL($target[0].files[0]); // @todo not supporting multiple images...yet...
             } else {
                 data[name] = $target.val();
             }
