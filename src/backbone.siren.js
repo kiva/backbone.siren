@@ -336,6 +336,41 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
     /**
      *
+     * @param {String} chain
+     * @param {$.Deferred} [deferred]
+     * @return {$.Deferred}
+     */
+    function resolveChain(chain, deferred) {
+        chain = parseChain(chain);
+
+        if (! deferred) {
+            deferred = new $.Deferred();
+        }
+
+        if (_.isEmpty(chain)) {
+            return deferred.resolve(this);
+        }
+
+        this.get(chain.shift()).resolve()
+            .then(
+            // Success...
+            function (bbSiren) {
+                bbSiren.resolveChain(chain, deferred);
+            }
+
+            // Failure...
+            , function (data) {
+                // @TODO - failure
+                warn(data, chain);
+            }
+        );
+
+        return deferred.promise();
+    }
+
+
+    /**
+     *
      * @return {Array}
      */
     function getRel(sirenObj) {
@@ -569,6 +604,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , getAllByAction: getAllByAction
             , parseActions: parseActions
             , request: request
+            , resolveChain: resolveChain
 
 
             /**
@@ -662,41 +698,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 }
 
                 return deferred.promise();
-            }
-
-
-            /**
-             *
-             * @params {Array} chain
-             * @param {$.Deferred} [deferred]
-             * @returns {$.Deferred}
-             */
-            , resolveChain: function (chain, deferred) {
-                chain = parseChain(chain);
-
-                if (! deferred) {
-                    deferred = new $.Deferred();
-                }
-
-                if (_.isEmpty(chain)) {
-                    return deferred.resolve(this);
-                }
-
-                this.get(chain.shift()).resolve()
-                    .then(
-                        // Success...
-                        function (bbSiren) {
-                            bbSiren.resolveChain(chain, deferred);
-                        }
-
-                        // Failure...
-                        , function (data) {
-                            // @TODO - failure
-                            warn(data, chain);
-                        }
-                    );
-
-                return deferred;
             }
 
 
@@ -801,6 +802,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , getAllByAction: getAllByAction
             , parseActions: parseActions
             , request: request
+            , resolveChain: resolveChain
 
 
             /**
