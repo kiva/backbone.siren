@@ -106,11 +106,34 @@
          * @param {jQuery.Event} event
          */
         , handleFormElementChange: function (event) {
-            var $target = $(event.target);
-            var data = {};
-            data[$target.attr('name')] = $target.val();
 
-            this.model.set(data, {validate: !!this.options.validateOnChange, actionName: this.action.name, forceUpdate: true});
+            /**
+             * Set the encoded image as a property on the model
+             *
+             * @param {jQuery.Event} event
+             */
+            function handleFileOnLoad(event) {
+                model.set(name, event.target.result);
+            }
+
+            var fileReader
+            , data = {}
+            , $target = $(event.target)
+            , name = $target.attr('name')
+            , model = this.model;
+
+            // Is this change event adding a file?
+            if ($target[0].files) {
+                fileReader = new FileReader();
+                fileReader.onload = handleFileOnLoad;
+                fileReader.readAsDataURL($target[0].files[0])
+            } else {
+                data[name] = $target.val();
+            }
+
+
+
+            model.set(data, {validate: !!this.options.validateOnChange, actionName: this.action.name, forceUpdate: true});
         }
 
 
