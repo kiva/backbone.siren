@@ -50,6 +50,7 @@
                 this.trigger('invalid', this, error, options || {});
             }
 
+            // @todo do we still need the forceUpdate flag?
             return !(error && !options.forceUpdate);
         }
 
