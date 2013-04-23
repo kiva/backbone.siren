@@ -57,8 +57,9 @@
             // formView2 - setting the data inside the initialize routine
             FormView = Backbone.Siren.FormView.extend({
                 initialize: function (obj) {
-                    this.initializeData(data);
-                    this._render(data);
+                    this.initializeForm(data);
+                    this.render();
+//                    this._render(data);
 //                    this.setFieldAttributes(obj);
                 }
             });

@@ -193,67 +193,70 @@
 
 
         /**
-         *
-         * @param {Object} data
-         */
-        , parseData: function (data) {
-            var action;
-
-            if (! (data && data.action)) {
-                throw 'Missing required property: "action"';
-            }
-
-            action = data.action;
-            if (! (action.parent instanceof Backbone.Siren.Model)) {
-                throw 'Action object either missing required "parent" or "parent" is not a Backbone.Siren Model';
-            }
-
-            return {
-                attributes: parseAttributes(action, data.attributes)
-                , fieldAttributes: parseFieldAttributes(action, data.fieldAttributes)
-                , model: action.parent
-                , action: action
-            };
-        }
-
-
-        /**
+         * By distinguishing ._render(), we can
          *
          * @param {Object} data
          * @returns {Backbone.Siren.FormView}
          */
-        , _render: function () {
+        , render: function () {
             this.$el.html(this.template({fieldAttributes: this.fieldAttributes}));
             return this;
         }
 
 
-        , initializeData: function (data) {
-            data = _.extend({}, {validateOnChange: true}, data);
-            var parsedData = this.parseData(data);
+        /**
+         * Sets the action as well as the model
+         *
+         * @param {Backbone.Siren.Action} action
+         * @returns {Backbone.Siren.FormView}
+         */
+        , setAction: function (action) {
+            if (! (action.parent instanceof Backbone.Siren.Model)) {
+                throw 'Action object either missing required "parent" or "parent" is not a Backbone.Siren Model';
+            }
 
-            this.action = parsedData.action;
-            this.fieldAttributes = parsedData.fieldAttributes;
+            this.action = action;
+            this.model = action.parent;
+            return this;
+        }
+
+
+        /**
+         * One-stop shop for setting the action, the model, and the field Attributes
+         *
+         * @param {Object} options
+         */
+        , initializeForm: function (options) {
+            var action = options.action;
+
+            if (! (options && options.action)) {
+                throw 'Missing required property: "action"';
+            }
+
+            this.setAction(action);
+            this.fieldAttributes = parseFieldAttributes(action, options.fieldAttributes);
+        }
+
+
+        /**
+         * Generic initialization
+         */
+        , initialize: function () {
+            this.render();
         }
 
 
         /**
          *
-         * @param {Object} data
+         * @param {Object} options
          */
-        , constructor: function (data) {
-            if (data) {
-                data = _.extend({}, data, this.initializeData(data));
-
-                // Set our parsed data as top level properties to our view + pass them directly to our template
-                Backbone.View.call(this, data);
-
-                if (this.render && this.render.toString().replace(/\s/g,'').length < 24) { // @todo hacky way to see if render has been overwritten
-                    this._render();
-                }
-            } else {
-                Backbone.View.call(this);
+        , constructor: function (options) {
+            if (options) {
+                this.initializeForm(options);
+                options.attributes = parseAttributes(options.action, options.attributes);
             }
+
+            Backbone.View.call(this, options);
         }
     });
 
