@@ -173,11 +173,11 @@
         , setFieldAttributes: function (fieldAttributes) {
             var updatedFieldAttributes = {};
 
-            _.each(this._fieldAttributes, function (attributes, name) {
+            _.each(this.fieldAttributes, function (attributes, name) {
                 updatedFieldAttributes[name] = $.extend(attributes, fieldAttributes[name]);
             });
 
-            this._fieldAttributes = updatedFieldAttributes;
+            this.fieldAttributes = updatedFieldAttributes;
             return this;
         }
 
@@ -188,7 +188,7 @@
          * @returns {Array}
          */
         , getFieldAttributes: function () {
-            return this._fieldAttributes;
+            return this.fieldAttributes;
         }
 
 
@@ -222,9 +222,18 @@
          * @param {Object} data
          * @returns {Backbone.Siren.FormView}
          */
-        , _render: function (data) {
-            this.$el.html(this.template(data));
+        , _render: function () {
+            this.$el.html(this.template({fieldAttributes: this.fieldAttributes}));
             return this;
+        }
+
+
+        , initializeData: function (data) {
+            data = _.extend({}, {validateOnChange: true}, data);
+            var parsedData = this.parseData(data);
+
+            this.action = parsedData.action;
+            this.fieldAttributes = parsedData.fieldAttributes;
         }
 
 
@@ -233,17 +242,17 @@
          * @param {Object} data
          */
         , constructor: function (data) {
-            data = _.extend({}, {validateOnChange: true}, data);
-            var parsedData = this.parseData(data);
+            if (data) {
+                data = _.extend({}, data, this.initializeData(data));
 
-            this.action = parsedData.action;
-            this._fieldAttributes = parsedData.fieldAttributes;
+                // Set our parsed data as top level properties to our view + pass them directly to our template
+                Backbone.View.call(this, data);
 
-            // Set our parsed data as top level properties to our view + pass them directly to our template
-            Backbone.View.call(this, _.extend({}, data, parsedData));
-
-            if (this.render && this.render.toString().replace(/\s/g,'').length < 24) { // @todo hacky way to see if render has been overwritten
-                this._render(parsedData);
+                if (this.render && this.render.toString().replace(/\s/g,'').length < 24) { // @todo hacky way to see if render has been overwritten
+                    this._render();
+                }
+            } else {
+                Backbone.View.call(this);
             }
         }
     });

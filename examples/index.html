@@ -49,9 +49,25 @@
                 }
                 , validateOnChange: true
             };
-            window.formView = new Backbone.Siren.FormView(data);
 
-            $('.wrap').html(formView.$el);
+            // formView1 - passing in the data as a parameter to the constructor function
+            window.formView1 = new Backbone.Siren.FormView(data);
+
+
+            // formView2 - setting the data inside the initialize routine
+            FormView = Backbone.Siren.FormView.extend({
+                initialize: function (obj) {
+                    this.initializeData(data);
+                    this._render(data);
+//                    this.setFieldAttributes(obj);
+                }
+            });
+
+            window.formView2 = new FormView();
+
+            $('.wrap').append(formView1.$el);
+            $('.wrap').append('<br /><br /> ');
+            $('.wrap').append(formView2.$el);
         });
 
 //        $.getJSON(alpsUrl, function (results) {
