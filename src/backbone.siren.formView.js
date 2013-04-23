@@ -47,7 +47,7 @@
      *
      * @param action
      * @param fieldAttributes
-     * @return {Array}
+     * @return {Object}
      */
     function parseFieldAttributes(action, fieldAttributes) {
         fieldAttributes = fieldAttributes || {};
@@ -56,29 +56,33 @@
         , fields = action.fields;
 
         _.each(fields, function (field) {
-            var fieldName
+            var fieldName, parsedField
             , bools = [];
 
             if (field.type != 'entity') {
                 fieldName = field.name;
-                parsedFieldAttributes[fieldName] = _.extend({value: getSirenProperty(action, fieldName), type: 'text'}, field, fieldAttributes[fieldName]);
-                if (parsedFieldAttributes[fieldName].type == 'checkbox') {
-                    if (parsedFieldAttributes[fieldName].value) {
+                parsedField = _.extend({value: getSirenProperty(action, fieldName), type: 'text'}, field, fieldAttributes[fieldName]);
+                if (parsedField.type == 'checkbox') {
+                    if (parsedField.value) {
                         bools.push('checked');
                     }
-                    delete parsedFieldAttributes[fieldName].value;
+                    delete parsedField.value;
                 }
 
-                if (parsedFieldAttributes[fieldName].required) {
+                if (parsedField.required) {
                     bools.push('required');
                 }
 
                 if (bools.length) {
-                    parsedFieldAttributes[fieldName].bools = bools.join(' ');
+                    parsedField.bools = bools.join(' ');
                 }
             } else if (field.type == 'entity') {
                 // @todo, how to handle the view for sub-entities...?
                 console.log('@todo - how to handle sub-entity views?');
+            }
+
+            if (parsedField) { // @todo check is temporary until nested entity rendering is working
+                parsedFieldAttributes[fieldName] = parsedField;
             }
         });
 
@@ -153,11 +157,38 @@
             var tpl = '<% _.each(data.fieldAttributes, function (field, fieldName) { %> \
                     <div> \
                         <% if (field.label) { %><label for="<%= field.id %>"><%= field.label %></label><% } %> \
-                        <input type="<%= field.type %>" name="<%= fieldName %>" id="<%= field.id %>" <% if (field.value) { %> value="<%= field.value %>" <% } %>  <%= field.bools %> /> \
+                        <input type="<%= field.type %>" name="<%= fieldName %>" <% if (field.id) { %> id="<%= field.id %>" <% } if (field.value) { %> value="<%= field.value %>" <% } %>  <%= field.bools %> /> \
                     </div> \
                 <% }); %> <input type="submit" class="submitButton" />';
 
             return  _.template(tpl, data, {variable: 'data'});
+        }
+
+
+        /**
+         *
+         * @param {Object} fieldAttributes
+         * @returns {Backbone.Siren.FormView}
+         */
+        , setFieldAttributes: function (fieldAttributes) {
+            var updatedFieldAttributes = {};
+
+            _.each(this._fieldAttributes, function (attributes, name) {
+                updatedFieldAttributes[name] = $.extend(attributes, fieldAttributes[name]);
+            });
+
+            this._fieldAttributes = updatedFieldAttributes;
+            return this;
+        }
+
+
+        /**
+         *
+         * @param {Object} [options]
+         * @returns {Array}
+         */
+        , getFieldAttributes: function () {
+            return this._fieldAttributes;
         }
 
 
@@ -206,7 +237,7 @@
             var parsedData = this.parseData(data);
 
             this.action = parsedData.action;
-            this.fieldAttributes = parsedData.fieldAttributes;
+            this._fieldAttributes = parsedData.fieldAttributes;
 
             // Set our parsed data as top level properties to our view + pass them directly to our template
             Backbone.View.call(this, _.extend({}, data, parsedData));

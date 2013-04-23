@@ -49,7 +49,7 @@
                 }
                 , validateOnChange: true
             };
-            formView = new Backbone.Siren.FormView(data);
+            window.formView = new Backbone.Siren.FormView(data);
 
             $('.wrap').html(formView.$el);
         });
