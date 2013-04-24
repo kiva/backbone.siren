@@ -351,7 +351,14 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             return deferred.resolve(this);
         }
 
-        this.get(chain.shift()).resolve()
+        var entityName = chain.shift()
+        , nestedEntity = this.get(entityName);
+
+        if (! nestedEntity) {
+            throw 'The entity you are looking for, "' + entityName + '" does not exist on this object.';
+        }
+
+        nestedEntity.resolve()
             .then(
             // Success...
             function (bbSiren) {
