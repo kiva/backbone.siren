@@ -20,17 +20,20 @@ describe('Siren FormView: ', function () {
     });
 
 
-    it('throws if there is no "action" property', function () {
-        expect(function () {
-            new Backbone.Siren.FormView({});
-        }).toThrow();
-    });
-
-
     it('throws if action.parent is not an instance of Backbone.Siren.Model', function () {
         expect(function () {
             new Backbone.Siren.FormView({action: {parent: new Backbone.Model({})}});
         }).toThrow();
+    });
+
+
+    describe('.initializeForm()', function () {
+        it('throws if there is no "action" property', function () {
+            expect(function () {
+                var myFormView = new Backbone.Siren.FormView({});
+                myFormView.initializeForm({});
+            }).toThrow();
+        });
     });
 
 

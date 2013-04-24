@@ -229,11 +229,19 @@
         , initializeForm: function (options) {
             var action = options.action;
 
-            if (! (options && options.action)) {
+            if (! action) {
                 throw 'Missing required property: "action"';
             }
 
             this.setAction(action);
+
+            // Set the attributes manually if the view has already been instantiated
+            if (this.cid) {
+                this.$el.attr(parseAttributes(action, options.attributes));
+            } else {
+                options.attributes = parseAttributes(options.action, options.attributes);
+            }
+
             this.fieldAttributes = parseFieldAttributes(action, options.fieldAttributes);
         }
 
@@ -251,10 +259,11 @@
          * @param {Object} options
          */
         , constructor: function (options) {
-            if (options) {
+            options = options || {};
+            options.validateOnChange = options.validateOnChange === undefined ? true : options.validateOnChange;
+
+            if (options.action) {
                 this.initializeForm(options);
-                options.attributes = parseAttributes(options.action, options.attributes);
-                options.validateOnChange = options.validateOnChange === undefined ? true : options.validateOnChange;
             }
 
             Backbone.View.call(this, options);
