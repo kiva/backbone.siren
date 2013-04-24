@@ -208,16 +208,6 @@ describe('Siren Validate: ', function () {
            result = bbSirenModel.validateType('notANumber', field);
            expect(result).toEqual({typeMismatch: true, valid: false});
        });
-
-
-       it('warns if there is no validation rule for the field type (unless the field type is "text" or "entity")', function () {
-           var warnStub = this.stub(Backbone.Siren, 'warn');
-
-           field.type = 'invalidType';
-           bbSirenModel.validateType('notANumber', field);
-
-           expect(warnStub).toHaveBeenCalled();
-       });
     });
 
 

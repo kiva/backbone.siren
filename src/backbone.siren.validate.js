@@ -94,8 +94,6 @@
                     validity.valid = false;
                     validity.typeMismatch = true;
                 }
-            } else if (type && type != 'text' && type != 'entity') {
-                Backbone.Siren.warn('Unable to validate type, "' + type + '" as it does not have a matching validation rule.');
             }
 
             return validity;
