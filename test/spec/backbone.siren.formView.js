@@ -53,12 +53,12 @@ describe('Siren FormView: ', function () {
 
             bbSirenFormView.$el.find('input').first().change();
 
-            expect(setSpy).toHaveBeenCalledWith({orderNumber: "42"}, {validate: false, actionName: 'add-item', forceUpdate: true});
-
-            // This time, set validateOnChange to "true"
-            bbSirenFormView = new Backbone.Siren.FormView({action: bbSirenAction, validateOnChange: true});
-            bbSirenFormView.$el.find('input').first().change();
             expect(setSpy).toHaveBeenCalledWith({orderNumber: "42"}, {validate: true, actionName: 'add-item', forceUpdate: true});
+
+            // This time, set validateOnChange to "false"
+            bbSirenFormView = new Backbone.Siren.FormView({action: bbSirenAction, validateOnChange: false});
+            bbSirenFormView.$el.find('input').first().change();
+            expect(setSpy).toHaveBeenCalledWith({orderNumber: "42"}, {validate: false, actionName: 'add-item', forceUpdate: true});
         });
     });
 });

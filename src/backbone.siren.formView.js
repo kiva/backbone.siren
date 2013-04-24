@@ -254,6 +254,7 @@
             if (options) {
                 this.initializeForm(options);
                 options.attributes = parseAttributes(options.action, options.attributes);
+                options.validateOnChange = options.validateOnChange === undefined ? true : options.validateOnChange;
             }
 
             Backbone.View.call(this, options);
