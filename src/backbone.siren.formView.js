@@ -2,27 +2,6 @@
     'use strict';
 
 
-    function drillDown(namesArray, value) {
-        value = value[namesArray.shift()];
-        if (namesArray.length) {
-            return drillDown(namesArray, value);
-        } else {
-            return value;
-        }
-    }
-
-    function getSirenProperty(action, fieldName) {
-        var namesArray = fieldName.split('.')
-        , value = action.parent.get(namesArray.shift());
-
-        if (namesArray.length && value) {
-            return drillDown(namesArray, value);
-        } else {
-            return value;
-        }
-    }
-
-
     /**
      *
      * @param action
@@ -61,7 +40,7 @@
 
             if (field.type != 'entity') {
                 fieldName = field.name;
-                parsedField = _.extend({value: getSirenProperty(action, fieldName), type: 'text'}, field, fieldAttributes[fieldName]);
+                parsedField = _.extend({value: action.parent.get(fieldName), type: 'text'}, field, fieldAttributes[fieldName]);
                 if (parsedField.type == 'checkbox') {
                     if (parsedField.value) {
                         bools.push('checked');
