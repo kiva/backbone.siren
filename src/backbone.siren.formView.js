@@ -159,7 +159,7 @@
                         <% if (field.label) { %><label for="<%= field.id %>"><%= field.label %></label><% } %> \
                         <input type="<%= field.type %>" name="<%= fieldName %>" <% if (field.id) { %> id="<%= field.id %>" <% } if (field.value) { %> value="<%= field.value %>" <% } %>  <%= field.bools %> /> \
                     </div> \
-                <% }); %> <input type="submit" class="submitButton" />';
+                <% }); %> <button type="submit" class="submitButton">Submit</button>';
 
             return  _.template(tpl, data, {variable: 'data'});
         }
