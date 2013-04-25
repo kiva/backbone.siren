@@ -130,7 +130,18 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 attributes = parent.getAllByAction(this.name);
             }
 
-            return parent.save(attributes, options);
+            // Create a temporary clone that will house all our actions related properties
+            var actionModel = this.actionModel = parent.clone();
+            actionModel._data = parent._data;
+            actionModel._actions = parent._actions;
+
+            options.success = function (model, resp, options) {
+                parent.trigger('sync', model, resp, options);
+                parent.attributes = {};
+                parent.set(actionModel.attributes);
+            };
+
+            return actionModel.save(attributes, options);
         }
     };
 
