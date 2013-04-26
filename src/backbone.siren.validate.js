@@ -41,7 +41,9 @@
         _validate: function (attrs, options) {
             var error;
 
-            if (! (options.validate && this.validate)) {
+            // @todo @hack adding an xhr check to prevent validation of server responses
+            // (Backone, .save() will call .set() on successful response from save, this set does validation, which we do not want)
+            if (options.xhr || !(options.validate && this.validate)) {
                 return true;
             }
 
