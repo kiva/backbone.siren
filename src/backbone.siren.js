@@ -3,6 +3,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
     // The store-cache
     var _store = {}
+    , _pending = {}
 
 
     /**
@@ -54,6 +55,16 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
         , clear: function () {
             _store = {};
+        }
+
+
+        , addRequest: function (url, request) {
+            _pending[url] = request;
+        }
+
+
+        , getRequest: function (url) {
+            return _pending[url];
         }
     }
 
@@ -591,13 +602,20 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 }
             }
 
-            var bbSiren
-            , chain = parseChain(url)
-            , deferred = new $.Deferred();
+            var bbSiren, deferred
+            , chain = parseChain(url);
 
             url = chain.shift();
+            deferred = Backbone.Siren.store.getRequest(url);
+
+            if (deferred && deferred.state() == 'pending') {
+                return deferred;
+            } else {
+                deferred = new $.Deferred();
+            }
 
             if (options.forceFetch || !(bbSiren = store.get(url))) {
+                Backbone.Siren.store.addRequest(url, deferred.promise());
                 Backbone.Siren.ajax(url, options).done(function (entity) {
                     handlleResolvedRoot(Backbone.Siren.parse(entity));
                 });
