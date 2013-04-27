@@ -356,45 +356,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
     }
 
 
-    /**
-     *
-     * @param {String} chain
-     * @param {$.Deferred} [deferred]
-     * @return {$.Deferred}
-     */
-    function resolveChain(chain, deferred) {
-        chain = parseChain(chain);
-
-        if (! deferred) {
-            deferred = new $.Deferred();
-        }
-
-        if (_.isEmpty(chain)) {
-            return deferred.resolve(this);
-        }
-
-        var entityName = chain.shift()
-        , nestedEntity = this.get(entityName);
-
-        if (! nestedEntity) {
-            throw 'The entity you are looking for, "' + entityName + '" does not exist on this object.';
-        }
-
-        nestedEntity.resolve()
-            .then(
-            // Success...
-            function (bbSiren) {
-                bbSiren.resolveChain(chain, deferred);
-            }
-
-            // Failure...
-            , function (data) {
-                // @TODO - failure
-                warn(data, chain);
-            }
-        );
-
-        return deferred.promise();
+    function resolveChain(chain, options) {
+        return nestedResolve(this, chain, new $.Deferred(), options);
     }
 
 
@@ -530,10 +493,38 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
     function parseChain(chain) {
         if (typeof chain == 'string') {
-            chain = chain.replace(/^#/, '').split('#');
+            chain = chain.replace(/^#|#$/, '').split('#');
         }
 
         return chain;
+    }
+
+
+    function nestedResolve(bbSiren, chain, deferred, options) {
+        var entityName = chain.shift();
+        var subEntity = bbSiren.get(entityName);
+        if (! subEntity) {
+            throw 'The entity you are looking for, "' + entityName + '" is not a sub-entity at ' + bbSiren.url() + '.';
+        }
+
+        options.deferred = deferred;
+        return Backbone.Siren.resolve(subEntity.url() + '#' + chain.join('#'), options);
+    }
+
+
+    /**
+     *
+     * @param {Backbone.Siren.Model} bbSiren
+     * @param {Array} chain
+     * @param {Object} deferred
+     * @param {Object} options
+     */
+    function handleRootRequest(bbSiren, chain, deferred, options) {
+        if (_.isEmpty(chain)) {
+            deferred.resolve(bbSiren);
+        } else {
+            nestedResolve(bbSiren, chain, deferred, options);
+        }
     }
 
 
@@ -580,6 +571,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
 
         /**
+         * @TODO Dire need of cleanup
          *
          * @param {String} url
          * @param {Object} options
@@ -589,40 +581,52 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
             var chain = parseChain(url);
             var rootUrl = chain.shift();
-            var deferred, state, promise;
+            var chainedDeferred = options.deferred;
+            var state, deferred, promise, storedPromise, bbSiren;
 
-            promise = store.getRequest(rootUrl);
-            if (promise) {
-                state = promise.state();
+            storedPromise = store.getRequest(rootUrl);
+            if (storedPromise) {
+                state = storedPromise.state();
+            }
+
+            // The request has already been made and we are ok to use it.
+            if ((_.isEmpty(chain) && ((state == 'resolved' && !options.forceFetch) || state == 'pending'))) {
+                if (chainedDeferred) {
+                    return storedPromise.done(function (bbSiren) {
+                        chainedDeferred.resolve(bbSiren);
+                    });
+                } else {
+                    return storedPromise;
+                }
+
+            }
+
+            if (! chainedDeferred) {
+                chainedDeferred = new $.Deferred();
             }
 
             if (state == 'pending') {
-                // Check for pending requests, piggy-back if they exist
+                // Check for a pending request, piggy-back on it's promise if it exists.
 
-                promise.done(function (bbSiren) {
-                    if (!_.isEmpty(chain)) {
-                        resolve(bbSiren.url() + chain.join('#'), options);
-                    }
+                storedPromise.done(function (bbSiren) {
+                    nestedResolve(bbSiren, chain, chainedDeferred, options);
                 });
-            } else if (!deferred || (state == 'resolved' && options.forceFetch) || state == 'rejected') {
-                // Either a request hasn't been made, we are forcing a request, or the previous request failed
+            } else {
+                if (options.forceFetch || !(bbSiren = store.get(rootUrl))) {
+                    deferred = new $.Deferred();
+                    store.addRequest(rootUrl, deferred.promise());
 
-                deferred = new $.Deferred();
-                promise = deferred.promise();
-                store.addRequest(rootUrl, promise);
-
-                Backbone.Siren.ajax(rootUrl, options).done(function (entity) {
-                    var bbSiren = Backbone.Siren.parse(entity);
-
-                    if (_.isEmpty(chain)) {
+                    Backbone.Siren.ajax(rootUrl, options).done(function (entity) {
+                        var bbSiren = Backbone.Siren.parse(entity);
                         deferred.resolve(bbSiren);
-                    } else {
-                        resolve(bbSiren.url() + '#' + chain.join('#'), options);
-                    }
-                });
+                        handleRootRequest(bbSiren, chain, chainedDeferred, options);
+                    });
+                } else {
+                    handleRootRequest(bbSiren, chain, chainedDeferred, options);
+                }
             }
 
-            return promise;
+            return chainedDeferred.promise();
         }
 
         , Model: Backbone.Model.extend({
