@@ -548,7 +548,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
 
         /**
-         * Creates a Backbone.Siren model, collection, or error from a Siren object, then saves it to the store
+         * Creates a Backbone.Siren model, collection, or error from a Siren object
          *
          * @param {Object} entity
          * @returns {Backbone.Siren.Model|Backbone.Siren.Collection|Backbone.Siren.Error}
@@ -584,48 +584,46 @@ Backbone.Siren = (function (_, Backbone, undefined) {
          * @param {String} url
          * @param {Object} options
          */
-        , resolve: function (url, options) {
+        , resolve: function resolve(url, options) {
             options = options || {};
 
+            var chain = parseChain(url);
+            var rootUrl = chain.shift();
+            var deferred, state, promise;
 
-            /**
-             * Resolves the chain
-             * @todo this probably only works with models
-             *
-             * @param {Backbone.Siren.Model|Backbone.Siren.Collection|Backbone.Siren.Error} resolvedRoot
-             */
-            function handlleResolvedRoot(resolvedRoot) {
-                if (_.isEmpty(chain)) {
-                    deferred.resolve(resolvedRoot);
-                } else {
-                    resolvedRoot.resolveChain(chain, deferred);
-                }
+            promise = store.getRequest(rootUrl);
+            if (promise) {
+                state = promise.state();
             }
 
-            var bbSiren, deferred
-            , chain = parseChain(url);
+            if (state == 'pending') {
+                // Check for pending requests, piggy-back if they exist
 
-            url = chain.shift();
-            deferred = Backbone.Siren.store.getRequest(url);
-
-            if (deferred && deferred.state() == 'pending') {
-                return deferred;
-            } else {
-                deferred = new $.Deferred();
-            }
-
-            if (options.forceFetch || !(bbSiren = store.get(url))) {
-                Backbone.Siren.store.addRequest(url, deferred.promise());
-                Backbone.Siren.ajax(url, options).done(function (entity) {
-                    handlleResolvedRoot(Backbone.Siren.parse(entity));
+                promise.done(function (bbSiren) {
+                    if (!_.isEmpty(chain)) {
+                        resolve(bbSiren.url() + chain.join('#'), options);
+                    }
                 });
-            } else {
-                handlleResolvedRoot(bbSiren);
+            } else if (!deferred || (state == 'resolved' && options.forceFetch) || state == 'rejected') {
+                // Either a request hasn't been made, we are forcing a request, or the previous request failed
+
+                deferred = new $.Deferred();
+                promise = deferred.promise();
+                store.addRequest(rootUrl, promise);
+
+                Backbone.Siren.ajax(rootUrl, options).done(function (entity) {
+                    var bbSiren = Backbone.Siren.parse(entity);
+
+                    if (_.isEmpty(chain)) {
+                        deferred.resolve(bbSiren);
+                    } else {
+                        resolve(bbSiren.url() + '#' + chain.join('#'), options);
+                    }
+                });
             }
 
-            return deferred.promise();
+            return promise;
         }
-
 
         , Model: Backbone.Model.extend({
 
