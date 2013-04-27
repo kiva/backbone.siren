@@ -39,14 +39,20 @@ describe('Backbone.Siren: ', function () {
     });
 
 
-    describe('.resolveChain', function () {
+    describe('.resolve', function () {
+        var server;
 
-        it('//Uses the first chain item as the root url to the chained request', function () {
-            var chainedRequest = Backbone.Siren.resolveChain('http://bbsiren/examples/settings.siren.json');
+        beforeEach(function () {
+            server = sinon.fakeServer.create();
+            server.respondWith(JSON.stringify(settingsModelSiren));
+        });
 
-            chainedRequest.done(function (bbsiren) {
-                console.log('hioijlkkjlkj');
-                console.log(bbsiren);
+        it('Uses the first chain item as the "root" url to the chained request', function () {
+            var bbSirenRequest = Backbone.Siren.resolve('http://blah');
+            server.respond();
+
+            bbSirenRequest.done(function (bbSiren) {
+               expect(bbSiren instanceof Backbone.Siren.Model).toBeTrue();
             });
         });
     });
