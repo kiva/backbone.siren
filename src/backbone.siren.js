@@ -357,7 +357,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
 
     function resolveChain(chain, options) {
-        return nestedResolve(this, chain, new $.Deferred(), options);
+        return nestedResolve(this, parseChain(chain), new $.Deferred(), options);
     }
 
 
@@ -501,6 +501,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
 
     function nestedResolve(bbSiren, chain, deferred, options) {
+        options = options || {};
+
         var entityName = chain.shift();
         var subEntity = bbSiren.get(entityName);
         if (! subEntity) {
@@ -582,7 +584,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             var chain = parseChain(url);
             var rootUrl = chain.shift();
             var chainedDeferred = options.deferred;
-            var state, deferred, promise, storedPromise, bbSiren;
+            var state, deferred, storedPromise, bbSiren;
 
             storedPromise = store.getRequest(rootUrl);
             if (storedPromise) {
