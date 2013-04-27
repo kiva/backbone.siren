@@ -575,6 +575,10 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         /**
          * @TODO Dire need of cleanup
          *
+         * We cache bbSiren models in the store, we also cache requests to the api.
+         * Caching the requests allows us asynchronous access to ALL requests not just those that have resolved.
+         * This implementation needs to be revisited.  Maybe more of this logic can be moved over to the store.
+         *
          * @param {String} url
          * @param {Object} options
          */
