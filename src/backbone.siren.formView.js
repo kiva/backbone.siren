@@ -210,7 +210,12 @@
          * @returns {Backbone.Siren.FormView}
          */
         , render: function () {
-            this.$el.html(this.template({fieldAttributes: this.fieldAttributes}));
+            var templateData = {fieldAttributes: this.fieldAttributes};
+            if (this.templateHelpers) {
+                _.extend(templateData, this.templateHelpers);
+            }
+
+            this.$el.html(this.template(templateData));
             return this;
         }
 
