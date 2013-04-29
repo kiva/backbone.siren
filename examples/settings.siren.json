@@ -7,6 +7,7 @@
         , "email": "elmo@gmx.com"
         , "member_since" : "2008-11-22T05:11:09Z"
         , "someRadio": "banana"
+        , "someFancyRadio": "cherry"
         , "info": {
             "i1": {
                 "n1": "this is n1"
@@ -172,6 +173,7 @@
                 , { "name": "someCb", "type": "checkbox", "value": true}
                 , { "name": "someImage", "type": "file"}
                 , { "name": "someRadio", "type": "radio", "value": ["apple", "banana", "cherry"]}
+                , { "name": "someFancyRadio", "type": "radio", "value": {"apple": "I like apples", "banana": "I like bananas", "cherry": "I like cherries"}}
             ]
         }
     ]

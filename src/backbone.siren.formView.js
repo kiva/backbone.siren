@@ -62,6 +62,17 @@
                                 ? 'checked'
                                 : '';
                         });
+                    } else if (_.isObject(parsedField.value)) {
+                        parsedField.options = {};
+                        _.each(parsedField.value, function (label, name) {
+                            parsedField.options[name] = {
+                                value: name
+                                , label: label
+                                , checked: propertyValue == name
+                                    ? 'checked'
+                                    : ''
+                            };
+                        });
                     }
                 }
 
@@ -166,6 +177,8 @@
                         <% if (field.label) { %><label for="<%= field.id %>"><%= field.label %></label><% } %> \
                         <% if (field.type == "radio" && _.isArray(field.value)) { %>\
                             <% _.each(field.options, function (checked, val) { %><input type="radio" name="<%= fieldName %>" value="<%= val %>"  <%= checked %> /><% }); %>\
+                        <% } else if (field.type == "radio" && _.isObject(field.value)) { %>\
+                            <% _.each(field.options, function (option, name) { %><input type="radio" name="<%= fieldName %>" value="<%= option.value %>"  <%= option.checked %> /><label><%= option.label %></label><% }); %>\
                         <% } else { %> \
                             <input type="<%= field.type %>" name="<%= fieldName %>" <% if (field.id) { %> id="<%= field.id %>" <% } if (field.value) { %> value="<%= field.value %>" <% } %>  <%= field.bools %> /> \
                         <% } %> \
