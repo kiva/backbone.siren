@@ -35,17 +35,34 @@
             , fields = action.fields;
 
         _.each(fields, function (field) {
-            var fieldName, parsedField
+            var fieldName, parsedField, propertyValue
                 , bools = [];
 
-            if (field.type != 'entity') {
+            if (field.type == 'entity') {
+                // @todo, how to handle the view for sub-entities...?
+                console.log('@todo - how to handle sub-entity views?');
+            } else if (field.type != 'entity') {
                 fieldName = field.name;
-                parsedField = _.extend({value: action.parent.get(fieldName), type: 'text'}, field, fieldAttributes[fieldName]);
+                propertyValue = action.parent.get(fieldName);
+                parsedField = _.extend({value: propertyValue, type: 'text'}, field, fieldAttributes[fieldName]);
                 if (parsedField.type == 'checkbox') {
+
+                    // We assume properties represented by checkboxes only have boolean values
                     if (parsedField.value) {
                         bools.push('checked');
                     }
                     delete parsedField.value;
+                } else if (parsedField.type == 'radio') {
+
+                    // Value is an array of values, if the value matches the property's value mark it "checked"
+                    if (_.isArray(parsedField.value)) {
+                        parsedField.options = {};
+                        _.each(parsedField.value, function (val, index) {
+                            parsedField.options[val] = propertyValue == val
+                                ? 'checked'
+                                : '';
+                        });
+                    }
                 }
 
                 if (parsedField.required) {
@@ -55,9 +72,6 @@
                 if (bools.length) {
                     parsedField.bools = bools.join(' ');
                 }
-            } else if (field.type == 'entity') {
-                // @todo, how to handle the view for sub-entities...?
-                console.log('@todo - how to handle sub-entity views?');
             }
 
             if (parsedField) { // @todo check is temporary until nested entity rendering is working
@@ -150,7 +164,11 @@
             var tpl = '<% _.each(data.fieldAttributes, function (field, fieldName) { %> \
                     <div> \
                         <% if (field.label) { %><label for="<%= field.id %>"><%= field.label %></label><% } %> \
-                        <input type="<%= field.type %>" name="<%= fieldName %>" <% if (field.id) { %> id="<%= field.id %>" <% } if (field.value) { %> value="<%= field.value %>" <% } %>  <%= field.bools %> /> \
+                        <% if (field.type == "radio" && _.isArray(field.value)) { %>\
+                            <% _.each(field.options, function (checked, val) { %><input type="radio" name="<%= fieldName %>" value="<%= val %>"  <%= checked %> /><% }); %>\
+                        <% } else { %> \
+                            <input type="<%= field.type %>" name="<%= fieldName %>" <% if (field.id) { %> id="<%= field.id %>" <% } if (field.value) { %> value="<%= field.value %>" <% } %>  <%= field.bools %> /> \
+                        <% } %> \
                     </div> \
                 <% }); %> <button type="submit" class="submitButton">Submit</button>';
 
