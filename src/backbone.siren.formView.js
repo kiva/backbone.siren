@@ -32,11 +32,11 @@
         fieldAttributes = fieldAttributes || {};
 
         var parsedFieldAttributes = {}
-        , fields = action.fields;
+            , fields = action.fields;
 
         _.each(fields, function (field) {
             var fieldName, parsedField
-            , bools = [];
+                , bools = [];
 
             if (field.type != 'entity') {
                 fieldName = field.name;
@@ -61,7 +61,21 @@
             }
 
             if (parsedField) { // @todo check is temporary until nested entity rendering is working
-                parsedFieldAttributes[fieldName] = parsedField;
+                var fieldNameArray = fieldName.split('.');
+                var pointer = parsedFieldAttributes;
+
+                var length = fieldNameArray.length;
+                _.each(fieldNameArray, function (name, index) {
+                    if (! pointer[name]) {
+                        if (index == length - 1) {
+                            pointer[name] = parsedField;
+                        } else {
+                            pointer[name] = {};
+                        }
+                    }
+
+                    pointer = pointer[name];
+                });
             }
         });
 
