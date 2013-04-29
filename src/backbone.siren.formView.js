@@ -29,6 +29,8 @@
      * @return {Object}
      */
     function parseFieldAttributes(action, fieldAttributes) {
+        /*jshint maxcomplexity: 15 */ // @todo clen up this function and remove this jshint config
+
         fieldAttributes = fieldAttributes || {};
 
         var parsedFieldAttributes = {}
@@ -36,7 +38,7 @@
 
         _.each(fields, function (field) {
             var fieldName, parsedField, propertyValue
-                , bools = [];
+            , bools = [];
 
             if (field.type == 'entity') {
                 // @todo, how to handle the view for sub-entities...?
