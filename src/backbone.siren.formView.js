@@ -57,7 +57,7 @@
                     // Value is an array of values, if the value matches the property's value mark it "checked"
                     if (_.isArray(parsedField.value)) {
                         parsedField.options = {};
-                        _.each(parsedField.value, function (val, index) {
+                        _.each(parsedField.value, function (val) {
                             parsedField.options[val] = propertyValue == val
                                 ? 'checked'
                                 : '';
