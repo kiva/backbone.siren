@@ -65,15 +65,15 @@
                                 : '';
                         });
                     } else if (_.isObject(parsedField.value)) {
-                        parsedField.options = {};
+                        parsedField.options = [];
                         _.each(parsedField.value, function (label, name) {
-                            parsedField.options[name] = {
+                            parsedField.options.push({
                                 value: name
                                 , label: label
                                 , checked: propertyValue == name
                                     ? 'checked'
                                     : ''
-                            };
+                            });
                         });
                     }
                 }
