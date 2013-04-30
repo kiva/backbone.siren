@@ -170,7 +170,7 @@
                 , { "name": "extra", "type": "number"}
                 , { "name": "info_i1_n1"}
                 , { "name": "info_i2", "type": "text"}
-                , { "name": "someCb", "type": "checkbox", "value": true}
+                , { "name": "someCb", "type": "checkbox"}
                 , { "name": "someImage", "type": "file"}
                 , { "name": "someRadio", "type": "radio", "value": ["apple", "banana", "cherry"]}
                 , { "name": "someFancyRadio", "type": "radio", "value": {"apple": "I like apples", "banana": "I like bananas", "cherry": "I like cherries"}}

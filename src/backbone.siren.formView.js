@@ -125,7 +125,17 @@
          */
         , handleFormSubmit: function (event) {
             event.preventDefault();
-            this.model.getActionByName(this.action.name).execute();
+
+            var nonModelAttributes = {};
+
+            // Allow mapping of attribute values to designated models
+            _.each(this.fieldAttributes, function (field, name) {
+                if (field.model) {
+                    nonModelAttributes[name] = field.model.get(name);
+                }
+            });
+
+            this.model.getActionByName(this.action.name).execute({attributes: nonModelAttributes});
         }
 
 

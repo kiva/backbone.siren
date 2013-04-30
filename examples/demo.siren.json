@@ -3,7 +3,8 @@
     "properties": {
         "orderNumber": 42,
         "itemCount": 3,
-        "status": "pending"
+        "status": "pending",
+        "someCb": true
     },
     "entities": [
         {

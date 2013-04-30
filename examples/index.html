@@ -16,6 +16,7 @@
     <div class="wrap"></div>
     <script>
 
+        var demoUrl = 'demo.siren.json';
         var settings, sirenUrl = 'settings.siren.json';
         var alps, alpsUrl = 'http://siren-alps.herokuapp.com/';
         var formView;
@@ -25,9 +26,10 @@
             Backbone.Siren.validate.setPatterns(patternLibrary);
         }
 
-        Backbone.Siren.resolve(sirenUrl).done(function (bbSiren) {
-//        $.getJSON(sirenUrl, function (results) {
-//            settings = new Backbone.Siren.Model(results);
+        var demoRequest = Backbone.Siren.resolve(demoUrl);
+        var settingsRequest = Backbone.Siren.resolve(sirenUrl);
+
+        $.when(settingsRequest, demoRequest).done(function(bbSiren, demoSiren) {
             settings = bbSiren;
 
             var action = settings.getActionByName('edit-lender');
@@ -45,6 +47,11 @@
                     , lastName: {
                         id: 'lastNameId'
                         , label: 'Last Name'
+                    }
+                    , someCb: {
+                        model: demoSiren
+                        , id: 'someCbId'
+                        , label: 'Some Checkbox'
                     }
                 }
                 , validateOnChange: true
@@ -68,6 +75,7 @@
             $('.wrap').append('<br /><br /> ');
             $('.wrap').append(formView2.$el);
         });
+
 
 //        $.getJSON(alpsUrl, function (results) {
 //            alps = new Backbone.Siren.Model(results);
