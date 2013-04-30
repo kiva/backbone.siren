@@ -50,9 +50,10 @@
                 if (parsedField.type == 'checkbox') {
 
                     // We assume properties represented by checkboxes only have boolean values
-                    if (parsedField.value) {
-                        bools.push('checked');
-                    }
+                    parsedField.checked = parsedField.value
+                        ? 'checked'
+                        : '';
+
                     delete parsedField.value;
                 } else if (parsedField.type == 'radio') {
 
@@ -78,9 +79,9 @@
                     }
                 }
 
-                if (parsedField.required) {
-                    bools.push('required');
-                }
+                parsedField.required = parsedField.required
+                    ? 'required'
+                    : '';
 
                 if (bools.length) {
                     parsedField.bools = bools.join(' ');
@@ -182,7 +183,7 @@
                         <% } else if (field.type == "radio" && _.isObject(field.value)) { %>\
                             <% _.each(field.options, function (option, name) { %><input type="radio" name="<%= fieldName %>" value="<%= option.value %>"  <%= option.checked %> /><label><%= option.label %></label><% }); %>\
                         <% } else { %> \
-                            <input type="<%= field.type %>" name="<%= fieldName %>" <% if (field.id) { %> id="<%= field.id %>" <% } if (field.value) { %> value="<%= field.value %>" <% } %>  <%= field.bools %> /> \
+                            <input type="<%= field.type %>" name="<%= fieldName %>" <% if (field.id) { %> id="<%= field.id %>" <% } if (field.value) { %> value="<%= field.value %>" <% } %>  <%= field.checked %> <%= field.required %> /> \
                         <% } %> \
                     </div> \
                 <% }); %> <button type="submit" class="submitButton">Submit</button>';
