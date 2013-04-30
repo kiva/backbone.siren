@@ -114,9 +114,10 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         , execute: function (options) {
             var attributes
             , parent = this.parent
+            , actionName = this.name
             , presets = {
                 url: this.href
-                , actionName: this.name
+                , actionName: actionName
             };
 
             if (! parent) {
@@ -147,7 +148,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             actionModel._actions = parent._actions;
 
             options.success = function (model, resp, options) {
-                parent.trigger('sync', model, resp, options);
+                parent.trigger('sync:' + actionName, model, resp, options);
                 parent.attributes = {};
                 parent.set(actionModel.attributes);
             };
