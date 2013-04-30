@@ -112,13 +112,18 @@ Backbone.Siren = (function (_, Backbone, undefined) {
          * @return {$.Deferred|undefined}
          */
         , execute: function (options) {
-            var attributes
-            , parent = this.parent
+            options = options || {};
+
+            var actionModel
+            , attributes = options.attributes
             , actionName = this.name
+            , parent = this.parent
             , presets = {
                 url: this.href
                 , actionName: actionName
             };
+
+            delete options.attributes;
 
             if (! parent) {
                 return;
@@ -132,27 +137,19 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 presets.contentType = this.type;
             }
 
-            options = _.extend(presets, options);
-
-            attributes = options.attributes;
-            if (attributes) {
-                delete options.attributes;
-                attributes = _.extend(parent.getAllByAction(this.name), attributes);
-            } else {
-                attributes = parent.getAllByAction(this.name);
-            }
-
             // Create a temporary clone that will house all our actions related properties
-            var actionModel = this.actionModel = parent.clone();
+            actionModel = parent.clone();
             actionModel._data = parent._data;
             actionModel._actions = parent._actions;
 
+            options = _.extend(presets, options);
             options.success = function (model, resp, options) {
                 parent.trigger('sync:' + actionName, model, resp, options);
                 parent.attributes = {};
                 parent.set(actionModel.attributes);
             };
 
+            attributes = _.extend(parent.getAllByAction(this.name), attributes);
             return actionModel.save(attributes, options);
         }
     };
