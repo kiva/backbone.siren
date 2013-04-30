@@ -37,8 +37,7 @@
             , fields = action.fields;
 
         _.each(fields, function (field) {
-            var fieldName, parsedField, propertyValue
-            , bools = [];
+            var fieldName, parsedField, propertyValue;
 
             if (field.type == 'entity') {
                 // @todo, how to handle the view for sub-entities...?
@@ -82,10 +81,6 @@
                 parsedField.required = parsedField.required
                     ? 'required'
                     : '';
-
-                if (bools.length) {
-                    parsedField.bools = bools.join(' ');
-                }
             }
 
             if (parsedField) { // @todo check is temporary until nested entity rendering is working
