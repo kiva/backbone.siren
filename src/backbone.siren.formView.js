@@ -112,6 +112,9 @@
 
         , events: {
             'submit': 'handleFormSubmit'
+
+            // @todo @uglymunky - remove support for view-model bindings, there are other plugins that can do it
+            // WRT file uploads, that logic is not specific to Backbone.Siren and it should go somewhere else...
             , 'change input, select': 'handleFormElementChange'
         }
 
