@@ -48,21 +48,5 @@ describe('Siren FormView: ', function () {
             expect(executeSpy).toHaveBeenCalled();
         });
     });
-
-
-    describe('On input element change', function () {
-        it('validates the field according to the siren-action and forces the model to update', function () {
-            var setSpy = this.stub(Backbone.Model.prototype, 'set');
-
-            bbSirenFormView.$el.find('input').first().change();
-
-            expect(setSpy).toHaveBeenCalledWith({orderNumber: "42"}, {validate: true, actionName: 'add-item', forceUpdate: true});
-
-            // This time, set validateOnChange to "false"
-            bbSirenFormView = new Backbone.Siren.FormView({action: bbSirenAction, validateOnChange: false});
-            bbSirenFormView.$el.find('input').first().change();
-            expect(setSpy).toHaveBeenCalledWith({orderNumber: "42"}, {validate: false, actionName: 'add-item', forceUpdate: true});
-        });
-    });
 });
 

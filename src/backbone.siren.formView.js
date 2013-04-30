@@ -112,10 +112,6 @@
 
         , events: {
             'submit': 'handleFormSubmit'
-
-            // @todo @uglymunky - remove support for view-model bindings, there are other plugins that can do it
-            // WRT file uploads, that logic is not specific to Backbone.Siren and it should go somewhere else...
-            , 'change input, select': 'handleFormElementChange'
         }
 
 
@@ -138,41 +134,6 @@
             this.model.getActionByName(this.action.name).execute({attributes: nonModelAttributes});
         }
 
-
-        /**
-         *
-         * @param {jQuery.Event} event
-         */
-        , handleFormElementChange: function (event) {
-
-            /**
-             * Set the encoded image as a property on the model
-             *
-             * @param {jQuery.Event} event
-             */
-            function handleFileOnLoad(event) {
-                model.set(name, event.target.result);
-            }
-
-            var fileReader, data
-            , $target = $(event.target)
-            , name = $target.attr('name')
-            , model = this.model
-            , file = $target[0].files
-                ? $target[0].files[0]
-                : undefined;
-
-            // Is this change event adding a file?
-            if (file) {
-                fileReader = new FileReader();
-                fileReader.onload = handleFileOnLoad;
-                fileReader.readAsDataURL(file); // @todo not supporting multiple images...yet...
-            } else {
-                data = {};
-                data[name] = $target.val();
-                model.set(data, {validate: !!this.options.validateOnChange, actionName: this.action.name, forceUpdate: true});
-            }
-        }
 
 
         /**
