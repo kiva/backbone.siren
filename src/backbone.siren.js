@@ -89,6 +89,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
     function Action(actionData, parent) {
         _.extend(this, actionData);
         this.parent = parent;
+
+        // Mainly for storing properties that will need to be saved to the server but that don't live on any model.
         this.store = new Backbone.Model();
     }
 
