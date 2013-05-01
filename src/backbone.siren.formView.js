@@ -122,12 +122,18 @@
         , handleFormSubmit: function (event) {
             event.preventDefault();
 
-            var nonModelAttributes = {};
+            var self = this
+            , nonModelAttributes = {};
 
             // Allow mapping of attribute values to designated models
             _.each(this.fieldAttributes, function (field, name) {
-                if (field.model) {
-                    nonModelAttributes[name] = field.model.get(name);
+                var model = field.model;
+                if (model) {
+                    if (model instanceof Backbone.Model) {
+                        nonModelAttributes[name] = model.get(name);
+                    } else if (typeof model == 'function') {
+                        nonModelAttributes[name] = model.call(self);
+                    }
                 }
             });
 

@@ -89,6 +89,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
     function Action(actionData, parent) {
         _.extend(this, actionData);
         this.parent = parent;
+        this.store = new Backbone.Model();
     }
 
 
