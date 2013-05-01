@@ -131,6 +131,8 @@
                 if (model) {
                     if (model instanceof Backbone.Model) {
                         nonModelAttributes[name] = model.get(name);
+                    } else if (model instanceof Backbone.View) {
+                        nonModelAttributes[name] = model.action.store.get(name);
                     } else if (typeof model == 'function') {
                         nonModelAttributes[name] = model.call(self);
                     }
