@@ -1,6 +1,8 @@
 .DS_Store
 npm-debug.log
-/dist
 /node_modules
 /components
 /test/coverage
+
+## The following are not ignored but are marked as "unchanged"
+# /dist
