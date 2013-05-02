@@ -28,8 +28,8 @@
     "buster-coverage": "~0.1.0",
     "grunt": "~0.4.1",
     "grunt-buster": "~0.1.2",
-    "grunt-contrib-jshint": "~0.1.1rc6",
-    "grunt-contrib-uglify": "~0.1.2",
+    "grunt-contrib-jshint": "~0.4.3",
+    "grunt-contrib-uglify": "~0.2.0",
     "grunt-rigger": "~0.4.0"
   }
 }
