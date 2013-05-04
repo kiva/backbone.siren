@@ -533,18 +533,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
     }
 
 
-    /**
-     *
-     * @param {Backbone.Siren.Model} bbSiren
-     * @param {Array} chain
-     * @param {Object} deferred
-     * @param {Object} options
-     */
-    function handleRootRequestFail(bbSiren, deferred) {
-        deferred.reject(bbSiren);
-    }
-
-
     return {
         settings: {
             showWarnings: true
@@ -635,7 +623,9 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 });
             } else {
                 if (options.forceFetch || !(bbSiren = store.get(rootUrl))) {
-                    deferred = new $.Deferred(); // @todo can I drop having to manually create this deferred object?
+
+                    // By creating our own Deferred() we can map standard responses to bbSiren error models along each step of the chain
+                    deferred = new $.Deferred();
                     store.addRequest(rootUrl, deferred.promise());
 
                     Backbone.Siren.ajax(rootUrl, options)
@@ -648,8 +638,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                             var entity = JSON.parse(jqXhr.responseText || '{}')
                             , bbSiren = Backbone.Siren.parse(entity);
 
-                            deferred.reject(bbSiren);
-                            handleRootRequestFail(bbSiren, chainedDeferred);
+                            chainedDeferred.reject(bbSiren);
                         });
                 } else {
                     // Use the stored bbSiren object
