@@ -20,7 +20,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
          * @return {Backbone.Siren.Model}
          */
         add: function (model) {
-            return _store[model.url()] = model;
+            _store[model.url()] = model;
         }
 
 
