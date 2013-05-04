@@ -600,10 +600,10 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         , resolve: function resolve(url, options) {
             options = options || {};
 
-            var chain = parseChain(url);
-            var rootUrl = chain.shift();
-            var chainedDeferred = options.deferred;
-            var state, deferred, storedPromise, bbSiren;
+            var state, deferred, storedPromise, bbSiren
+            , chain = parseChain(url)
+            , rootUrl = chain.shift()
+            , chainedDeferred = options.deferred;
 
             storedPromise = store.getRequest(rootUrl);
             if (storedPromise) {
@@ -622,6 +622,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
             }
 
+            // We need a deferred object to track the final result of our request (bc it can be chained)
             if (! chainedDeferred) {
                 chainedDeferred = new $.Deferred();
             }
@@ -634,7 +635,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 });
             } else {
                 if (options.forceFetch || !(bbSiren = store.get(rootUrl))) {
-                    deferred = new $.Deferred();
+                    deferred = new $.Deferred(); // @todo can I drop having to manually create this deferred object?
                     store.addRequest(rootUrl, deferred.promise());
 
                     Backbone.Siren.ajax(rootUrl, options)
@@ -644,18 +645,11 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                             handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
                         })
                         .fail(function (jqXhr) {
-                            var bbSiren
-                            , entity = JSON.parse(jqXhr.responseText || '{}');
-
-                            try {  //@todo not sure if this try/catch is necessary
-                                bbSiren = Backbone.Siren.parse(entity);
-                            } catch (exception) {
-                                bbSiren = Backbone.Siren.parse({});
-                            }
+                            var entity = JSON.parse(jqXhr.responseText || '{}')
+                            , bbSiren = Backbone.Siren.parse(entity);
 
                             deferred.reject(bbSiren);
                             handleRootRequestFail(bbSiren, chainedDeferred);
-
                         });
                 } else {
                     // Use the stored bbSiren object
