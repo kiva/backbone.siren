@@ -524,12 +524,24 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      * @param {Object} deferred
      * @param {Object} options
      */
-    function handleRootRequest(bbSiren, chain, deferred, options) {
+    function handleRootRequestSuccess(bbSiren, chain, deferred, options) {
         if (_.isEmpty(chain)) {
             deferred.resolve(bbSiren);
         } else {
             nestedResolve(bbSiren, chain, deferred, options);
         }
+    }
+
+
+    /**
+     *
+     * @param {Backbone.Siren.Model} bbSiren
+     * @param {Array} chain
+     * @param {Object} deferred
+     * @param {Object} options
+     */
+    function handleRootRequestFail(bbSiren, deferred) {
+        deferred.reject(bbSiren);
     }
 
 
@@ -555,8 +567,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             if (_hasClass(entity, 'collection')) {
                 bbSiren = new Backbone.Siren.Collection(entity);
             } else if (_hasClass(entity, 'error')) {
-                // @todo how should we represent errors?
-                warn('@todo - errors');
+                // @todo how should we represent errors?  For now, treat them as regular Models...
+                bbSiren = new Backbone.Siren.Model(entity);
             } else {
                 bbSiren = new Backbone.Siren.Model(entity);
             }
@@ -625,13 +637,29 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                     deferred = new $.Deferred();
                     store.addRequest(rootUrl, deferred.promise());
 
-                    Backbone.Siren.ajax(rootUrl, options).done(function (entity) {
-                        var bbSiren = Backbone.Siren.parse(entity);
-                        deferred.resolve(bbSiren);
-                        handleRootRequest(bbSiren, chain, chainedDeferred, options);
-                    });
+                    Backbone.Siren.ajax(rootUrl, options)
+                        .done(function (entity) {
+                            var bbSiren = Backbone.Siren.parse(entity);
+                            deferred.resolve(bbSiren);
+                            handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
+                        })
+                        .fail(function (jqXhr) {
+                            var bbSiren
+                            , entity = JSON.parse(jqXhr.responseText || '{}');
+
+                            try {  //@todo not sure if this try/catch is necessary
+                                bbSiren = Backbone.Siren.parse(entity);
+                            } catch (exception) {
+                                bbSiren = Backbone.Siren.parse({});
+                            }
+
+                            deferred.reject(bbSiren);
+                            handleRootRequestFail(bbSiren, chainedDeferred);
+
+                        });
                 } else {
-                    handleRootRequest(bbSiren, chain, chainedDeferred, options);
+                    // Use the stored bbSiren object
+                    handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
                 }
             }
 
