@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "grunt test --verbose",
-    "prepublish": "bower install"
+    "prepublish": "bower install  && git ls-files -z dist/ | xargs -0 git update-index --assume-unchanged"
   },
   "repository": {
     "type": "git",
