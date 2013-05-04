@@ -638,6 +638,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                             var entity = JSON.parse(jqXhr.responseText || '{}')
                             , bbSiren = Backbone.Siren.parse(entity);
 
+                            deferred.reject(bbSiren);
                             chainedDeferred.reject(bbSiren);
                         });
                 } else {
