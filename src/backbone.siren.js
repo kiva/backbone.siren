@@ -622,7 +622,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                     nestedResolve(bbSiren, chain, chainedDeferred, options);
                 });
             } else {
-                if (options.forceFetch || !(bbSiren = store.get(rootUrl))) {
+                if (options.forceFetch || !(bbSiren = store.get(rootUrl))) { // Assign value to bbSiren
 
                     // By creating our own Deferred() we can map standard responses to bbSiren error models along each step of the chain
                     deferred = new $.Deferred();
@@ -638,8 +638,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                             var entity = JSON.parse(jqXhr.responseText || '{}')
                             , bbSiren = Backbone.Siren.parse(entity);
 
-                            deferred.reject(bbSiren);
-                            chainedDeferred.reject(bbSiren);
+                            deferred.reject(bbSiren, jqXhr);
+                            chainedDeferred.reject(bbSiren, jqXhr);
                         });
                 } else {
                     // Use the stored bbSiren object
@@ -740,6 +740,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
              * Wrapper for .fetch(), adds the following:
              * 1) Checks the local store
              * 2) The deferred is resolved with the parsed Siren object
+             *
+             * @param {Object} options
              */
             , resolve: function (options) {
                 options = options || {};
