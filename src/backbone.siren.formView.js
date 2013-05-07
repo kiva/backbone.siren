@@ -110,7 +110,7 @@
 
         tagName: 'form'
 
-        , events: {
+        , _events: {
             'submit': 'handleFormSubmit'
         }
 
@@ -275,6 +275,8 @@
                 this.initializeForm(options);
             }
 
+            // Use _events so that events don't get overridden by child views.
+            _.extend(this.events, this._events);
             Backbone.View.call(this, options);
         }
     });
