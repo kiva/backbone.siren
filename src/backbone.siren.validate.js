@@ -166,7 +166,7 @@
                 , valid: true
             };
 
-            if (!val) {
+            if (val === undefined) {
                 validity = _.extend(validity, this.validateEmptyField(field));
             } else {
                 _.extend(validity, this.validateType(val, field));
