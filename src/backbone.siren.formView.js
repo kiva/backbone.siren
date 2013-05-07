@@ -276,7 +276,7 @@
             }
 
             // Use _events so that events don't get overridden by child views.
-            _.extend(this.events, this._events);
+            this.events = _.extend(this._events, this.events);
             Backbone.View.call(this, options);
         }
     });
