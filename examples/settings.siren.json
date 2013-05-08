@@ -8,6 +8,7 @@
         , "member_since" : "2008-11-22T05:11:09Z"
         , "someRadio": "banana"
         , "someFancyRadio": "cherry"
+        , "myMulti": ["red"]
         , "info": {
             "i1": {
                 "n1": "this is n1"
@@ -174,6 +175,7 @@
                 , { "name": "someImage", "type": "file"}
                 , { "name": "someRadio", "type": "radio", "value": ["apple", "banana", "cherry"]}
                 , { "name": "someFancyRadio", "type": "radio", "value": {"apple": "I like apples", "banana": "I like bananas", "cherry": "I like cherries"}}
+                , { "name": "myMulti", "type": "checkbox", "value": {"green": "I like green", "yellow": "I like yellow", "red": "I like red"}}
             ]
         }
     ]

@@ -23,6 +23,7 @@
 
 
     /**
+     * @todo the function needs help!!
      *
      * @param action
      * @param fieldAttributes
@@ -47,15 +48,32 @@
                 propertyValue = action.parent.get(fieldName);
                 parsedField = _.extend({value: propertyValue, type: 'text'}, field, fieldAttributes[fieldName]);
                 if (parsedField.type == 'checkbox') {
+                    // Value is an array of values, if the value matches the property's value mark it "checked"
+                    if (_.isArray(parsedField.value)) {
+                        parsedField.options = {};
+                        _.each(parsedField.value, function (val) {
+                            parsedField.options[val] = propertyValue == val
+                                ? 'checked'
+                                : '';
+                        });
+                    } else if (_.isObject(parsedField.value)) {
+                        parsedField.options = [];
+                        _.each(parsedField.value, function (label, name) {
+                            parsedField.options.push({
+                                value: name
+                                , label: label
+                                , checked: propertyValue == name
+                                    ? 'checked'
+                                    : ''
+                            });
+                        });
+                    } else if (parsedField.value) {
+                        parsedField.checked = 'checked';
+                    } else {
+                        parsedField.checked = '';
+                    }
 
-                    // We assume properties represented by checkboxes only have boolean values
-                    parsedField.checked = parsedField.value
-                        ? 'checked'
-                        : '';
-
-                    delete parsedField.value;
                 } else if (parsedField.type == 'radio') {
-
                     // Value is an array of values, if the value matches the property's value mark it "checked"
                     if (_.isArray(parsedField.value)) {
                         parsedField.options = {};
@@ -151,14 +169,14 @@
          */
         , template: function (data) {
             /*jshint multistr:true */
-
+window.blah = data.fieldAttributes;
             var tpl = '<% _.each(data.fieldAttributes, function (field, fieldName) { %> \
                     <div> \
                         <% if (field.label) { %><label for="<%= field.id %>"><%= field.label %></label><% } %> \
-                        <% if (field.type == "radio" && _.isArray(field.value)) { %>\
-                            <% _.each(field.options, function (checked, val) { %><input type="radio" name="<%= fieldName %>" value="<%= val %>"  <%= checked %> /><% }); %>\
-                        <% } else if (field.type == "radio" && _.isObject(field.value)) { %>\
-                            <% _.each(field.options, function (option, name) { %><input type="radio" name="<%= fieldName %>" value="<%= option.value %>"  <%= option.checked %> /><label><%= option.label %></label><% }); %>\
+                        <% if ((field.type == "radio" || field.type == "checkbox") && _.isArray(field.value)) { %>\
+                            <% _.each(field.options, function (checked, val) { %><input type="<%= field.type %>" name="<%= fieldName %>" value="<%= val %>"  <%= checked %> /><% }); %>\
+                        <% } else if ((field.type == "radio" || field.type == "checkbox") && _.isObject(field.value)) { %>\
+                            <% _.each(field.options, function (option, name) { %><input type="<%= field.type %>" name="<%= fieldName %>" value="<%= option.value %>"  <%= option.checked %> /><label><%= option.label %></label><% }); %>\
                         <% } else { %> \
                             <input type="<%= field.type %>" name="<%= fieldName %>" <% if (field.id) { %> id="<%= field.id %>" <% } if (field.value) { %> value="<%= field.value %>" <% } %>  <%= field.checked %> <%= field.required %> /> \
                         <% } %> \
