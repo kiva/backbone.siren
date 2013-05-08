@@ -154,6 +154,10 @@ describe('Siren Validate: ', function () {
         it('validates required fields; on failure sets .valueMissing = true', function () {
             result = bbSirenModel.validateOne('', sirenObject.actions[0].fields[0]);
             expect(result).toEqual(_.extend({}, validityState, {valueMissing: true, valid: false}));
+
+            // value === false is not considered an empty field
+            result = bbSirenModel.validateOne(false, sirenObject.actions[0].fields[0]);
+            expect(result).toEqual(validityState);
         });
 
 
