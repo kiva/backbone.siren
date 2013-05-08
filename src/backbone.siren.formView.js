@@ -62,7 +62,7 @@
                             parsedField.options.push({
                                 value: name
                                 , label: label
-                                , checked: propertyValue == name
+                                , checked: _.indexOf(propertyValue, name) > -1
                                     ? 'checked'
                                     : ''
                             });
