@@ -35,7 +35,7 @@
         fieldAttributes = fieldAttributes || {};
 
         var parsedFieldAttributes = {}
-            , fields = action.fields;
+        , fields = action.fields;
 
         _.each(fields, function (field) {
             var fieldName, parsedField, propertyValue;
@@ -58,7 +58,7 @@
                         });
                     } else if (_.isObject(parsedField.value)) {
                         parsedField.options = [];
-                        _.each(parsedField.value, function (label, name) {
+                        _.each(parsedField.value, function (name, label) {
                             parsedField.options.push({
                                 value: name
                                 , label: label
