@@ -1,5 +1,5 @@
 /*
-* Backbone.Siren v0.2.1
+* Backbone.Siren v0.2.2
 *
 * Copyright (c) 2013 Kiva Microfunds
 * Licensed under the MIT license.
@@ -27,7 +27,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
          * @return {Backbone.Siren.Model}
          */
         add: function (model) {
-            return _store[model.url()] = model;
+            _store[model.url()] = model;
         }
 
 
@@ -131,6 +131,14 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , presets = {
                 url: this.href
                 , actionName: actionName
+                , success: function (model, resp, options) {
+                    parent.trigger('sync:' + actionName, model, resp, options);
+                    parent.attributes = {};
+                    parent.set(actionModel.attributes);
+                }
+                , error: function (model, xhr, options) {
+                    parent.trigger('error: ' + actionName, model, options);
+                }
             };
 
             delete options.attributes;
@@ -153,12 +161,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             actionModel._actions = parent._actions;
 
             options = _.extend(presets, options);
-            options.success = function (model, resp, options) {
-                parent.trigger('sync:' + actionName, model, resp, options);
-                parent.attributes = {};
-                parent.set(actionModel.attributes);
-            };
-
             attributes = _.extend(parent.getAllByAction(this.name), attributes);
             return actionModel.save(attributes, options);
         }
@@ -529,7 +531,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      * @param {Object} deferred
      * @param {Object} options
      */
-    function handleRootRequest(bbSiren, chain, deferred, options) {
+    function handleRootRequestSuccess(bbSiren, chain, deferred, options) {
         if (_.isEmpty(chain)) {
             deferred.resolve(bbSiren);
         } else {
@@ -560,8 +562,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             if (_hasClass(entity, 'collection')) {
                 bbSiren = new Backbone.Siren.Collection(entity);
             } else if (_hasClass(entity, 'error')) {
-                // @todo how should we represent errors?
-                warn('@todo - errors');
+                // @todo how should we represent errors?  For now, treat them as regular Models...
+                bbSiren = new Backbone.Siren.Model(entity);
             } else {
                 bbSiren = new Backbone.Siren.Model(entity);
             }
@@ -593,10 +595,10 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         , resolve: function resolve(url, options) {
             options = options || {};
 
-            var chain = parseChain(url);
-            var rootUrl = chain.shift();
-            var chainedDeferred = options.deferred;
-            var state, deferred, storedPromise, bbSiren;
+            var state, deferred, storedPromise, bbSiren
+            , chain = parseChain(url)
+            , rootUrl = chain.shift()
+            , chainedDeferred = options.deferred;
 
             storedPromise = store.getRequest(rootUrl);
             if (storedPromise) {
@@ -615,6 +617,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
             }
 
+            // We need a deferred object to track the final result of our request (bc it can be chained)
             if (! chainedDeferred) {
                 chainedDeferred = new $.Deferred();
             }
@@ -626,17 +629,28 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                     nestedResolve(bbSiren, chain, chainedDeferred, options);
                 });
             } else {
-                if (options.forceFetch || !(bbSiren = store.get(rootUrl))) {
+                if (options.forceFetch || !(bbSiren = store.get(rootUrl))) { // Assign value to bbSiren
+
+                    // By creating our own Deferred() we can map standard responses to bbSiren error models along each step of the chain
                     deferred = new $.Deferred();
                     store.addRequest(rootUrl, deferred.promise());
 
-                    Backbone.Siren.ajax(rootUrl, options).done(function (entity) {
-                        var bbSiren = Backbone.Siren.parse(entity);
-                        deferred.resolve(bbSiren);
-                        handleRootRequest(bbSiren, chain, chainedDeferred, options);
-                    });
+                    Backbone.Siren.ajax(rootUrl, options)
+                        .done(function (entity) {
+                            var bbSiren = Backbone.Siren.parse(entity);
+                            deferred.resolve(bbSiren);
+                            handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
+                        })
+                        .fail(function (jqXhr) {
+                            var entity = JSON.parse(jqXhr.responseText || '{}')
+                            , bbSiren = Backbone.Siren.parse(entity);
+
+                            deferred.reject(bbSiren, jqXhr);
+                            chainedDeferred.reject(bbSiren, jqXhr);
+                        });
                 } else {
-                    handleRootRequest(bbSiren, chain, chainedDeferred, options);
+                    // Use the stored bbSiren object
+                    handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
                 }
             }
 
@@ -733,6 +747,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
              * Wrapper for .fetch(), adds the following:
              * 1) Checks the local store
              * 2) The deferred is resolved with the parsed Siren object
+             *
+             * @param {Object} options
              */
             , resolve: function (options) {
                 options = options || {};
@@ -1116,7 +1132,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 , valid: true
             };
 
-            if (!val) {
+            if (val === undefined || val === '') {
                 validity = _.extend(validity, this.validateEmptyField(field));
             } else {
                 _.extend(validity, this.validateType(val, field));
@@ -1233,6 +1249,7 @@ Backbone.Siren.validate.setPatterns(patternLibrary);
 
 
     /**
+     * @todo the function needs help!!
      *
      * @param action
      * @param fieldAttributes
@@ -1244,7 +1261,7 @@ Backbone.Siren.validate.setPatterns(patternLibrary);
         fieldAttributes = fieldAttributes || {};
 
         var parsedFieldAttributes = {}
-            , fields = action.fields;
+        , fields = action.fields;
 
         _.each(fields, function (field) {
             var fieldName, parsedField, propertyValue;
@@ -1257,15 +1274,32 @@ Backbone.Siren.validate.setPatterns(patternLibrary);
                 propertyValue = action.parent.get(fieldName);
                 parsedField = _.extend({value: propertyValue, type: 'text'}, field, fieldAttributes[fieldName]);
                 if (parsedField.type == 'checkbox') {
+                    // Value is an array of values, if the value matches the property's value mark it "checked"
+                    if (_.isArray(parsedField.value)) {
+                        parsedField.options = {};
+                        _.each(parsedField.value, function (val) {
+                            parsedField.options[val] = propertyValue == val
+                                ? 'checked'
+                                : '';
+                        });
+                    } else if (_.isObject(parsedField.value)) {
+                        parsedField.options = [];
+                        _.each(parsedField.value, function (name, label) {
+                            parsedField.options.push({
+                                value: name
+                                , label: label
+                                , checked: _.indexOf(propertyValue, name) > -1
+                                    ? 'checked'
+                                    : ''
+                            });
+                        });
+                    } else if (parsedField.value) {
+                        parsedField.checked = 'checked';
+                    } else {
+                        parsedField.checked = '';
+                    }
 
-                    // We assume properties represented by checkboxes only have boolean values
-                    parsedField.checked = parsedField.value
-                        ? 'checked'
-                        : '';
-
-                    delete parsedField.value;
                 } else if (parsedField.type == 'radio') {
-
                     // Value is an array of values, if the value matches the property's value mark it "checked"
                     if (_.isArray(parsedField.value)) {
                         parsedField.options = {};
@@ -1320,7 +1354,7 @@ Backbone.Siren.validate.setPatterns(patternLibrary);
 
         tagName: 'form'
 
-        , events: {
+        , _events: {
             'submit': 'handleFormSubmit'
         }
 
@@ -1341,6 +1375,8 @@ Backbone.Siren.validate.setPatterns(patternLibrary);
                 if (model) {
                     if (model instanceof Backbone.Model) {
                         nonModelAttributes[name] = model.get(name);
+                    } else if (model instanceof Backbone.View) {
+                        nonModelAttributes[name] = model.action.store.get(name);
                     } else if (typeof model == 'function') {
                         nonModelAttributes[name] = model.call(self);
                     }
@@ -1359,14 +1395,14 @@ Backbone.Siren.validate.setPatterns(patternLibrary);
          */
         , template: function (data) {
             /*jshint multistr:true */
-
+window.blah = data.fieldAttributes;
             var tpl = '<% _.each(data.fieldAttributes, function (field, fieldName) { %> \
                     <div> \
                         <% if (field.label) { %><label for="<%= field.id %>"><%= field.label %></label><% } %> \
-                        <% if (field.type == "radio" && _.isArray(field.value)) { %>\
-                            <% _.each(field.options, function (checked, val) { %><input type="radio" name="<%= fieldName %>" value="<%= val %>"  <%= checked %> /><% }); %>\
-                        <% } else if (field.type == "radio" && _.isObject(field.value)) { %>\
-                            <% _.each(field.options, function (option, name) { %><input type="radio" name="<%= fieldName %>" value="<%= option.value %>"  <%= option.checked %> /><label><%= option.label %></label><% }); %>\
+                        <% if ((field.type == "radio" || field.type == "checkbox") && _.isArray(field.value)) { %>\
+                            <% _.each(field.options, function (checked, val) { %><input type="<%= field.type %>" name="<%= fieldName %>" value="<%= val %>"  <%= checked %> /><% }); %>\
+                        <% } else if ((field.type == "radio" || field.type == "checkbox") && _.isObject(field.value)) { %>\
+                            <% _.each(field.options, function (option, name) { %><input type="<%= field.type %>" name="<%= fieldName %>" value="<%= option.value %>"  <%= option.checked %> /><label><%= option.label %></label><% }); %>\
                         <% } else { %> \
                             <input type="<%= field.type %>" name="<%= fieldName %>" <% if (field.id) { %> id="<%= field.id %>" <% } if (field.value) { %> value="<%= field.value %>" <% } %>  <%= field.checked %> <%= field.required %> /> \
                         <% } %> \
@@ -1483,6 +1519,8 @@ Backbone.Siren.validate.setPatterns(patternLibrary);
                 this.initializeForm(options);
             }
 
+            // Use _events so that events don't get overridden by child views.
+            this.events = _.extend(this._events, this.events);
             Backbone.View.call(this, options);
         }
     });
