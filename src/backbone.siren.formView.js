@@ -2,128 +2,6 @@
     'use strict';
 
 
-    /**
-     *
-     * @param action
-     * @param attributes
-     * @return {Object}
-     */
-    function parseAttributes(action, attributes) {
-        attributes = attributes || {};
-
-        return {
-            id: attributes.id || action.name + '-form'
-            , enctype: attributes.enctype || action.type
-            , method: attributes.method || action.method
-            , action: attributes.action || action.href
-            , title: attributes.title || action.title
-            , novalidate: !attributes.validation
-        };
-    }
-
-
-    /**
-     * @todo the function needs help!!
-     *
-     * @param action
-     * @param fieldAttributes
-     * @return {Object}
-     */
-    function parseFieldAttributes(action, fieldAttributes) {
-        /*jshint maxcomplexity: 15 */ // @todo clen up this function and remove this jshint config
-
-        fieldAttributes = fieldAttributes || {};
-
-        var parsedFieldAttributes = {}
-        , fields = action.fields;
-
-        _.each(fields, function (field) {
-            var fieldName, parsedField, propertyValue;
-
-            if (field.type == 'entity') {
-                // @todo, how to handle the view for sub-entities...?
-                console.log('@todo - how to handle sub-entity views?');
-            } else if (field.type != 'entity') {
-                fieldName = field.name;
-                propertyValue = action.parent.get(fieldName);
-                parsedField = _.extend({value: propertyValue, type: 'text'}, field, fieldAttributes[fieldName]);
-                if (parsedField.type == 'checkbox') {
-                    // Value is an array of values, if the value matches the property's value mark it "checked"
-                    if (_.isArray(parsedField.value)) {
-                        parsedField.options = {};
-                        _.each(parsedField.value, function (val) {
-                            parsedField.options[val] = propertyValue == val
-                                ? 'checked'
-                                : '';
-                        });
-                    } else if (_.isObject(parsedField.value)) {
-                        parsedField.options = [];
-                        _.each(parsedField.value, function (name, label) {
-                            parsedField.options.push({
-                                value: name
-                                , label: label
-                                , checked: _.indexOf(propertyValue, name) > -1
-                                    ? 'checked'
-                                    : ''
-                            });
-                        });
-                    } else if (parsedField.value) {
-                        parsedField.checked = 'checked';
-                    } else {
-                        parsedField.checked = '';
-                    }
-
-                } else if (parsedField.type == 'radio') {
-                    // Value is an array of values, if the value matches the property's value mark it "checked"
-                    if (_.isArray(parsedField.value)) {
-                        parsedField.options = {};
-                        _.each(parsedField.value, function (val) {
-                            parsedField.options[val] = propertyValue == val
-                                ? 'checked'
-                                : '';
-                        });
-                    } else if (_.isObject(parsedField.value)) {
-                        parsedField.options = [];
-                        _.each(parsedField.value, function (label, name) {
-                            parsedField.options.push({
-                                value: name
-                                , label: label
-                                , checked: propertyValue == name
-                                    ? 'checked'
-                                    : ''
-                            });
-                        });
-                    }
-                }
-
-                parsedField.required = parsedField.required
-                    ? 'required'
-                    : '';
-            }
-
-            if (parsedField) { // @todo check is temporary until nested entity rendering is working
-                var fieldNameArray = fieldName.split('.');
-                var pointer = parsedFieldAttributes;
-
-                var length = fieldNameArray.length;
-                _.each(fieldNameArray, function (name, index) {
-                    if (! pointer[name]) {
-                        if (index == length - 1) {
-                            pointer[name] = parsedField;
-                        } else {
-                            pointer[name] = {};
-                        }
-                    }
-
-                    pointer = pointer[name];
-                });
-            }
-        });
-
-        return parsedFieldAttributes;
-    }
-
-
     Backbone.Siren.FormView = Backbone.View.extend({
 
         tagName: 'form'
@@ -184,6 +62,129 @@
                 <% }); %> <button type="submit" class="submitButton">Submit</button>';
 
             return  _.template(tpl, data, {variable: 'data'});
+        }
+
+
+        /**
+         *
+         * @param action
+         * @param attributes
+         * @return {Object}
+         */
+        , parseAttributes: function (action, attributes) {
+            attributes = attributes || {};
+
+            return {
+                id: attributes.id || action.name + '-form'
+                , enctype: attributes.enctype || action.type
+                , method: attributes.method || action.method
+                , action: attributes.action || action.href
+                , title: attributes.title || action.title
+                , novalidate: !attributes.validation
+            };
+        }
+
+
+
+        /**
+         * @todo the function needs help!!
+         *
+         * @param action
+         * @param fieldAttributes
+         * @return {Object}
+         */
+        , parseFieldAttributes: function (action, fieldAttributes) {
+            /*jshint maxcomplexity: 15 */ // @todo clen up this function and remove this jshint config
+
+            fieldAttributes = fieldAttributes || {};
+
+            var parsedFieldAttributes = {}
+                , fields = action.fields;
+
+            _.each(fields, function (field) {
+                var fieldName, parsedField, propertyValue;
+
+                if (field.type == 'entity') {
+                    // @todo, how to handle the view for sub-entities...?
+                    console.log('@todo - how to handle sub-entity views?');
+                } else if (field.type != 'entity') {
+                    fieldName = field.name;
+                    propertyValue = action.parent.get(fieldName);
+                    parsedField = _.extend({value: propertyValue, type: 'text'}, field, fieldAttributes[fieldName]);
+                    if (parsedField.type == 'checkbox') {
+                        // Value is an array of values, if the value matches the property's value mark it "checked"
+                        if (_.isArray(parsedField.value)) {
+                            parsedField.options = {};
+                            _.each(parsedField.value, function (val) {
+                                parsedField.options[val] = propertyValue == val
+                                    ? 'checked'
+                                    : '';
+                            });
+                        } else if (_.isObject(parsedField.value)) {
+                            parsedField.options = [];
+                            _.each(parsedField.value, function (name, label) {
+                                parsedField.options.push({
+                                    value: name
+                                    , label: label
+                                    , checked: _.indexOf(propertyValue, name) > -1
+                                        ? 'checked'
+                                        : ''
+                                });
+                            });
+                        } else if (parsedField.value) {
+                            parsedField.checked = 'checked';
+                        } else {
+                            parsedField.checked = '';
+                        }
+
+                    } else if (parsedField.type == 'radio') {
+                        // Value is an array of values, if the value matches the property's value mark it "checked"
+                        if (_.isArray(parsedField.value)) {
+                            parsedField.options = {};
+                            _.each(parsedField.value, function (val) {
+                                parsedField.options[val] = propertyValue == val
+                                    ? 'checked'
+                                    : '';
+                            });
+                        } else if (_.isObject(parsedField.value)) {
+                            parsedField.options = [];
+                            _.each(parsedField.value, function (label, name) {
+                                parsedField.options.push({
+                                    value: name
+                                    , label: label
+                                    , checked: propertyValue == name
+                                        ? 'checked'
+                                        : ''
+                                });
+                            });
+                        }
+                    }
+
+                    parsedField.required = parsedField.required
+                        ? 'required'
+                        : '';
+                }
+
+                if (parsedField) { // @todo check is temporary until nested entity rendering is working
+                    var fieldNameArray = fieldName.split('.');
+                    var pointer = parsedFieldAttributes;
+
+                    var length = fieldNameArray.length;
+                    _.each(fieldNameArray, function (name, index) {
+                        if (! pointer[name]) {
+                            if (index == length - 1) {
+                                pointer[name] = parsedField;
+                            } else {
+                                pointer[name] = {};
+                            }
+                        }
+
+                        pointer = pointer[name];
+                    });
+                }
+            });
+
+            return parsedFieldAttributes;
         }
 
 
@@ -264,12 +265,12 @@
 
             // Set the attributes manually if the view has already been instantiated
             if (this.cid) {
-                this.$el.attr(parseAttributes(action, options.attributes));
+                this.$el.attr(this.parseAttributes(action, options.attributes));
             } else {
-                options.attributes = parseAttributes(options.action, options.attributes);
+                options.attributes = this.parseAttributes(options.action, options.attributes);
             }
 
-            this.fieldAttributes = parseFieldAttributes(action, options.fieldAttributes);
+            this.fieldAttributes = this.parseFieldAttributes(action, options.fieldAttributes);
         }
 
 
