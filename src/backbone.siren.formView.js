@@ -169,7 +169,7 @@
          */
         , template: function (data) {
             /*jshint multistr:true */
-window.blah = data.fieldAttributes;
+
             var tpl = '<% _.each(data.fieldAttributes, function (field, fieldName) { %> \
                     <div> \
                         <% if (field.label) { %><label for="<%= field.id %>"><%= field.label %></label><% } %> \
