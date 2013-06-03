@@ -1,0 +1,68 @@
+// There are 3 levels of abstraction for errors:
+// 1 - http
+// 2 - generic error wrapper
+// 3 - specific errors in errors array
+
+{
+    "class":["error", "SirenError"]
+
+
+    , "properties": {
+
+        // We don't pass in the http status code or status text, that's already in the header
+
+        "summary": "There was a validation error"
+        , "code": "org.kiva.validationError"
+
+        // HTTP has status text AND status code...should we have both?
+
+        , "errors": [
+            {
+                "field": "username" // field is [optional], required only when the errors is wrt a field
+                , "message": "Missing required field, username"
+                , "type": "http://api.io/errors/missing-value"
+                , "code": "1001" // Is this necessary?
+                , "value": "" // value is [optional]
+            }
+
+            // Errors can also be nested in errors in a subentity
+            , {
+                "field": "someSubEntity"
+                , "errors": [
+                    {
+                        "field": ""
+                        , "message": ""
+                        , "type": ""
+                        , "value": ""
+                    }
+                ]
+            }
+        ]
+    }
+
+    , "actions": [
+        // @todo
+        // Retry action should only be added when there is a 5XX error...you don't want to retry an invalid action
+        {
+            "name":"retry"
+            ,"method":"PATCH"
+            ,"href":"https:\/\/api-vm.kiva.org\/SirenV1\/SirenV1\/my\/facebook"
+            ,"type":"application\/json"
+            ,"fields":{
+                // All the fields that need to be submitted on a retry
+                // respects dot notation and uses the original model for context
+
+                // wrt backbone.siren...the retry action should get added as an action to the original Backbone Model
+            }
+        }
+    ]
+
+
+    , "links": [
+
+        // The "self" points to a description of the error
+        {
+            "rel": ["self"], "href": "https://api.x.io/errors/org.kiva.validationError"
+        }
+    ]
+}

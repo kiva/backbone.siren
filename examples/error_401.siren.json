@@ -1,0 +1,60 @@
+// In general, no need to escape url strings...
+
+// Add the spec to the following ticket: https://bugs.kiva.org/issues/32311
+
+{
+    "class":["error","SirenError"]
+    ,"properties":{
+        "summary":"Valid OAuth credentials are required to access this resource. Either you have supplied invalid or malformed credentials, or omitted them altogether."
+
+        // "Status" is a mirror of the http status code.  We can probably remove it and grab this info directly from the header
+        // "Summary" will still be necessary
+        ,"status": {
+            "code":401
+            ,"name":"Unauthorized"
+        }
+        ,"code":0   // I don't think this is necessary
+        ,"errors":[
+            {
+                "code":"-1"
+                ,"message":"Error validating token: Expired timestamp, yours 1368840100, ours 1368838904"
+            }
+            , {
+                field: isLoanRepayment
+                , value: false
+            }
+        ]
+
+        // Rethink this + retry action.  Should not have to say the same thing twice in two different places
+        ,"fields": {
+            "input": {
+                "isLoanAutoPublish":false
+                ,"isRepaymentAutoPublish":false
+                ,"isTeamAutoPublish":false
+                ,"isShowActivityToFriends":false
+            }
+        }
+    }
+    ,"actions":[
+        {
+            "name":"retry"
+            ,"method":"PATCH"
+            ,"href":"https:\/\/api-vm.kiva.org\/SirenV1\/SirenV1\/my\/facebook"
+            ,"type":"application\/json"
+            ,"fields":{
+                "input":{
+                    "isLoanAutoPublish":false
+                    ,"isRepaymentAutoPublish":false
+                    ,"isTeamAutoPublish":false
+                    ,"isShowActivityToFriends":false
+                }
+            }
+        }
+    ],"links":[
+    // Remove the self url, errors do not have an endpoint
+        {
+            "rel":["self"]
+            ,"href":"https:\/\/api-vm.kiva.org\/SirenV1\/SirenV1\/my\/facebook"
+        }
+    ]
+}
