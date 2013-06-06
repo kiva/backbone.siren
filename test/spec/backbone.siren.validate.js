@@ -206,12 +206,25 @@ describe('Siren Validate: ', function () {
             bbSirenModel = new Backbone.Siren.Model(sirenObject);
         });
 
-       it('returns a partial ValidityState object, sets .typeMismatch = true on failure', function () {
-           var result;
 
-           result = bbSirenModel.validateType('notANumber', field);
-           expect(result).toEqual({typeMismatch: true, valid: false});
-       });
+		it('returns a partial ValidityState object, sets .typeMismatch = true on failure', function () {
+		   var result;
+
+		   result = bbSirenModel.validateType('notANumber', field);
+		   expect(result).toEqual({typeMismatch: true, valid: false});
+		});
+
+
+	    it('fails if type == "checkbox" and the value is not a boolean', function () {
+		    var result;
+		    field = {name: 'prop1', type: 'checkbox'};
+
+		    result = bbSirenModel.validateType(true, field);
+		    expect(result).toEqual({});
+
+		    result = bbSirenModel.validateType('notABoolean', field);
+		    expect(result).toEqual({typeMismatch: true, valid: false});
+	    });
     });
 
 

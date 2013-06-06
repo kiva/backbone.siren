@@ -87,15 +87,13 @@
          * @param {Object} field A Siren action field
          */
         , validateType: function (val, field) {
-            var validity = {}
+            var invalid, validity = {}
             , type = field.type
             , pattern = Backbone.Siren.validate.customPatterns[type] || Backbone.Siren.validate.standardPatterns[type];
 
-            if (pattern) {
-                if (!pattern.test(val)) {
-                    validity.valid = false;
-                    validity.typeMismatch = true;
-                }
+            if (pattern && !pattern.test(val) || (type == 'checkbox' && typeof val != 'boolean')) {
+	            validity.valid = false;
+	            validity.typeMismatch = true;
             }
 
             return validity;
