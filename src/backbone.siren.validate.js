@@ -87,7 +87,7 @@
          * @param {Object} field A Siren action field
          */
         , validateType: function (val, field) {
-            var invalid, validity = {}
+            var validity = {}
             , type = field.type
             , pattern = Backbone.Siren.validate.customPatterns[type] || Backbone.Siren.validate.standardPatterns[type];
 
