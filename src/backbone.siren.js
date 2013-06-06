@@ -89,9 +89,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
     function Action(actionData, parent) {
         _.extend(this, actionData);
         this.parent = parent;
-
-        // Mainly for storing properties that will need to be saved to the server but that don't live on any model.
-        this.store = new Backbone.Model();
     }
 
 
@@ -107,6 +104,62 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 return field.name == name;
             });
         }
+
+
+	    /**
+	     * Gets the secureKeys model.
+	     *
+	     * 95% of Models will not use secureKeys, so no need to have the secureKeys model added to all actions.
+	     *
+	     * Technically, secureKeys aren't all that inherently "secure", it's a bucket for temporarily storing security
+	     * information in one spot so you can easily clear them out as soon as they are no longer needed.
+	     *
+	     * @returns {Backbone.Model}
+	     */
+	    , getSecureKeys: function () {
+		    var secureKeys = this.secureKeys;
+		    if (secureKeys) {
+			    return secureKeys;
+		    }
+
+		    this.secureKeys = new Backbone.Model();
+		    return this.secureKeys;
+	    }
+
+
+	    /**
+	     *
+	     * @param {String} name
+	     * @param {String} value
+	     */
+	    , setSecureKey: function (name, value) {
+		    var secureKeys = this.getSecureKeys();
+		    secureKeys.set(name, value);
+	    }
+
+
+	    /**
+	     *
+	     * @param {String}
+	     * @returns {*}
+	     */
+	    , getSecureKey: function (name) {
+		    var secureKeys = this.secureKeys;
+
+		    if (secureKeys) {
+			    return secureKeys.get(name);
+		    }
+	    }
+
+
+	    /**
+	     * Clears all secure keys.
+	     * We don't want "secure keys" floating around they should be cleared as soon as they are no longer needed
+	     *
+	     */
+	    , clearSecureKeys: function () {
+		    return this.getSecureKeys().clear();
+	    }
 
 
         /**

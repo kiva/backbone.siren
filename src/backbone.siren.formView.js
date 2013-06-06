@@ -23,12 +23,16 @@
 
             // Allow mapping of attribute values to designated models
             _.each(this.fieldAttributes, function (field, name) {
+
                 var model = field.model;
                 if (model) {
                     if (model instanceof Backbone.Model) {
                         nonModelAttributes[name] = model.get(name);
-                    } else if (model instanceof Backbone.View) {
-                        nonModelAttributes[name] = model.action.store.get(name);
+                    } else if (field.isSecure) {
+                        nonModelAttributes[name] = model.action.getSecureKey(name);
+
+	                    // We don't want to store secure keys any longer than we need to.
+	                    model.action.clearSecurekeys();
                     } else if (typeof model == 'function') {
                         nonModelAttributes[name] = model.call(self);
                     }

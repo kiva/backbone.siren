@@ -66,6 +66,13 @@ var jqXhrResult = editUserAction.execute();
 
 ```
 
+Actions have:
+
+```
+.parent     // the parent model to the action
+```
+
+
 ### Options
 
 ```
