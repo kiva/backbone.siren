@@ -1,0 +1,82 @@
+{
+	"class":[
+		"collection",
+		"Subscriptions"
+	],
+	"entities":[
+		{
+			"class":[
+				"Subscription"
+			],
+			"properties":{
+				"id":994,
+				"type":"deposit",
+				"status":"active",
+				"startDate":"2013-04-24T03:38:24Z",
+				"amount": 40
+			},
+			"actions":[
+				{
+					"name":"myAction",
+					"method":"POST",
+					"href":"http://x.io/subscriptions",
+					"fields":[
+						{
+							"name": "type"
+							, "type": "text"
+						},
+						{
+							"name":"status",
+							"type":"text"
+						},
+						{
+							"name":"startDate",
+							"type":"text"
+						},
+						{
+							"name": "amount"
+							, "type": "number"
+						}
+					]
+				}
+			],
+			"links":[
+				{
+					"rel":[
+						"self"
+					],
+					"href":"https:\/\/api-vm.kiva.org\/SirenV1\/my\/subscription\/994"
+				}
+			]
+		}
+	],
+	"actions": [
+		{
+			"name": "myBatchAction"
+			, "method": "POST"
+			, "class": ["batch"]
+			, "href": "http://x.io/subscriptions"
+			, "fields": [
+				{"name": "myAction", "type": "batch"}
+			]
+		}
+
+		, {
+			"name": "myNestedBatchAction"
+			, "method": "POST"
+			, "class": ["batch"]
+			, "href": "http://x.io/subscriptions"
+			, "fields": [
+				{"name": "active", "type": "text"}
+			]
+		}
+	],
+	"links":[
+		{
+			"rel":[
+				"self"
+			],
+			"href":"http://x.io/subscriptions"
+		}
+	]
+}
