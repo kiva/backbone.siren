@@ -486,6 +486,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
 
     /**
+     * @todo very similar to .toJSON...should they be the same function?
      *
      * @param {String} actionName
      * @param {Boolean} [asJson]
