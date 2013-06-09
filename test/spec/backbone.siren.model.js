@@ -141,7 +141,8 @@ describe('Siren Model: ', function () {
             var actions = sirenModel.actions();
 
             expect($.isArray(actions)).toBe(true);
-            expect(actions[0].name).toBe('add-item');
+	        expect(actions[0].name).toBe('simple-add');
+            expect(actions[1].name).toBe('add-item');
         });
     });
 
@@ -202,7 +203,8 @@ describe('Siren Model: ', function () {
                 expect(action instanceof Backbone.Siren.Action).toBeTrue();
             });
 
-            expect(actions[0].name).toBe('add-item');
+	        expect(actions[0].name).toBe('simple-add');
+            expect(actions[1].name).toBe('add-item');
         });
 
 
