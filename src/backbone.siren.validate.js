@@ -219,4 +219,14 @@
 
     });
 
+
+	_.extend(Backbone.Siren.Collection.prototype, {
+
+		validate: function (attrs, options) {
+			return this.every(function (model) {
+				return model.validate(attrs, options);
+			});
+		}
+	});
+
 }(_, Backbone));
