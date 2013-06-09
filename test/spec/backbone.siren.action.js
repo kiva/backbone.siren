@@ -25,7 +25,7 @@ describe('Siren Action: ', function () {
     });
 
 
-    describe('.execute', function () {
+    describe('.execute()', function () {
         beforeEach(function () {
             this.stub($, 'ajax').returns('jqXhr');
         });
@@ -61,6 +61,17 @@ describe('Siren Action: ', function () {
         it('returns undefined if there is no parent to the action', function () {
             expect(bbSirenAction.execute()).not.toBeDefined();
         });
+
+
+	    it('sets the validationError object on models that fail validation', function () {
+		    var mySirenModel = {href: 'test', actions: [sirenAction]}
+			, myBbSirenModel = new Backbone.Siren.Model(mySirenModel);
+
+		    this.stub(Backbone.Siren.Model.prototype, 'validate').returns('There was an error');
+
+		    myBbSirenModel.getActionByName('add-item').execute();
+		    expect(myBbSirenModel.validationError).toMatch('There was an error');
+	    });
     });
 });
 

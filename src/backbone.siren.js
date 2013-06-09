@@ -170,7 +170,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         , execute: function (options) {
             options = options || {};
 
-            var actionModel
+            var actionModel, jqXhr
             , attributes = options.attributes
             , actionName = this.name
             , parent = this.parent
@@ -208,7 +208,13 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
             options = _.extend(presets, options);
             attributes = _.extend(parent.getAllByAction(this.name), attributes);
-            return actionModel.save(attributes, options);
+
+		    jqXhr = actionModel.save(attributes, options);
+
+		    // Transfer any validation errors back onto the "original" model
+		    parent.validationError = actionModel.validationError;
+
+		    return jqXhr;
         }
     };
 
