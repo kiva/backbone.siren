@@ -1023,6 +1023,61 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 		    }
 
 
+		    /**
+		     * A Collection can only do POST, or GET actions.
+		     *
+		     * Ex:
+		     * POST a new resource
+		     * POST batch action (including deletion of many resources)
+		     * GET many resources
+		     *
+		     * @param {Object} attributes
+		     * @param {Object} options
+		     */
+		    , save: function(key, val, options) {
+			    var attrs, method, xhr, attributes = this.attributes;
+
+			    // Handle both `"key", value` and `{key: value}` -style arguments.
+			    if (key == null || typeof key === 'object') {
+				    attrs = key;
+				    options = val;
+			    } else {
+				    (attrs = {})[key] = val;
+			    }
+
+			    // We want to validate each model but not the collection
+			    options = _.extend({validate: false}, options);
+			    var isValid = true;
+
+			    // Validate each model in the collection.
+			    this.each(function (model) {
+				    if (!model._validate(attrs, options)) {
+					    isValid = false;
+				    }
+			    });
+
+			    // Do not persist invalid models.
+			    if (! isValid) {
+				    return false;
+			    }
+
+			    // After a successful server-side save, the client is (optionally)
+			    // updated with the server-side state.
+			    if (options.parse === void 0) options.parse = true;
+			    var collection = this;
+			    var success = options.success;
+			    options.success = function(resp) {
+
+				    // @todo do stuff
+
+			    };
+			    // @todo handle error -> wrapError(this, options);
+
+			    // We use "create" because that is the only Backbone "method" that maps to "POST"
+			    return  this.sync('create', this, options);
+		    }
+
+
             /**
              * http://backbonejs.org/#Collection-constructor
              *
