@@ -1005,6 +1005,24 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             }
 
 
+		    /**
+		     * Overrides the default implementation so that we can append each model's "id"
+		     *
+		     * @param {Object} options
+		     * @returns {Object}
+		     */
+		    , toJSON: function(options) {
+			    return this.map(function (model){
+				    var jsonObj = model.toJSON(options);
+				    if (options.actionName) {
+					    jsonObj.id = model.id;
+				    }
+
+				    return jsonObj;
+			    });
+		    }
+
+
             /**
              * http://backbonejs.org/#Collection-constructor
              *
