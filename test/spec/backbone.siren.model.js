@@ -12,7 +12,8 @@ describe('Siren Model: ', function () {
                 ,{"class":["info","customer"],"rel":["http://x.io/rels/customer", "name:customer"],"properties":{"customerId":"pj123","name":"Peter Joseph"},"links":[{"rel":["self"],"href":"http://api.x.io/customers/pj123"}]}
             ]
             ,"actions":[
-                {"name":"add-item","title":"Add Item","method":"POST","href":"http://api.x.io/orders/42/items","type":"application/x-www-form-urlencoded","fields":[{name: "addedLater"}, {"name":"orderNumber","type":"hidden","value":"42"},{"name":"productCode","type":"text"},{"name":"quantity","type":"number"}]}
+			    {name: 'simple-add', method: 'POST', href: 'http://api.x.io/orders', fields: [{name: 'orderNumber'}]}
+                , {"name":"add-item","title":"Add Item","method":"POST","href":"http://api.x.io/orders/42/items","type":"application/x-www-form-urlencoded","fields":[{name: "addedLater"}, {"name":"orderNumber","type":"hidden","value":"42"},{"name":"productCode","type":"text"},{"name":"quantity","type":"number"}]}
             ]
             ,"links":[
                 {"rel":["self"],"href":"http://api.x.io/orders/42"},{"rel":["previous"],"href":"http://api.x.io/orders/41"},{"rel":["next"],"href":"http://api.x.io/orders/43"}
@@ -218,7 +219,7 @@ describe('Siren Model: ', function () {
     });
 
 
-    describe('.resolveEntity', function () {
+    describe('.resolveEntity()', function () {
 
         it ('returns the bbSiren object wrapped in a Deferred object', function () {
             var subEntity = {href: 'http://test.com', name: 'mySubEntity'}
@@ -279,7 +280,7 @@ describe('Siren Model: ', function () {
     });
 
 
-    describe('.setEntity', function () {
+    describe('.setEntity()', function () {
 
         it ('sets a raw Siren object as a model on the parent entity', function () {
             sirenModel.setEntity(new Backbone.Siren.Model({properties: {one: 'uno'}, name: 'testEntity'}), [], 'testEntity');
@@ -296,7 +297,7 @@ describe('Siren Model: ', function () {
     });
 
 
-    describe('.resolveChain', function () {
+    describe('.resolveChain()', function () {
 
         it('makes serialized requests through the descendant chain', function () {
             var chainedRequest = sirenModel.resolveChain('#customer');
@@ -306,6 +307,34 @@ describe('Siren Model: ', function () {
             });
         });
     });
+
+
+	describe('.toJSON()', function () {
+
+		it('returns an object with all the model\'s attributes', function () {
+			var props = {boom: "ba", bastic: "da"};
+			var model = new Backbone.Siren.Model({properties: props, links: [{rel: ["self"], href: "http://dada"}]});
+
+			expect(model.toJSON()).toEqual(props);
+		});
+
+
+		it('returns an object with all the model\'s attributes as well as the attributes in any nested models', function () {
+
+			var expected = _.extend(
+				settingsModelSiren.properties
+				, {customer: sirenModel.get('customer').attributes}
+				, {'order-items': []} // Empty, nested entities are represented as an empty array
+			);
+
+			expect(sirenModel.toJSON()).toEqual(expected);
+		});
+
+
+		it('if passed an action name, returns an object with only those attributes that correspond to the action', function () {
+			expect(sirenModel.toJSON({actionName: 'simple-add'})).toEqual({orderNumber: 42});
+		});
+	});
 
 
     it('sets a Backbone Model\'s "attributes" hash to the siren "properties"', function () {

@@ -202,9 +202,16 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             }
 
             // Create a temporary clone that will house all our actions related properties
-            actionModel = parent.clone();
-            actionModel._data = parent._data;
-            actionModel._actions = parent._actions;
+		    // We do this because Backbone will override our model with the response from the server
+		    // @todo we probably want something smarter so that we can update the model but still mitigate funky stuff from happening in the View.
+		    if (parent instanceof Backbone.Model) {
+			    actionModel = parent.clone();
+			    actionModel._data = parent._data;
+			    actionModel._actions = parent._actions;
+		    } else {
+			    // parent is a collection, no need to clone it.
+			    actionModel = parent;
+		    }
 
             options = _.extend(presets, options);
             attributes = _.extend(parent.getAllByAction(this.name), attributes);
@@ -855,11 +862,9 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                     action = this.getActionByName(options.actionName);
                     if (action) {
                         _.each(action.fields, function (field) {
-                            var val = self instanceof Backbone.Siren.Model
-                                ? self.get(field.name)
-                                : self.meta(field.name);
+                            var val = self.get(field.name);
 
-                            json[field.name] = val instanceof Backbone.Siren.Model
+                            json[field.name] = (val instanceof Backbone.Siren.Model || (val instanceof Backbone.Siren.Collection))
                                 ? val.toJSON({actionName: field.action})
                                 : val;
                         });
