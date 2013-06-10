@@ -178,7 +178,7 @@ describe('Siren Model: ', function () {
 	    it('returns an object with all the model\'s attributes as well as the attributes in any nested models', function () {
 
 		    var expected = _.extend(
-			    settingsModelSiren.properties
+			    _.clone(settingsModelSiren.properties)
 			    , {customer: sirenModel.get('customer').attributes}
 			    , {'order-items': []} // Empty, nested entities are represented as an empty array
 		    );
