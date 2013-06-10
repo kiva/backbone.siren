@@ -1,5 +1,5 @@
 /*
-* Backbone.Siren v0.2.2
+* Backbone.Siren v0.2.3
 *
 * Copyright (c) 2013 Kiva Microfunds
 * Licensed under the MIT license.
@@ -94,11 +94,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      * @constructor
      */
     function Action(actionData, parent) {
-        _.extend(this, actionData);
+        _.extend(this, {class: [], method: 'GET', type: 'application/x-www-form-urlencoded'}, actionData);
         this.parent = parent;
-
-        // Mainly for storing properties that will need to be saved to the server but that don't live on any model.
-        this.store = new Backbone.Model();
     }
 
 
@@ -116,6 +113,62 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         }
 
 
+	    /**
+	     * Gets the secureKeys model.
+	     *
+	     * 95% of Models will not use secureKeys, so no need to have the secureKeys model added to all actions.
+	     *
+	     * Technically, secureKeys aren't all that inherently "secure", it's a bucket for temporarily storing security
+	     * information in one spot so you can easily clear them out as soon as they are no longer needed.
+	     *
+	     * @returns {Backbone.Model}
+	     */
+	    , getSecureKeys: function () {
+		    var secureKeys = this.secureKeys;
+		    if (secureKeys) {
+			    return secureKeys;
+		    }
+
+		    this.secureKeys = new Backbone.Model();
+		    return this.secureKeys;
+	    }
+
+
+	    /**
+	     *
+	     * @param {String} name
+	     * @param {String} value
+	     */
+	    , setSecureKey: function (name, value) {
+		    var secureKeys = this.getSecureKeys();
+		    secureKeys.set(name, value);
+	    }
+
+
+	    /**
+	     *
+	     * @param {String}
+	     * @returns {*}
+	     */
+	    , getSecureKey: function (name) {
+		    var secureKeys = this.secureKeys;
+
+		    if (secureKeys) {
+			    return secureKeys.get(name);
+		    }
+	    }
+
+
+	    /**
+	     * Clears all secure keys.
+	     * We don't want "secure keys" floating around they should be cleared as soon as they are no longer needed
+	     *
+	     */
+	    , clearSecureKeys: function () {
+		    return this.getSecureKeys().clear();
+	    }
+
+
         /**
          *
          * @param {Object} options
@@ -124,8 +177,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         , execute: function (options) {
             options = options || {};
 
-            var actionModel
-            , attributes = options.attributes
+            var actionModel, jqXhr
+            , attributes = options.attributes// So you can pass in properties that do not exist in the parent.
             , actionName = this.name
             , parent = this.parent
             , presets = {
@@ -156,13 +209,26 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             }
 
             // Create a temporary clone that will house all our actions related properties
-            actionModel = parent.clone();
-            actionModel._data = parent._data;
-            actionModel._actions = parent._actions;
+		    // We do this because Backbone will override our model with the response from the server
+		    // @todo we probably want something smarter so that we can update the model but still mitigate funky stuff from happening in the View.
+		    if (parent instanceof Backbone.Model) {
+			    actionModel = parent.clone();
+			    actionModel._data = parent._data;
+			    actionModel._actions = parent._actions;
+		    } else {
+			    // parent is a collection, no need to clone it.
+			    actionModel = parent;
+		    }
 
             options = _.extend(presets, options);
-            attributes = _.extend(parent.getAllByAction(this.name), attributes);
-            return actionModel.save(attributes, options);
+            attributes = _.extend(parent.toJSON({actionName: this.name}), attributes);
+
+		    jqXhr = actionModel.save(attributes, options);
+
+		    // Transfer any validation errors back onto the "original" model or collection.
+		    parent.validationError = actionModel.validationError;
+
+		    return jqXhr;
         }
     };
 
@@ -428,34 +494,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
     /**
      *
-     * @param {String} actionName
-     * @param {Boolean} [asJson]
-     * @return {Object}
-     */
-    function getAllByAction(actionName, asJson) {
-        var values
-        , action = this.getActionByName(actionName)
-        , self = this;
-
-        if (action) {
-            values = {};
-            _.each(action.fields, function (field) {
-                var val = self instanceof Backbone.Siren.Model
-                    ? self.get(field.name)
-                    : self.meta(field.name);
-
-                values[field.name] = asJson && val instanceof Backbone.Siren.Model
-                    ? val.getAllByAction(field.action)
-                    : val;
-            });
-        }
-
-        return values;
-    }
-
-
-    /**
-     *
      * @param {String} name
      * @return {Object|undefined}
      */
@@ -667,7 +705,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , actions: actions
             , links: links
             , getActionByName: getActionByName
-            , getAllByAction: getAllByAction
             , parseActions: parseActions
             , request: request
             , resolveChain: resolveChain
@@ -797,21 +834,31 @@ Backbone.Siren = (function (_, Backbone, undefined) {
              * @param {Object} options
              */
             , toJSON: function (options) {
-                var action, json = {}, self = this;
+                var fields, action
+	            , json = {}
+	            , self = this;
 
                 if (options && options.actionName) {
                     action = this.getActionByName(options.actionName);
-                    if (action) {
-                        _.each(action.fields, function (field) {
-                            var val = self instanceof Backbone.Siren.Model
-                                ? self.get(field.name)
-                                : self.meta(field.name);
+                }
 
-                            json[field.name] = val instanceof Backbone.Siren.Model
-                                ? val.toJSON({actionName: field.action})
-                                : val;
-                        });
-                    }
+			    if (action) {
+				    // WIP - Batch
+				    // It's implied that an empty fields array means we are using field definitions as provided by sub-entities
+				    // I'm calling this "nested batch".  No support yet for "inline batch"
+				    if (action.class.indexOf('batch') > -1 && _.empty(action.fields)) {
+					    fields = this.at(0).getActionByName(action.name).fields;
+				    } else {
+					    fields = action.fields;
+				    }
+
+                    _.each(fields, function (field) {
+                        var val = self.get(field.name);
+
+                        json[field.name] = (val instanceof Backbone.Siren.Model || (val instanceof Backbone.Siren.Collection))
+                            ? val.toJSON({actionName: field.action})
+                            : val;
+                    });
                 } else {
                     _.each(this.attributes, function (val, name) {
                         json[name] = (val instanceof Backbone.Siren.Model) || (val instanceof Backbone.Siren.Collection)
@@ -867,7 +914,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , links: links
             , actions: actions
             , getActionByName: getActionByName
-            , getAllByAction: getAllByAction
             , parseActions: parseActions
             , request: request
             , resolveChain: resolveChain
@@ -946,6 +992,58 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , meta: function (name) {
                 return this._meta[name];
             }
+
+
+		    /**
+		     * Overrides the default implementation so that we can append each model's "id"
+		     *
+		     * @param {Object} options
+		     * @returns {Object}
+		     */
+		    , toJSON: function (options) {
+			    options  = options || {};
+
+			    if (! options.isNestedBatch) { // @todo WIP
+				    delete options.actionName;
+			    }
+
+			    return this.map(function (model){
+				    var jsonObj = model.toJSON(options);
+				    if (options.actionName) {
+					    jsonObj.id = model.id;
+				    }
+
+				    return jsonObj;
+			    });
+		    }
+
+
+		    /**
+		     * A Collection can only do POST, or GET actions.
+		     *
+		     * Ex:
+		     * POST a new resource
+		     * POST batch action (including deletion of many resources)
+		     * GET many resources
+		     *
+		     * @param {Object} attributes
+		     * @param {Object} options
+		     */
+		    , save: function(attrs, options) {
+			    options = _.extend({validate: true}, options);
+
+			    if (this._validate) {
+					this._validate(attrs, options);
+			    }
+
+			    // After a successful server-side save, the client is (optionally)
+			    // updated with the server-side state.
+			    if (options.parse === undefined) {
+				    options.parse = true;
+			    }
+
+			    return  this.sync('create', this, options);
+		    }
 
 
             /**
@@ -1041,7 +1139,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
          */
         , validateSubEntity: function (subEntity, field) {
             var actionName = field.action;
-            return subEntity._validate(subEntity.getAllByAction(actionName), {validate: true, actionName: actionName})
+            return subEntity._validate(subEntity.toJSON({actionName: actionName}), {validate: true, actionName: actionName})
                 ? {}
                 : {customError: true, valid: false};
         }
@@ -1057,11 +1155,9 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , type = field.type
             , pattern = Backbone.Siren.validate.customPatterns[type] || Backbone.Siren.validate.standardPatterns[type];
 
-            if (pattern) {
-                if (!pattern.test(val)) {
-                    validity.valid = false;
-                    validity.typeMismatch = true;
-                }
+            if (pattern && !pattern.test(val) || (type == 'checkbox' && typeof val != 'boolean')) {
+	            validity.valid = false;
+	            validity.typeMismatch = true;
             }
 
             return validity;
@@ -1187,6 +1283,63 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
     });
 
+
+	_.extend(Backbone.Siren.Collection.prototype, {
+
+		/**
+		 *
+		 *
+		 * @param attributes
+		 * @param options
+		 * @returns {Object|undefined} Errors, keyed by each model's id.  Undefined if there are no errors
+		 */
+		validate: function (attributes, options) {
+			var errors;
+			var self = this;
+
+			_.each(attributes, function (attrs) {
+				if (! attrs.id) {
+					return true;
+				}
+
+				var model = self.get(attrs.id);
+				var error = model.validate(attrs, options);
+
+				if (error) {
+					errors[attrs.id] = error;
+				}
+			});
+
+			if (! _.isEmpty(errors)) {
+				return errors;
+			}
+		}
+
+
+		/**
+		 *
+		 * @param {Object} attrs
+		 * @param {Object} options
+		 */
+		, _validate: function (attrs, options) {
+			var errors;
+
+			if (!options.validate || !this.validate) {
+				return true;
+			}
+
+			attrs = _.extend({}, this.attributes, attrs);
+			errors = this.validationErrors = this.validate(attrs, options) || null;
+
+			if (!errors) {
+				return true;
+			}
+
+			this.trigger('invalid', this, errors, _.extend(options || {}, {validationErrors: errors}));
+			return false;
+		}
+	});
+
 }(_, Backbone));
 
 /*jshint unused: false*/
@@ -1228,128 +1381,6 @@ Backbone.Siren.validate.setPatterns(patternLibrary);
     'use strict';
 
 
-    /**
-     *
-     * @param action
-     * @param attributes
-     * @return {Object}
-     */
-    function parseAttributes(action, attributes) {
-        attributes = attributes || {};
-
-        return {
-            id: attributes.id || action.name + '-form'
-            , enctype: attributes.enctype || action.type
-            , method: attributes.method || action.method
-            , action: attributes.action || action.href
-            , title: attributes.title || action.title
-            , novalidate: !attributes.validation
-        };
-    }
-
-
-    /**
-     * @todo the function needs help!!
-     *
-     * @param action
-     * @param fieldAttributes
-     * @return {Object}
-     */
-    function parseFieldAttributes(action, fieldAttributes) {
-        /*jshint maxcomplexity: 15 */ // @todo clen up this function and remove this jshint config
-
-        fieldAttributes = fieldAttributes || {};
-
-        var parsedFieldAttributes = {}
-        , fields = action.fields;
-
-        _.each(fields, function (field) {
-            var fieldName, parsedField, propertyValue;
-
-            if (field.type == 'entity') {
-                // @todo, how to handle the view for sub-entities...?
-                console.log('@todo - how to handle sub-entity views?');
-            } else if (field.type != 'entity') {
-                fieldName = field.name;
-                propertyValue = action.parent.get(fieldName);
-                parsedField = _.extend({value: propertyValue, type: 'text'}, field, fieldAttributes[fieldName]);
-                if (parsedField.type == 'checkbox') {
-                    // Value is an array of values, if the value matches the property's value mark it "checked"
-                    if (_.isArray(parsedField.value)) {
-                        parsedField.options = {};
-                        _.each(parsedField.value, function (val) {
-                            parsedField.options[val] = propertyValue == val
-                                ? 'checked'
-                                : '';
-                        });
-                    } else if (_.isObject(parsedField.value)) {
-                        parsedField.options = [];
-                        _.each(parsedField.value, function (name, label) {
-                            parsedField.options.push({
-                                value: name
-                                , label: label
-                                , checked: _.indexOf(propertyValue, name) > -1
-                                    ? 'checked'
-                                    : ''
-                            });
-                        });
-                    } else if (parsedField.value) {
-                        parsedField.checked = 'checked';
-                    } else {
-                        parsedField.checked = '';
-                    }
-
-                } else if (parsedField.type == 'radio') {
-                    // Value is an array of values, if the value matches the property's value mark it "checked"
-                    if (_.isArray(parsedField.value)) {
-                        parsedField.options = {};
-                        _.each(parsedField.value, function (val) {
-                            parsedField.options[val] = propertyValue == val
-                                ? 'checked'
-                                : '';
-                        });
-                    } else if (_.isObject(parsedField.value)) {
-                        parsedField.options = [];
-                        _.each(parsedField.value, function (label, name) {
-                            parsedField.options.push({
-                                value: name
-                                , label: label
-                                , checked: propertyValue == name
-                                    ? 'checked'
-                                    : ''
-                            });
-                        });
-                    }
-                }
-
-                parsedField.required = parsedField.required
-                    ? 'required'
-                    : '';
-            }
-
-            if (parsedField) { // @todo check is temporary until nested entity rendering is working
-                var fieldNameArray = fieldName.split('.');
-                var pointer = parsedFieldAttributes;
-
-                var length = fieldNameArray.length;
-                _.each(fieldNameArray, function (name, index) {
-                    if (! pointer[name]) {
-                        if (index == length - 1) {
-                            pointer[name] = parsedField;
-                        } else {
-                            pointer[name] = {};
-                        }
-                    }
-
-                    pointer = pointer[name];
-                });
-            }
-        });
-
-        return parsedFieldAttributes;
-    }
-
-
     Backbone.Siren.FormView = Backbone.View.extend({
 
         tagName: 'form'
@@ -1371,12 +1402,16 @@ Backbone.Siren.validate.setPatterns(patternLibrary);
 
             // Allow mapping of attribute values to designated models
             _.each(this.fieldAttributes, function (field, name) {
+
                 var model = field.model;
                 if (model) {
                     if (model instanceof Backbone.Model) {
                         nonModelAttributes[name] = model.get(name);
-                    } else if (model instanceof Backbone.View) {
-                        nonModelAttributes[name] = model.action.store.get(name);
+                    } else if (field.isSecure) {
+                        nonModelAttributes[name] = model.action.getSecureKey(name);
+
+	                    // We don't want to store secure keys any longer than we need to.
+	                    model.action.clearSecurekeys();
                     } else if (typeof model == 'function') {
                         nonModelAttributes[name] = model.call(self);
                     }
@@ -1395,7 +1430,7 @@ Backbone.Siren.validate.setPatterns(patternLibrary);
          */
         , template: function (data) {
             /*jshint multistr:true */
-window.blah = data.fieldAttributes;
+
             var tpl = '<% _.each(data.fieldAttributes, function (field, fieldName) { %> \
                     <div> \
                         <% if (field.label) { %><label for="<%= field.id %>"><%= field.label %></label><% } %> \
@@ -1410,6 +1445,129 @@ window.blah = data.fieldAttributes;
                 <% }); %> <button type="submit" class="submitButton">Submit</button>';
 
             return  _.template(tpl, data, {variable: 'data'});
+        }
+
+
+        /**
+         *
+         * @param action
+         * @param attributes
+         * @return {Object}
+         */
+        , parseAttributes: function (action, attributes) {
+            attributes = attributes || {};
+
+            return {
+                id: attributes.id || action.name + '-form'
+                , enctype: attributes.enctype || action.type
+                , method: attributes.method || action.method
+                , action: attributes.action || action.href
+                , title: attributes.title || action.title
+                , novalidate: !attributes.validation
+            };
+        }
+
+
+
+        /**
+         * @todo the function needs help!!
+         *
+         * @param action
+         * @param fieldAttributes
+         * @return {Object}
+         */
+        , parseFieldAttributes: function (action, fieldAttributes) {
+            /*jshint maxcomplexity: 15 */ // @todo clen up this function and remove this jshint config
+
+            fieldAttributes = fieldAttributes || {};
+
+            var parsedFieldAttributes = {}
+                , fields = action.fields;
+
+            _.each(fields, function (field) {
+                var fieldName, parsedField, propertyValue;
+
+                if (field.type == 'entity') {
+                    // @todo, how to handle the view for sub-entities...?
+                    console.log('@todo - how to handle sub-entity views?');
+                } else if (field.type != 'entity') {
+                    fieldName = field.name;
+                    propertyValue = action.parent.get(fieldName);
+                    parsedField = _.extend({value: propertyValue, type: 'text'}, field, fieldAttributes[fieldName]);
+                    if (parsedField.type == 'checkbox') {
+                        // Value is an array of values, if the value matches the property's value mark it "checked"
+                        if (_.isArray(parsedField.value)) {
+                            parsedField.options = {};
+                            _.each(parsedField.value, function (val) {
+                                parsedField.options[val] = propertyValue == val
+                                    ? 'checked'
+                                    : '';
+                            });
+                        } else if (_.isObject(parsedField.value)) {
+                            parsedField.options = [];
+                            _.each(parsedField.value, function (name, label) {
+                                parsedField.options.push({
+                                    value: name
+                                    , label: label
+                                    , checked: _.indexOf(propertyValue, name) > -1
+                                        ? 'checked'
+                                        : ''
+                                });
+                            });
+                        } else if (parsedField.value) {
+                            parsedField.checked = 'checked';
+                        } else {
+                            parsedField.checked = '';
+                        }
+
+                    } else if (parsedField.type == 'radio') {
+                        // Value is an array of values, if the value matches the property's value mark it "checked"
+                        if (_.isArray(parsedField.value)) {
+                            parsedField.options = {};
+                            _.each(parsedField.value, function (val) {
+                                parsedField.options[val] = propertyValue == val
+                                    ? 'checked'
+                                    : '';
+                            });
+                        } else if (_.isObject(parsedField.value)) {
+                            parsedField.options = [];
+                            _.each(parsedField.value, function (label, name) {
+                                parsedField.options.push({
+                                    value: name
+                                    , label: label
+                                    , checked: propertyValue == name
+                                        ? 'checked'
+                                        : ''
+                                });
+                            });
+                        }
+                    }
+
+                    parsedField.required = parsedField.required
+                        ? 'required'
+                        : '';
+                }
+
+                if (parsedField) { // @todo check is temporary until nested entity rendering is working
+                    var fieldNameArray = fieldName.split('.');
+                    var pointer = parsedFieldAttributes;
+
+                    var length = fieldNameArray.length;
+                    _.each(fieldNameArray, function (name, index) {
+                        if (! pointer[name]) {
+                            if (index == length - 1) {
+                                pointer[name] = parsedField;
+                            } else {
+                                pointer[name] = {};
+                            }
+                        }
+
+                        pointer = pointer[name];
+                    });
+                }
+            });
+
+            return parsedFieldAttributes;
         }
 
 
@@ -1490,12 +1648,12 @@ window.blah = data.fieldAttributes;
 
             // Set the attributes manually if the view has already been instantiated
             if (this.cid) {
-                this.$el.attr(parseAttributes(action, options.attributes));
+                this.$el.attr(this.parseAttributes(action, options.attributes));
             } else {
-                options.attributes = parseAttributes(options.action, options.attributes);
+                options.attributes = this.parseAttributes(options.action, options.attributes);
             }
 
-            this.fieldAttributes = parseFieldAttributes(action, options.fieldAttributes);
+            this.fieldAttributes = this.parseFieldAttributes(action, options.fieldAttributes);
         }
 
 
