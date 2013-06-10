@@ -189,6 +189,85 @@ describe('Siren Collection: ', function () {
     });
 
 
+	describe('.save', function () {
+		var collectionObj = {
+			entities: [
+				{
+					rel: 'teamSettings'
+					, properties: {
+					prop1: 'uno'
+					, prop2: 'dos'
+					, prop3: 'tres'
+				}
+					, actions: [
+					{
+						rel: ''
+						, method: 'POST'
+						, href: 'http://x.io/communicationSettings/team1'
+					}
+				]
+				}
+				, {
+					rel: 'teamSettings'
+					, properties: {
+						prop1: 'uno'
+						, prop2: 'dos'
+						, prop3: 'tres'
+					}
+					, actions: [
+						{
+							rel: ''
+							, method: 'POST'
+							, href: 'http://x.io/communicationSettings/team1'
+						}
+					]
+				}
+				, {
+					rel: 'teamSettings'
+					, properties: {
+						prop1: 'uno'
+						, prop2: 'dos'
+						, prop3: 'tres'
+					}
+					, actions: [
+						{
+							rel: ''
+							, method: 'POST'
+							, href: 'http://x.io/communicationSettings/team1'
+						}
+					]
+				}
+			]
+
+			, actions: [
+				{
+					name: 'updateSettings'
+					, class: ['nested-batch']
+					, method: 'POST'
+					, href: 'http://x.io/communicationSettings'
+				}
+			]
+
+			, links: [
+				{
+					rel: ['self']
+					, href: 'http://x.io/communicationSettings'
+				}
+			]
+		}
+
+
+		it('//', function () {
+
+			sirenCollection = new Backbone.Siren.Collection(collectionObj);
+
+			var attrs = {};
+			sirenCollection.save(attrs, {actionName: ''});
+
+		});
+	});
+
+
     it('Adds siren sub-entities as models to a Backbone Collection\'s models property', function () {
         expect(sirenCollection.models).toBeDefined();
         expect(sirenCollection.models.length).toBe(3);
