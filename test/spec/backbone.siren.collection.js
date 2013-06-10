@@ -144,14 +144,14 @@ describe('Siren Collection: ', function () {
 
 
     describe('.toJSON()', function () {
-        it('gets all "properties" for a given "action"', function () {
+        it('gets all "properties" for a given "action", grouped by object and adding "id"', function () {
             var expectedProperties = [
-	            sirenCollection.at(0).toJSON()
-	            , sirenCollection.at(1).toJSON()
-	            , sirenCollection.at(2).toJSON()
+	            _.extend(sirenCollection.at(0).toJSON(), {id: 39032})
+				, _.extend(sirenCollection.at(1).toJSON(), {id: 39922})
+				, _.extend(sirenCollection.at(2).toJSON(), {id: 521056})
             ];
 
-            expect(sirenCollection.toJSON({actionName: 'do-stuff'})).toMatch(expectedProperties);
+            expect(sirenCollection.toJSON({actionName: 'do-stuff'})).toEqual(expectedProperties);
         });
 
 
