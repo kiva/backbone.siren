@@ -214,7 +214,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 		    }
 
             options = _.extend(presets, options);
-            attributes = _.extend(parent.getAllByAction(this.name), attributes);
+            attributes = _.extend(parent.toJSON({actionName: this.name}), attributes);
 
 		    jqXhr = actionModel.save(attributes, options);
 
@@ -486,35 +486,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
 
     /**
-     * @todo very similar to .toJSON...should they be the same function?
-     *
-     * @param {String} actionName
-     * @param {Boolean} [asJson]
-     * @return {Object}
-     */
-    function getAllByAction(actionName, asJson) {
-        var values
-        , action = this.getActionByName(actionName)
-        , self = this;
-
-        if (action) {
-            values = {};
-            _.each(action.fields, function (field) {
-                var val = self instanceof Backbone.Siren.Model
-                    ? self.get(field.name)
-                    : self.meta(field.name);
-
-                values[field.name] = asJson && val instanceof Backbone.Siren.Model
-                    ? val.getAllByAction(field.action)
-                    : val;
-            });
-        }
-
-        return values;
-    }
-
-
-    /**
      *
      * @param {String} name
      * @return {Object|undefined}
@@ -727,7 +698,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , actions: actions
             , links: links
             , getActionByName: getActionByName
-            , getAllByAction: getAllByAction
             , parseActions: parseActions
             , request: request
             , resolveChain: resolveChain
@@ -861,7 +831,9 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
                 if (options && options.actionName) {
                     action = this.getActionByName(options.actionName);
-                    if (action) {
+                }
+
+			    if (action) {
                         _.each(action.fields, function (field) {
                             var val = self.get(field.name);
 
@@ -869,7 +841,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                                 ? val.toJSON({actionName: field.action})
                                 : val;
                         });
-                    }
                 } else {
                     _.each(this.attributes, function (val, name) {
                         json[name] = (val instanceof Backbone.Siren.Model) || (val instanceof Backbone.Siren.Collection)
@@ -925,7 +896,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , links: links
             , actions: actions
             , getActionByName: getActionByName
-            , getAllByAction: getAllByAction
             , parseActions: parseActions
             , request: request
             , resolveChain: resolveChain
@@ -1012,7 +982,13 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 		     * @param {Object} options
 		     * @returns {Object}
 		     */
-		    , toJSON: function(options) {
+		    , toJSON: function (options) {
+			    options  = options || {};
+
+			    if (! options.isNestedBatch) { // @todo WIP
+				    delete options.actionName;
+			    }
+
 			    return this.map(function (model){
 				    var jsonObj = model.toJSON(options);
 				    if (options.actionName) {

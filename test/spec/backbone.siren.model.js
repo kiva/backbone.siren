@@ -166,31 +166,55 @@ describe('Siren Model: ', function () {
     });
 
 
-    describe('.getAllByAction()', function () {
-        it('gets all "properties" for a given "action"', function () {
+    describe('.toJSON()', function () {
+	    it('returns an object with all the model\'s attributes', function () {
+		    var props = {boom: "ba", bastic: "da"};
+		    var model = new Backbone.Siren.Model({properties: props, links: [{rel: ["self"], href: "http://dada"}]});
+
+		    expect(model.toJSON()).toEqual(props);
+	    });
+
+
+	    it('returns an object with all the model\'s attributes as well as the attributes in any nested models', function () {
+
+		    var expected = _.extend(
+			    settingsModelSiren.properties
+			    , {customer: sirenModel.get('customer').attributes}
+			    , {'order-items': []} // Empty, nested entities are represented as an empty array
+		    );
+
+		    expect(sirenModel.toJSON()).toEqual(expected);
+	    });
+
+
+        it('if passed an action name, returns an object with only those attributes that correspond to the action', function () {
             var expectedProperties = {
                 orderNumber: 42
             };
 
-            expect(sirenModel.getAllByAction('add-item')).toMatch(expectedProperties);
+            expect(sirenModel.toJSON({actionName: 'add-item'})).toMatch(expectedProperties);
 
             // Make sure it works for attributes that are added during run-time.
             sirenModel.set('addedLater', 'uno');
             expectedProperties.addedLater = 'uno';
-            expect(sirenModel.getAllByAction('add-item')).toMatch(expectedProperties);
+            expect(sirenModel.toJSON({actionName: 'add-item'})).toMatch(expectedProperties);
         });
 
 
         it('returns an empty object if the model does not have any matching attributes for the given action', function () {
+	        // @todo should probably throw instead.
+
             var mySirenModel = new Backbone.Siren.Model({actions: [{name: 'do-test'}]});
 
-            expect(mySirenModel.getAllByAction('do-test')).toEqual({});
+            expect(mySirenModel.toJSON({actionName: 'do-test'})).toEqual({});
         });
 
 
-        it('returns undefined if the action is not found', function () {
-            var mySirenModel = new Backbone.Siren.Model({});
-            expect(mySirenModel.getAllByAction('non-existent-action')).not.toBeDefined();
+        it('returns an object with all the model\'s attributes if the action is not found', function () {
+	        var props = {boom: "ba", bastic: "da"};
+	        var model = new Backbone.Siren.Model({properties: props, links: [{rel: ["self"], href: "http://dada"}]});
+
+	        expect(model.toJSON()).toEqual(props);
         });
     });
 
@@ -309,34 +333,6 @@ describe('Siren Model: ', function () {
             });
         });
     });
-
-
-	describe('.toJSON()', function () {
-
-		it('returns an object with all the model\'s attributes', function () {
-			var props = {boom: "ba", bastic: "da"};
-			var model = new Backbone.Siren.Model({properties: props, links: [{rel: ["self"], href: "http://dada"}]});
-
-			expect(model.toJSON()).toEqual(props);
-		});
-
-
-		it('returns an object with all the model\'s attributes as well as the attributes in any nested models', function () {
-
-			var expected = _.extend(
-				settingsModelSiren.properties
-				, {customer: sirenModel.get('customer').attributes}
-				, {'order-items': []} // Empty, nested entities are represented as an empty array
-			);
-
-			expect(sirenModel.toJSON()).toEqual(expected);
-		});
-
-
-		it('if passed an action name, returns an object with only those attributes that correspond to the action', function () {
-			expect(sirenModel.toJSON({actionName: 'simple-add'})).toEqual({orderNumber: 42});
-		});
-	});
 
 
     it('sets a Backbone Model\'s "attributes" hash to the siren "properties"', function () {

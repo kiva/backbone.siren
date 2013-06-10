@@ -75,7 +75,7 @@
          */
         , validateSubEntity: function (subEntity, field) {
             var actionName = field.action;
-            return subEntity._validate(subEntity.getAllByAction(actionName), {validate: true, actionName: actionName})
+            return subEntity._validate(subEntity.toJSON({actionName: actionName}), {validate: true, actionName: actionName})
                 ? {}
                 : {customError: true, valid: false};
         }
