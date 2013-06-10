@@ -222,10 +222,33 @@
 
 	_.extend(Backbone.Siren.Collection.prototype, {
 
-		validate: function (attrs, options) {
-			return this.every(function (model) {
-				return model.validate(attrs, options);
+		/**
+		 *
+		 *
+		 * @param attributes
+		 * @param options
+		 * @returns {Object|undefined} Errors, keyed by each model's id.  Undefined if there are no errors
+		 */
+		validate: function (attributes, options) {
+			var errors;
+			var self = this;
+
+			_.each(attributes, function (attrs) {
+				if (! attrs.id) {
+					return true;
+				}
+
+				var model = self.at(attrs.id);
+				var error = model.validate(attrs[this], options);
+
+				if (error) {
+					errors[attrs.id] = error;
+				}
 			});
+
+			if (! _.isEmpty(errors)) {
+				return errors;
+			}
 		}
 
 
@@ -235,21 +258,20 @@
 		 * @param {Object} options
 		 */
 		, _validate: function (attrs, options) {
-			var error;
+			var errors;
 
 			if (!options.validate || !this.validate) {
 				return true;
 			}
 
 			attrs = _.extend({}, this.attributes, attrs);
+			errors = this.validationErrors = this.validate(attrs, options) || null;
 
-			error = this.validationError = this.validate(attrs, options) || null;
-
-			if (!error) {
+			if (!errors) {
 				return true;
 			}
 
-			this.trigger('invalid', this, error, _.extend(options || {}, {validationError: error}));
+			this.trigger('invalid', this, errors, _.extend(options || {}, {validationErrors: errors}));
 			return false;
 		}
 	});

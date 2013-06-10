@@ -87,7 +87,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      * @constructor
      */
     function Action(actionData, parent) {
-        _.extend(this, actionData);
+        _.extend(this, {class: [], method: 'GET', type: 'application/x-www-form-urlencoded'}, actionData);
         this.parent = parent;
     }
 
@@ -827,20 +827,28 @@ Backbone.Siren = (function (_, Backbone, undefined) {
              * @param {Object} options
              */
             , toJSON: function (options) {
-                var action, json = {}, self = this;
+                var fields, action
+	            , json = {}
+	            , self = this;
 
                 if (options && options.actionName) {
                     action = this.getActionByName(options.actionName);
                 }
 
 			    if (action) {
-                        _.each(action.fields, function (field) {
-                            var val = self.get(field.name);
+				    if (action.class.indexOf('batch') > -1 && _.empty(action.fields)) {
+					    fields = this.at(0).getActionByName(action.name).fields;
+				    } else {
+					    fields = action.fields;
+				    }
 
-                            json[field.name] = (val instanceof Backbone.Siren.Model || (val instanceof Backbone.Siren.Collection))
-                                ? val.toJSON({actionName: field.action})
-                                : val;
-                        });
+                    _.each(fields, function (field) {
+                        var val = self.get(field.name);
+
+                        json[field.name] = (val instanceof Backbone.Siren.Model || (val instanceof Backbone.Siren.Collection))
+                            ? val.toJSON({actionName: field.action})
+                            : val;
+                    });
                 } else {
                     _.each(this.attributes, function (val, name) {
                         json[name] = (val instanceof Backbone.Siren.Model) || (val instanceof Backbone.Siren.Collection)
@@ -1012,23 +1020,18 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 		     * @param {Object} options
 		     */
 		    , save: function(attrs, options) {
-			    // We want to validate each model but not the collection
-			    options = _.extend({validate: false}, options);
-				this._validate(attrs, options);
+			    options = _.extend({validate: true}, options);
+
+			    if (this._validate) {
+					this._validate(attrs, options);
+			    }
 
 			    // After a successful server-side save, the client is (optionally)
 			    // updated with the server-side state.
-			    if (options.parse === void 0) options.parse = true;
-			    var collection = this;
-			    var success = options.success;
-			    options.success = function(resp) {
+			    if (options.parse === undefined) {
+				    options.parse = true;
+			    }
 
-				    // @todo do stuff
-
-			    };
-			    // @todo handle error -> wrapError(this, options);
-
-			    // We use "create" because that is the only Backbone "method" that maps to "POST"
 			    return  this.sync('create', this, options);
 		    }
 

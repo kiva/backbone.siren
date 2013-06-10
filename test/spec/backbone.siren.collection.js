@@ -199,21 +199,26 @@ describe('Siren Collection: ', function () {
     });
 
 
-	describe('.save', function () {
+	describe('.save()', function () {
 		var collectionObj = {
 			entities: [
 				{
 					rel: 'teamSettings'
 					, properties: {
-					prop1: 'uno'
-					, prop2: 'dos'
-					, prop3: 'tres'
-				}
+						prop1: 'uno'
+						, prop2: 'dos'
+						, prop3: 'tres'
+					}
 					, actions: [
 					{
-						rel: ''
+						name: 'updateSettings'
 						, method: 'POST'
 						, href: 'http://x.io/communicationSettings/team1'
+						, fields: [
+							{name: 'prop1'}
+							, {name: 'prop2'}
+							, {name: 'prop3'}
+						]
 					}
 				]
 				}
@@ -226,9 +231,14 @@ describe('Siren Collection: ', function () {
 					}
 					, actions: [
 						{
-							rel: ''
+							name: 'updateSettings'
 							, method: 'POST'
 							, href: 'http://x.io/communicationSettings/team1'
+							, fields: [
+								{name: 'prop1'}
+								, {name: 'prop2'}
+								, {name: 'prop3'}
+							]
 						}
 					]
 				}
@@ -241,9 +251,14 @@ describe('Siren Collection: ', function () {
 					}
 					, actions: [
 						{
-							rel: ''
+							name: 'updateSettings'
 							, method: 'POST'
 							, href: 'http://x.io/communicationSettings/team1'
+							, fields: [
+								{name: 'prop1'}
+								, {name: 'prop2'}
+								, {name: 'prop3'}
+							]
 						}
 					]
 				}
@@ -252,7 +267,7 @@ describe('Siren Collection: ', function () {
 			, actions: [
 				{
 					name: 'updateSettings'
-					, class: ['nested-batch']
+					, class: ['batch']
 					, method: 'POST'
 					, href: 'http://x.io/communicationSettings'
 				}
@@ -264,16 +279,15 @@ describe('Siren Collection: ', function () {
 					, href: 'http://x.io/communicationSettings'
 				}
 			]
-		}
+		};
 
 
-		it('//', function () {
-
+		it('returns a jqXhr object', function () {
 			sirenCollection = new Backbone.Siren.Collection(collectionObj);
+			var result = sirenCollection.save({}, {actionName: 'updateSettings'});
 
-			var attrs = {};
-			sirenCollection.save(attrs, {actionName: ''});
-
+			// @todo poor-man's jqXhr test.
+			expect(result.done).toBeFunction();
 		});
 	});
 
