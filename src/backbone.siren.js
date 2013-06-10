@@ -836,6 +836,9 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 }
 
 			    if (action) {
+				    // WIP - Batch
+				    // It's implied that an empty fields array means we are using field definitions as provided by sub-entities
+				    // I'm calling this "nested batch".  No support yet for "inline batch"
 				    if (action.class.indexOf('batch') > -1 && _.empty(action.fields)) {
 					    fields = this.at(0).getActionByName(action.name).fields;
 				    } else {
