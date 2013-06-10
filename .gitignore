@@ -5,4 +5,5 @@ npm-debug.log
 /test/coverage
 
 ## The following are not ignored but are marked as "unchanged"
+## To view a list of files marked "assume-unchanged": git ls-files -v
 # /dist
