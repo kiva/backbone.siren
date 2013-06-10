@@ -171,7 +171,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             options = options || {};
 
             var actionModel, jqXhr
-            , attributes = options.attributes
+            , attributes = options.attributes// So you can pass in properties that do not exist in the parent.
             , actionName = this.name
             , parent = this.parent
             , presets = {
@@ -218,7 +218,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
 		    jqXhr = actionModel.save(attributes, options);
 
-		    // Transfer any validation errors back onto the "original" model
+		    // Transfer any validation errors back onto the "original" model or collection.
 		    parent.validationError = actionModel.validationError;
 
 		    return jqXhr;
@@ -1011,32 +1011,10 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 		     * @param {Object} attributes
 		     * @param {Object} options
 		     */
-		    , save: function(key, val, options) {
-			    var attrs, method, xhr, attributes = this.attributes;
-
-			    // Handle both `"key", value` and `{key: value}` -style arguments.
-			    if (key == null || typeof key === 'object') {
-				    attrs = key;
-				    options = val;
-			    } else {
-				    (attrs = {})[key] = val;
-			    }
-
+		    , save: function(attrs, options) {
 			    // We want to validate each model but not the collection
 			    options = _.extend({validate: false}, options);
-			    var isValid = true;
-
-			    // Validate each model in the collection.
-			    this.each(function (model) {
-				    if (!model._validate(attrs, options)) {
-					    isValid = false;
-				    }
-			    });
-
-			    // Do not persist invalid models.
-			    if (! isValid) {
-				    return false;
-			    }
+				this._validate(attrs, options);
 
 			    // After a successful server-side save, the client is (optionally)
 			    // updated with the server-side state.

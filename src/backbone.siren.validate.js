@@ -227,6 +227,31 @@
 				return model.validate(attrs, options);
 			});
 		}
+
+
+		/**
+		 *
+		 * @param {Object} attrs
+		 * @param {Object} options
+		 */
+		, _validate: function (attrs, options) {
+			var error;
+
+			if (!options.validate || !this.validate) {
+				return true;
+			}
+
+			attrs = _.extend({}, this.attributes, attrs);
+
+			error = this.validationError = this.validate(attrs, options) || null;
+
+			if (!error) {
+				return true;
+			}
+
+			this.trigger('invalid', this, error, _.extend(options || {}, {validationError: error}));
+			return false;
+		}
 	});
 
 }(_, Backbone));
