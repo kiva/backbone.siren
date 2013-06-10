@@ -17,6 +17,7 @@
     <script>
 
         var demoUrl = 'demo.siren.json';
+        var collection, collectionUrl = 'collection.siren.json';
         var settings, sirenUrl = 'settings.siren.json';
         var alps, alpsUrl = 'http://siren-alps.herokuapp.com/';
         var formView;
@@ -74,6 +75,13 @@
             $('.wrap').append(formView1.$el);
             $('.wrap').append('<br /><br /> ');
             $('.wrap').append(formView2.$el);
+        });
+
+
+        Backbone.Siren.resolve(collectionUrl).done(function (bbSirenCollection) {
+	        collection = bbSirenCollection;
+
+
         });
 
 

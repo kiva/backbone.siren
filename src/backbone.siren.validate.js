@@ -238,8 +238,8 @@
 					return true;
 				}
 
-				var model = self.at(attrs.id);
-				var error = model.validate(attrs[this], options);
+				var model = self.get(attrs.id);
+				var error = model.validate(attrs, options);
 
 				if (error) {
 					errors[attrs.id] = error;
