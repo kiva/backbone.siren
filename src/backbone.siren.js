@@ -426,7 +426,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
 
     function resolveChain(chain, options) {
-        return nestedResolve(this, parseChain(chain), new $.Deferred(), options);
+        return nestedResolve(this, Backbone.Siren.parseChain(chain), new $.Deferred(), options);
     }
 
 
@@ -532,15 +532,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
     }
 
 
-    function parseChain(chain) {
-        if (typeof chain == 'string') {
-            chain = chain.replace(/^#|#$/, '').split('#');
-        }
-
-        return chain;
-    }
-
-
     function nestedResolve(bbSiren, chain, deferred, options) {
         options = options || {};
 
@@ -613,6 +604,19 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         }
 
 
+	    /**
+	     *
+	     *
+	     */
+	    , parseChain: function (chain) {
+		    if (typeof chain == 'string') {
+			    chain = chain.replace(/^#|#$/, '').split('#');
+		    }
+
+		    return chain;
+	    }
+
+
         /**
          * @TODO Dire need of cleanup
          *
@@ -627,7 +631,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             options = options || {};
 
             var state, deferred, storedPromise, bbSiren
-            , chain = parseChain(url)
+            , chain = Backbone.Siren.parseChain(url)
             , rootUrl = chain.shift()
             , chainedDeferred = options.deferred;
 
@@ -788,7 +792,9 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                     deferred.resolve(bbSiren);
                 });
 
-                if (options.forceFetch || (this._data.href && !this._data.links)) {
+			    if (options.url) {
+
+			    } else if (options.forceFetch || (this._data.href && !this._data.links)) {
                     this.fetch(options);
                 } else {
                     deferred.resolve(this);

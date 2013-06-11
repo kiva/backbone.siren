@@ -39,6 +39,25 @@ describe('Backbone.Siren: ', function () {
     });
 
 
+	describe('.parseChain()', function () {
+
+		it('parses a url chain string', function () {
+			var chain = Backbone.Siren.parseChain('http://api.io/resource');
+			expect(chain).toEqual(['http://api.io/resource']);
+		});
+
+		it('parses nested url chain strings', function () {
+			var chain;
+
+			chain = Backbone.Siren.parseChain('http://api.io/resource#nested');
+			expect(chain).toEqual(['http://api.io/resource', 'nested']);
+
+			chain = Backbone.Siren.parseChain('http://api.io/resource#nested#nested2#nested3');
+			expect(chain).toEqual(['http://api.io/resource', 'nested', 'nested2', 'nested3']);
+		});
+	});
+
+
     describe('.resolve', function () {
         var server;
 
