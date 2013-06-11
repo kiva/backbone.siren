@@ -444,7 +444,20 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 			deferred.resolve(bbSiren);
 		});
 
-		if (options.forceFetch || (this._data.href && !this._data.links)) {
+		if (options.url) {
+			var self = this;
+			var chain = Backbone.Siren.parseChain(options.url);
+			var finalUrl = chain.pop();
+
+			if (! chain.length && finalUrl) {
+				this.resolve(_.extend({url: finalUrl}, options));
+			} else if (finalUrl) {
+				Backbone.Siren.resolve(Backbone.Siren.resolve(chain, options)).done(function (model) {
+					var url = model.get(finalUrl).url();
+					self.resolve(_.extend({url: finalUrl}, options));
+				});
+			}
+		} else if (options.forceFetch || (this._data.href && !this._data.links)) {
 			this.fetch(options);
 		} else {
 			deferred.resolve(this);
@@ -454,6 +467,13 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 	}
 
 
+	/**
+	 * Goes down the given chain and resolves all entities, relative to the current entity.
+	 *
+	 * @param chain
+	 * @param options
+	 * @returns {Promise}
+	 */
     function resolveChain(chain, options) {
         return nestedResolve(this, Backbone.Siren.parseChain(chain), new $.Deferred(), options);
     }
