@@ -61,7 +61,7 @@ describe('Backbone.Siren: ', function () {
 		it('returns the chain argument, unchanged, if its not a string', function () {
 			var param = ['http://api.io/resource'];
 			var chain = Backbone.Siren.parseChain(param);
-			expect(chain).toEqualp(param);
+			expect(chain).toEqual(param);
 		});
 	});
 

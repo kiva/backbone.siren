@@ -425,6 +425,35 @@ Backbone.Siren = (function (_, Backbone, undefined) {
     }
 
 
+	/**
+	 * @TODO fix
+	 *  - currently, collections do not get cached by the store
+	 *
+	 * Wrapper for .fetch(), adds the following:
+	 * 1) Checks the local store
+	 * 2) The deferred is resolved with the parsed Siren object
+	 *
+	 * @param {Object} options
+	 */
+	function resolve(options) {
+		options = options || {};
+
+		var deferred = new $.Deferred();
+
+		this.once('sync', function (bbSiren) {
+			deferred.resolve(bbSiren);
+		});
+
+		if (options.forceFetch || (this._data.href && !this._data.links)) {
+			this.fetch(options);
+		} else {
+			deferred.resolve(this);
+		}
+
+		return deferred.promise();
+	}
+
+
     function resolveChain(chain, options) {
         return nestedResolve(this, Backbone.Siren.parseChain(chain), new $.Deferred(), options);
     }
@@ -703,6 +732,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , getActionByName: getActionByName
             , parseActions: parseActions
             , request: request
+		    , resolve: resolve
             , resolveChain: resolveChain
 
 
@@ -776,32 +806,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             }
 
 
-            /**
-             * Wrapper for .fetch(), adds the following:
-             * 1) Checks the local store
-             * 2) The deferred is resolved with the parsed Siren object
-             *
-             * @param {Object} options
-             */
-            , resolve: function (options) {
-                options = options || {};
 
-                var deferred = new $.Deferred();
-
-                this.once('sync', function (bbSiren) {
-                    deferred.resolve(bbSiren);
-                });
-
-			    if (options.url) {
-
-			    } else if (options.forceFetch || (this._data.href && !this._data.links)) {
-                    this.fetch(options);
-                } else {
-                    deferred.resolve(this);
-                }
-
-                return deferred.promise();
-            }
 
 
             /**
@@ -914,6 +919,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , getActionByName: getActionByName
             , parseActions: parseActions
             , request: request
+		    , resolve: resolve
             , resolveChain: resolveChain
 
 
@@ -928,33 +934,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 } else {
                     return filter(this, arg);
                 }
-            }
-
-
-            /**
-             * @TODO fix
-             *  - currently, collections do not get cached by the store
-             *
-             * Wrapper for .fetch(), adds the following:
-             * 1) Checks the local store
-             * 2) The deferred is resolved with the parsed Siren object
-             */
-            , resolve: function (options) {
-                options = options || {};
-
-                var deferred = new $.Deferred();
-
-                this.once('sync', function (bbSiren) {
-                    deferred.resolve(bbSiren);
-                });
-
-                if (options.forceFetch || (this._data.href && !this._data.links)) {
-                    this.fetch(options);
-                } else {
-                    deferred.resolve(this);
-                }
-
-                return deferred.promise();
             }
 
 
