@@ -46,6 +46,7 @@ describe('Backbone.Siren: ', function () {
 			expect(chain).toEqual(['http://api.io/resource']);
 		});
 
+
 		it('parses nested url chain strings', function () {
 			var chain;
 
@@ -54,6 +55,13 @@ describe('Backbone.Siren: ', function () {
 
 			chain = Backbone.Siren.parseChain('http://api.io/resource#nested#nested2#nested3');
 			expect(chain).toEqual(['http://api.io/resource', 'nested', 'nested2', 'nested3']);
+		});
+
+
+		it('returns the chain argument, unchanged, if its not a string', function () {
+			var param = ['http://api.io/resource'];
+			var chain = Backbone.Siren.parseChain(param);
+			expect(chain).toEqualp(param);
 		});
 	});
 
