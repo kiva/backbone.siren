@@ -246,6 +246,10 @@ Backbone.Siren = (function (_, Backbone, undefined) {
     function getUrl(entity) {
         var link, url;
 
+	    if (!entity) {
+		    return;
+	    }
+
         if (entity.href) {
             url = entity.href;
         } else if (entity.links) {
@@ -273,9 +277,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      * @return {String}
      */
     function url() {
-	    if (this._data) {
-		    return getUrl(this._data);
-	    }
+	    return getUrl(this._data);
     }
 
 
@@ -434,6 +436,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 	 * Wrapper for .fetch(), adds the following:
 	 * 1) Checks the local store
 	 * 2) The deferred is resolved with the parsed Siren object
+	 * 3) "sync" event is only fired once
 	 *
 	 * @param {Object} options
 	 */
@@ -448,18 +451,30 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
 		if (options.forceFetch || (this._data && this._data.href && !this._data.links)) {
 			this.fetch(options);
-		} else if (this.url()) {
+		} else if (! _.isEmpty(this._data)) {
+			// Its already been hydrated
 			deferred.resolve(this);
 		} else if (options.url) {
-			var self = this;
-			var chain = Backbone.Siren.parseChain(options.url);
-			var finalUrl = chain.pop();
+			// This option allows us to defer hydration of our model or collection with the url provided
+			// Very much like .fetch() only it adds support for chaining nested entities
 
-			if (finalUrl && ! chain.length) {
-				this.resolveChain(_.extend(_.clone(options), {url: finalUrl, forceFetch: true}));
-			} else if (finalUrl) {
+			var self = this
+			, chain = Backbone.Siren.parseChain(options.url)
+			, finalEntity = chain.pop();
+
+			delete options.url;
+
+			if (finalEntity && ! chain.length) {
+				this.resolve(_.extend(_.clone(options), {url: finalEntity, forceFetch: true})).done(function (bbSiren) {
+					// Resolve the original deferred object.
+					deferred.resolve(bbSiren);
+				});
+			} else if (finalEntity) {
 				Backbone.Siren.resolve(chain, options).done(function (model) {
-					self.resolve(_.extend(_.clone(options), {url: model.get(finalUrl).url(), forceFetch: true}));
+					self.resolve(_.extend(_.clone(options), {url: model.get(finalEntity).url(), forceFetch: true})).done(function (bbSiren) {
+						// Resolve the original deferred object.
+						deferred.resolve(bbSiren);
+					});
 				});
 			}
 		}

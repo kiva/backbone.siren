@@ -23,6 +23,11 @@
 		, "href": "http://bbsiren/examples/collection.siren.json"
 	}
 
+	, {
+		"rel": ["name:demo"]
+		, "href": "http://bbsiren/examples/demo.siren.json"
+	}
+
     , {
         "class": ["test", "trial"]
         , "rel": ["api.kiva.org/rels/address"]
