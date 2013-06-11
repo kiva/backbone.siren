@@ -1,5 +1,5 @@
 /*
-* Backbone.Siren v0.2.3
+* Backbone.Siren v0.2.4
 *
 * Copyright (c) 2013 Kiva Microfunds
 * Licensed under the MIT license.
@@ -282,7 +282,9 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
          * @return {String}
          */
         function url() {
-            return getUrl(this._data);
+    	    if (this._data) {
+    		    return getUrl(this._data);
+    	    }
         }
     
     
@@ -434,8 +436,56 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
         }
     
     
+    	/**
+    	 * @TODO fix
+    	 *  - currently, collections do not get cached by the store
+    	 *
+    	 * Wrapper for .fetch(), adds the following:
+    	 * 1) Checks the local store
+    	 * 2) The deferred is resolved with the parsed Siren object
+    	 *
+    	 * @param {Object} options
+    	 */
+    	function resolve(options) {
+    		options = options || {};
+    
+    		var deferred = new $.Deferred();
+    
+    		this.once('sync', function (bbSiren) {
+    			deferred.resolve(bbSiren);
+    		});
+    
+    		if (options.forceFetch || (this._data && this._data.href && !this._data.links)) {
+    			this.fetch(options);
+    		} else if (this.url()) {
+    			deferred.resolve(this);
+    		} else if (options.url) {
+    			var self = this;
+    			var chain = Backbone.Siren.parseChain(options.url);
+    			var finalUrl = chain.pop();
+    
+    			if (finalUrl && ! chain.length) {
+    				this.resolveChain(_.extend(_.clone(options), {url: finalUrl, forceFetch: true}));
+    			} else if (finalUrl) {
+    				Backbone.Siren.resolve(chain, options).done(function (model) {
+    					self.resolve(_.extend(_.clone(options), {url: model.get(finalUrl).url(), forceFetch: true}));
+    				});
+    			}
+    		}
+    
+    		return deferred.promise();
+    	}
+    
+    
+    	/**
+    	 * Goes down the given chain and resolves all entities, relative to the current entity.
+    	 *
+    	 * @param chain
+    	 * @param options
+    	 * @returns {Promise}
+    	 */
         function resolveChain(chain, options) {
-            return nestedResolve(this, parseChain(chain), new $.Deferred(), options);
+            return nestedResolve(this, Backbone.Siren.parseChain(chain), new $.Deferred(), options);
         }
     
     
@@ -541,15 +591,6 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
         }
     
     
-        function parseChain(chain) {
-            if (typeof chain == 'string') {
-                chain = chain.replace(/^#|#$/, '').split('#');
-            }
-    
-            return chain;
-        }
-    
-    
         function nestedResolve(bbSiren, chain, deferred, options) {
             options = options || {};
     
@@ -622,6 +663,19 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
             }
     
     
+    	    /**
+    	     *
+    	     *
+    	     */
+    	    , parseChain: function (chain) {
+    		    if (typeof chain == 'string') {
+    			    chain = chain.replace(/^#|#$/, '').split('#');
+    		    }
+    
+    		    return chain;
+    	    }
+    
+    
             /**
              * @TODO Dire need of cleanup
              *
@@ -636,7 +690,7 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                 options = options || {};
     
                 var state, deferred, storedPromise, bbSiren
-                , chain = parseChain(url)
+                , chain = Backbone.Siren.parseChain(url)
                 , rootUrl = chain.shift()
                 , chainedDeferred = options.deferred;
     
@@ -646,7 +700,7 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                 }
     
                 // The request has already been made and we are ok to use it.
-                if ((_.isEmpty(chain) && ((state == 'resolved' && !options.forceFetch) || state == 'pending'))) {
+                if (_.isEmpty(chain) && ((state == 'resolved' && !options.forceFetch) || state == 'pending')) {
                     if (chainedDeferred) {
                         return storedPromise.done(function (bbSiren) {
                             chainedDeferred.resolve(bbSiren);
@@ -654,7 +708,6 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                     } else {
                         return storedPromise;
                     }
-    
                 }
     
                 // We need a deferred object to track the final result of our request (bc it can be chained)
@@ -709,6 +762,7 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                 , getActionByName: getActionByName
                 , parseActions: parseActions
                 , request: request
+    		    , resolve: resolve
                 , resolveChain: resolveChain
     
     
@@ -782,30 +836,7 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                 }
     
     
-                /**
-                 * Wrapper for .fetch(), adds the following:
-                 * 1) Checks the local store
-                 * 2) The deferred is resolved with the parsed Siren object
-                 *
-                 * @param {Object} options
-                 */
-                , resolve: function (options) {
-                    options = options || {};
     
-                    var deferred = new $.Deferred();
-    
-                    this.once('sync', function (bbSiren) {
-                        deferred.resolve(bbSiren);
-                    });
-    
-                    if (options.forceFetch || (this._data.href && !this._data.links)) {
-                        this.fetch(options);
-                    } else {
-                        deferred.resolve(this);
-                    }
-    
-                    return deferred.promise();
-                }
     
     
                 /**
@@ -918,6 +949,7 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                 , getActionByName: getActionByName
                 , parseActions: parseActions
                 , request: request
+    		    , resolve: resolve
                 , resolveChain: resolveChain
     
     
@@ -932,33 +964,6 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                     } else {
                         return filter(this, arg);
                     }
-                }
-    
-    
-                /**
-                 * @TODO fix
-                 *  - currently, collections do not get cached by the store
-                 *
-                 * Wrapper for .fetch(), adds the following:
-                 * 1) Checks the local store
-                 * 2) The deferred is resolved with the parsed Siren object
-                 */
-                , resolve: function (options) {
-                    options = options || {};
-    
-                    var deferred = new $.Deferred();
-    
-                    this.once('sync', function (bbSiren) {
-                        deferred.resolve(bbSiren);
-                    });
-    
-                    if (options.forceFetch || (this._data.href && !this._data.links)) {
-                        this.fetch(options);
-                    } else {
-                        deferred.resolve(this);
-                    }
-    
-                    return deferred.promise();
                 }
     
     
