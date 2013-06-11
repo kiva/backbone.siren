@@ -637,7 +637,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             }
 
             // The request has already been made and we are ok to use it.
-            if ((_.isEmpty(chain) && ((state == 'resolved' && !options.forceFetch) || state == 'pending'))) {
+            if (_.isEmpty(chain) && ((state == 'resolved' && !options.forceFetch) || state == 'pending')) {
                 if (chainedDeferred) {
                     return storedPromise.done(function (bbSiren) {
                         chainedDeferred.resolve(bbSiren);
@@ -645,7 +645,6 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 } else {
                     return storedPromise;
                 }
-
             }
 
             // We need a deferred object to track the final result of our request (bc it can be chained)
