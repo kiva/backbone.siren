@@ -17,7 +17,13 @@
         }
     }
     , "entities": [
-    {
+	{
+		"class": ["collection"]
+		, "rel": ["name:collection"]
+		, "href": "http://bbsiren/examples/collection.siren.json"
+	}
+
+    , {
         "class": ["test", "trial"]
         , "rel": ["api.kiva.org/rels/address"]
         , "name": "address"

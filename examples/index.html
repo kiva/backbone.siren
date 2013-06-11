@@ -78,11 +78,9 @@
         });
 
 
-        Backbone.Siren.resolve(collectionUrl).done(function (bbSirenCollection) {
-	        collection = bbSirenCollection;
-
-
-        });
+        // demo out deferred models/collections
+        collection = new Backbone.Siren.Collection();
+        collection.resolve({url: 'http://bbsiren/examples/settings.siren.json#collection'});
 
 
 //        $.getJSON(alpsUrl, function (results) {

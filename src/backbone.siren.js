@@ -273,7 +273,9 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      * @return {String}
      */
     function url() {
-        return getUrl(this._data);
+	    if (this._data) {
+		    return getUrl(this._data);
+	    }
     }
 
 
@@ -444,23 +446,22 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 			deferred.resolve(bbSiren);
 		});
 
-		if (options.url) {
+		if (options.forceFetch || (this._data && this._data.href && !this._data.links)) {
+			this.fetch(options);
+		} else if (this.url()) {
+			deferred.resolve(this);
+		} else if (options.url) {
 			var self = this;
 			var chain = Backbone.Siren.parseChain(options.url);
 			var finalUrl = chain.pop();
 
-			if (! chain.length && finalUrl) {
-				this.resolve(_.extend({url: finalUrl}, options));
+			if (finalUrl && ! chain.length) {
+				this.resolveChain(_.extend(_.clone(options), {url: finalUrl, forceFetch: true}));
 			} else if (finalUrl) {
-				Backbone.Siren.resolve(Backbone.Siren.resolve(chain, options)).done(function (model) {
-					var url = model.get(finalUrl).url();
-					self.resolve(_.extend({url: finalUrl}, options));
+				Backbone.Siren.resolve(chain, options).done(function (model) {
+					self.resolve(_.extend(_.clone(options), {url: model.get(finalUrl).url(), forceFetch: true}));
 				});
 			}
-		} else if (options.forceFetch || (this._data.href && !this._data.links)) {
-			this.fetch(options);
-		} else {
-			deferred.resolve(this);
 		}
 
 		return deferred.promise();
