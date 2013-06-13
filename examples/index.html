@@ -2,6 +2,13 @@
 <html lang="en" class="no-js">
 <head>
 
+</head>
+
+<body>
+
+    <div class="wrap"></div>
+
+
     <script src="/components/jquery/jquery.js"></script>
     <script src="/components/underscore/underscore.js"></script>
     <script src="/components/backbone/backbone.js"></script>
@@ -9,12 +16,13 @@
     <script src="/src/backbone.siren.validate.js"></script>
     <script src="/src/backbone.siren.formView.js"></script>
     <script src="/src/patternLibrary.js"></script>
-</head>
-
-<body>
-
-    <div class="wrap"></div>
+    <script src="backbone.stickit.js"></script>
     <script>
+
+	    Backbone.Stickit.addHandler({
+		    selector: '*',
+		    setOptions: {validate:true, actionName: 'edit-lender'}
+	    });
 
         var demoUrl = 'demo.siren.json';
         var collection, collectionUrl = 'collection.siren.json';
@@ -67,14 +75,28 @@
                 initialize: function (obj) {
                     this.initializeForm(data);
                     this.render();
+		            this.stickit(bbSiren, {
+			            '[name="username"]': 'username'
+			            , '[name="firstname"]': 'firstname'
+			            , '[name="lastname"]': 'lastname'
+			            , '[name="email"]': 'email'
+			            , '[name="extra"]': 'extra'
+			            , '[name="info_i1_n1"]': 'info_i1_n1'
+			            , '[name="info_i2"]': 'info_i2'
+			            , '[name="someCb"]': 'someCb'
+			            , '[name="someImage"]': 'someImage'
+			            , '[name="someRadio"]': 'someRadio'
+			            , '[name="someFancyRadio"]': 'someFancyRadio'
+			            , '[name="myMulti"]': 'myMulti'
+		            });
                 }
             });
 
             window.formView2 = new FormView();
 
-            $('.wrap').append(formView1.$el);
+//            $('.wrap').append(formView1.$el);
             $('.wrap').append('<br /><br /> ');
-            $('.wrap').append(formView2.$el);
+//            $('.wrap').append(formView2.$el);
         });
 
 
