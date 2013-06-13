@@ -201,8 +201,14 @@
             if (action) {
                 _.each(attributes, function (value, name) {
                     var field = action.getFieldByName(name)
-                    , validityState = self.validateOne(value, field, options);
+                    , validityState;
 
+	                // @todo revisit - Not validating attributes that don't have a field, but still allowing them to be processed.
+	                if (! field) {
+		                return true;
+	                }
+
+	                validityState = self.validateOne(value, field, options);
                     if (! validityState.valid) {
                         errors[name] = validityState;
                     }
