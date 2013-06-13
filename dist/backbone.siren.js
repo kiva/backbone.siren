@@ -1283,13 +1283,18 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             , errors = {};
 
             if (action) {
-                _.each(action.fields, function (field) {
-                    var attributeName = field.name
-                    , attribute = attributes[attributeName]
-                    , validityState = self.validateOne(attribute, field, options);
+                _.each(attributes, function (value, name) {
+                    var field = action.getFieldByName(name)
+                    , validityState;
 
+	                // @todo revisit - Not validating attributes that don't have a field, but still allowing them to be processed.
+	                if (! field) {
+		                return true;
+	                }
+
+	                validityState = self.validateOne(value, field, options);
                     if (! validityState.valid) {
-                        errors[attributeName] = validityState;
+                        errors[name] = validityState;
                     }
                 });
             } else {
@@ -1691,7 +1696,6 @@ Backbone.Siren.validate.setPatterns(patternLibrary);
          */
         , constructor: function (options) {
             options = options || {};
-            options.validateOnChange = options.validateOnChange === undefined ? true : options.validateOnChange;
 
             if (options.action) {
                 this.initializeForm(options);
