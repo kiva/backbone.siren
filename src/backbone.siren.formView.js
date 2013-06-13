@@ -292,7 +292,6 @@
          */
         , constructor: function (options) {
             options = options || {};
-            options.validateOnChange = options.validateOnChange === undefined ? true : options.validateOnChange;
 
             if (options.action) {
                 this.initializeForm(options);
