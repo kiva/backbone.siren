@@ -199,13 +199,12 @@
             , errors = {};
 
             if (action) {
-                _.each(action.fields, function (field) {
-                    var attributeName = field.name
-                    , attribute = attributes[attributeName]
-                    , validityState = self.validateOne(attribute, field, options);
+                _.each(attributes, function (value, name) {
+                    var field = action.getFieldByName(name)
+                    , validityState = self.validateOne(value, field, options);
 
                     if (! validityState.valid) {
-                        errors[attributeName] = validityState;
+                        errors[name] = validityState;
                     }
                 });
             } else {
