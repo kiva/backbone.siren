@@ -87,16 +87,21 @@ Backbone.Siren = (function (_, Backbone, undefined) {
      * @constructor
      */
     function Action(actionData, parent) {
-        _.extend(this, {class: [], method: 'GET', type: 'application/x-www-form-urlencoded'}, actionData);
+	    var someModel;
+
+	    _.extend(this, {class: [], method: 'GET', type: 'application/x-www-form-urlencoded'}, actionData);
 
 	    // WIP - Batch
 	    // It's implied that an empty fields array means we are using field definitions as provided by sub-entities
 	    // I'm calling this "nested batch".  No support yet for "inline batch"
 	    if (this.class.indexOf('batch') > -1 && _.isEmpty(this.fields)) {
-		    this.fields = parent.first().getActionByName(this.name).fields;
+		    someModel = parent.first();
+		    if (someModel) {
+			    this.fields = someModel.getActionByName(this.name).fields;
+		    }
 	    }
 
-        this.parent = parent;
+	    this.parent = parent;
     }
 
 
