@@ -210,26 +210,6 @@ describe('Siren Collection: ', function () {
 						, prop3: 'tres'
 					}
 					, actions: [
-					{
-						name: 'updateSettings'
-						, method: 'POST'
-						, href: 'http://x.io/communicationSettings/team1'
-						, fields: [
-							{name: 'prop1'}
-							, {name: 'prop2'}
-							, {name: 'prop3'}
-						]
-					}
-				]
-				}
-				, {
-					rel: 'teamSettings'
-					, properties: {
-						prop1: 'uno'
-						, prop2: 'dos'
-						, prop3: 'tres'
-					}
-					, actions: [
 						{
 							name: 'updateSettings'
 							, method: 'POST'
@@ -240,6 +220,9 @@ describe('Siren Collection: ', function () {
 								, {name: 'prop3'}
 							]
 						}
+					]
+					, links: [
+						{rel: ['self'], href: 'http://uno'}
 					]
 				}
 				, {
@@ -260,6 +243,32 @@ describe('Siren Collection: ', function () {
 								, {name: 'prop3'}
 							]
 						}
+					]
+					, links: [
+						{rel: ['self'], href: 'http://uno'}
+					]
+				}
+				, {
+					rel: 'teamSettings'
+					, properties: {
+						prop1: 'uno'
+						, prop2: 'dos'
+						, prop3: 'tres'
+					}
+					, actions: [
+						{
+							name: 'updateSettings'
+							, method: 'POST'
+							, href: 'http://x.io/communicationSettings/team1'
+							, fields: [
+								{name: 'prop1'}
+								, {name: 'prop2'}
+								, {name: 'prop3'}
+							]
+						}
+					]
+					, links: [
+						{rel: ['self'], href: 'http://uno'}
 					]
 				}
 			]
