@@ -102,12 +102,17 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
     Action.prototype = {
 
+	    hasClass: function (classname) {
+		    return this.class.indexOf(classname) > -1;
+	    }
+
+
         /**
          *
          * @param name
          * @return {*}
          */
-        getFieldByName: function (name) {
+        , getFieldByName: function (name) {
             return _.find(this.fields, function (field) {
                 return field.name == name;
             });
