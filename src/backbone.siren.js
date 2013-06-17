@@ -1023,9 +1023,9 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 		    , toJSON: function (options) {
 			    options  = options || {};
 
-			    if (! options.isNestedBatch) { // @todo WIP
-				    delete options.actionName;
-			    }
+//			    if (! options.isNestedBatch) { // @todo WIP
+//				    delete options.actionName;
+//			    }
 
 			    return this.map(function (model){
 				    var jsonObj = model.toJSON(options);
