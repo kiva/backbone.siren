@@ -592,13 +592,17 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
     /**
      *
-     * @return {Array}
+     * @return {Array|undefined}
      */
     function parseActions() {
         var self = this
         , _actions = [];
 
-        _.each(self._data.actions, function (action) {
+	    if (! this._data) {
+		    return;
+	    }
+
+        _.each(this._data.actions, function (action) {
             var bbSirenAction = new Backbone.Siren.Action(action, self);
 
             _actions.push(bbSirenAction);
@@ -947,7 +951,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 options.parse = true; // Force "parse" to be called on instantiation: http://stackoverflow.com/questions/11068989/backbone-js-using-parse-without-calling-fetch/14950519#14950519
 
                 Backbone.Model.call(this, sirenObj, options);
-			    this.parseActions(options);
+			    this.parseActions();
             }
 
         })
