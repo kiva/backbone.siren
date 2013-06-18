@@ -1,5 +1,5 @@
 /*
-* Backbone.Siren v0.2.4
+* Backbone.Siren v0.2.5
 *
 * Copyright (c) 2013 Kiva Microfunds
 * Licensed under the MIT license.
@@ -96,19 +96,37 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
          * @constructor
          */
         function Action(actionData, parent) {
-            _.extend(this, {class: [], method: 'GET', type: 'application/x-www-form-urlencoded'}, actionData);
-            this.parent = parent;
+    	    var someModel;
+    
+    	    _.extend(this, {class: [], method: 'GET', type: 'application/x-www-form-urlencoded'}, actionData);
+    
+    	    // WIP - Batch
+    	    // It's implied that an empty fields array means we are using field definitions as provided by sub-entities
+    	    // I'm calling this "nested batch".  No support yet for "inline batch"
+    	    if (this.class.indexOf('batch') > -1 && _.isEmpty(this.fields)) {
+    		    someModel = parent.first();
+    		    if (someModel) {
+    			    this.fields = someModel.getActionByName(this.name).fields;
+    		    }
+    	    }
+    
+    	    this.parent = parent;
         }
     
     
         Action.prototype = {
+    
+    	    hasClass: function (classname) {
+    		    return this.class.indexOf(classname) > -1;
+    	    }
+    
     
             /**
              *
              * @param name
              * @return {*}
              */
-            getFieldByName: function (name) {
+            , getFieldByName: function (name) {
                 return _.find(this.fields, function (field) {
                     return field.name == name;
                 });
@@ -583,13 +601,17 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
     
         /**
          *
-         * @return {Array}
+         * @return {Array|undefined}
          */
         function parseActions() {
             var self = this
             , _actions = [];
     
-            _.each(self._data.actions, function (action) {
+    	    if (! this._data) {
+    		    return;
+    	    }
+    
+            _.each(this._data.actions, function (action) {
                 var bbSirenAction = new Backbone.Siren.Action(action, self);
     
                 _actions.push(bbSirenAction);
@@ -864,7 +886,6 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                     this._entities = [];
     
                     this.resolveEntities(options);
-                    this.parseActions(options);
     
                     // Only store if we have the complete entity
                     // According to the spec, linked entities have an href, nested entities have a "self" link.
@@ -882,7 +903,7 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                  * @param {Object} options
                  */
                 , toJSON: function (options) {
-                    var fields, action
+                    var action
     	            , json = {}
     	            , self = this;
     
@@ -891,16 +912,7 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                     }
     
     			    if (action) {
-    				    // WIP - Batch
-    				    // It's implied that an empty fields array means we are using field definitions as provided by sub-entities
-    				    // I'm calling this "nested batch".  No support yet for "inline batch"
-    				    if (action.class.indexOf('batch') > -1 && _.empty(action.fields)) {
-    					    fields = this.at(0).getActionByName(action.name).fields;
-    				    } else {
-    					    fields = action.fields;
-    				    }
-    
-                        _.each(fields, function (field) {
+                        _.each(action.fields, function (field) {
                             var val = self.get(field.name);
     
                             json[field.name] = (val instanceof Backbone.Siren.Model || (val instanceof Backbone.Siren.Collection))
@@ -948,6 +960,7 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                     options.parse = true; // Force "parse" to be called on instantiation: http://stackoverflow.com/questions/11068989/backbone-js-using-parse-without-calling-fetch/14950519#14950519
     
                     Backbone.Model.call(this, sirenObj, options);
+    			    this.parseActions();
                 }
     
             })
@@ -987,7 +1000,7 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                  *
                  * @param {Object} sirenObj
                  */
-                , parse: function (sirenObj, options) {
+                , parse: function (sirenObj) {
                     this._data = sirenObj; // Store the entire siren object in raw json
                     this._meta = sirenObj.properties || {};
     
@@ -995,8 +1008,6 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                     _.each(sirenObj.entities, function (entity) {
                         models.push(new Backbone.Siren.Model(entity));
                     });
-    
-                    this.parseActions(options);
     
                     return models;
                 }
@@ -1025,9 +1036,9 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
     		    , toJSON: function (options) {
     			    options  = options || {};
     
-    			    if (! options.isNestedBatch) { // @todo WIP
-    				    delete options.actionName;
-    			    }
+    //			    if (! options.isNestedBatch) { // @todo WIP
+    //				    delete options.actionName;
+    //			    }
     
     			    return this.map(function (model){
     				    var jsonObj = model.toJSON(options);
@@ -1079,6 +1090,7 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                     options.parse = true; // Force "parse" to be called on instantiation: http://stackoverflow.com/questions/11068989/backbone-js-using-parse-without-calling-fetch/14950519#14950519
     
                     Backbone.Collection.call(this, sirenObj, options);
+    			    this.parseActions();
                 }
             })
         };

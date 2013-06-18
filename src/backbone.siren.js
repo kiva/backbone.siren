@@ -991,7 +991,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
              *
              * @param {Object} sirenObj
              */
-            , parse: function (sirenObj, options) {
+            , parse: function (sirenObj) {
                 this._data = sirenObj; // Store the entire siren object in raw json
                 this._meta = sirenObj.properties || {};
 
