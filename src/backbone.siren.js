@@ -234,6 +234,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             options = _.extend(presets, options);
             attributes = _.extend(parent.toJSON({actionName: this.name}), attributes);
 
+		    // Note that .save() can return false in the case of failed validation.
 		    jqXhr = actionModel.save(attributes, options);
 
 		    // Transfer any validation errors back onto the "original" model or collection.
