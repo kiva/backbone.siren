@@ -52,7 +52,7 @@
                 this.trigger('invalid', this, error, options || {});
             }
 
-            // @todo do we still need the forceUpdate flag?
+            // forceUpdate allows us to set, even if validation fails
             return !(error && !options.forceUpdate);
         }
 
