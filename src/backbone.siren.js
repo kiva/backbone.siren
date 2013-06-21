@@ -34,6 +34,13 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         }
 
 
+		, filter: function (regex) {
+			return _.filter(_store, function (val, key) {
+				return regex.test(key);
+			});
+		}
+
+
         /**
          *
          * @param {Backbone.Siren.Model|Object|String} ModelOrSirenObjOrUrl
