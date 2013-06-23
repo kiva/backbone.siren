@@ -1,5 +1,5 @@
 /*
-* Backbone.Siren v0.2.5
+* Backbone.Siren v0.2.6
 *
 * Copyright (c) 2013 Kiva Microfunds
 * Licensed under the MIT license.
@@ -41,6 +41,13 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
             , get: function (sirenObjOrUrl) {
                 return _store[typeof sirenObjOrUrl == 'object'? getUrl(sirenObjOrUrl): sirenObjOrUrl];
             }
+    
+    
+    		, filter: function (regex) {
+    			return _.filter(_store, function (val, key) {
+    				return regex.test(key);
+    			});
+    		}
     
     
             /**
@@ -206,8 +213,13 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                     , actionName: actionName
                     , success: function (model, resp, options) {
                         parent.trigger('sync:' + actionName, model, resp, options);
-                        parent.attributes = {};
-                        parent.set(actionModel.attributes);
+    			        if (parent instanceof Backbone.Model) {
+    				        parent.attributes = {};
+    						parent.set(actionModel.attributes);
+    			        } else {
+    				        // Parent is assumed to be a collection
+    				        parent.set(actionModel.models);
+    			        }
                     }
                     , error: function (model, xhr, options) {
                         parent.trigger('error: ' + actionName, model, options);
@@ -243,6 +255,7 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                 options = _.extend(presets, options);
                 attributes = _.extend(parent.toJSON({actionName: this.name}), attributes);
     
+    		    // Note that .save() can return false in the case of failed validation.
     		    jqXhr = actionModel.save(attributes, options);
     
     		    // Transfer any validation errors back onto the "original" model or collection.
@@ -1150,7 +1163,7 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                     this.trigger('invalid', this, error, options || {});
                 }
     
-                // @todo do we still need the forceUpdate flag?
+                // forceUpdate allows us to set, even if validation fails
                 return !(error && !options.forceUpdate);
             }
     
