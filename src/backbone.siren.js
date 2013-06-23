@@ -204,9 +204,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 , actionName: actionName
                 , success: function (model, resp, options) {
                     parent.trigger('sync:' + actionName, model, resp, options);
-                    parent.attributes = {};
-
 			        if (parent instanceof Backbone.Model) {
+				        parent.attributes = {};
 						parent.set(actionModel.attributes);
 			        } else {
 				        // Parent is assumed to be a collection
