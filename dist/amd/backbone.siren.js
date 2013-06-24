@@ -1,5 +1,5 @@
 /*
-* Backbone.Siren v0.2.6
+* Backbone.Siren v0.2.7
 *
 * Copyright (c) 2013 Kiva Microfunds
 * Licensed under the MIT license.
@@ -191,6 +191,16 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
     	     * We don't want "secure keys" floating around they should be cleared as soon as they are no longer needed
     	     *
     	     */
+    	    , clearSecureKey: function (name) {
+    		    return this.getSecureKeys().unset(name);
+    	    }
+    
+    
+    	    /**
+    	     * Clears all secure keys.
+    	     * We don't want "secure keys" floating around they should be cleared as soon as they are no longer needed
+    	     *
+    	     */
     	    , clearSecureKeys: function () {
     		    return this.getSecureKeys().clear();
     	    }
@@ -251,6 +261,11 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
     			    // parent is a collection, no need to clone it.
     			    actionModel = parent;
     		    }
+    
+    		    actionModel.on('request', function () {
+    			    parent.trigger('request');
+    			    parent.trigger('request:' + actionName);
+    		    });
     
                 options = _.extend(presets, options);
                 attributes = _.extend(parent.toJSON({actionName: this.name}), attributes);
