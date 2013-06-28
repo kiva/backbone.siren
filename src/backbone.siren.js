@@ -223,7 +223,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 			        }
                 }
                 , error: function (model, xhr, options) {
-                    parent.trigger('error: ' + actionName, model, options);
+                    parent.trigger('error:' + actionName, model, options);
                 }
             };
 
