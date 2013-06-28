@@ -1,5 +1,5 @@
 /*
-* Backbone.Siren v0.2.7
+* Backbone.Siren v0.2.8
 *
 * Copyright (c) 2013 Kiva Microfunds
 * Licensed under the MIT license.
@@ -230,7 +230,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 			        }
                 }
                 , error: function (model, xhr, options) {
-                    parent.trigger('error: ' + actionName, model, options);
+                    parent.trigger('error:' + actionName, model, xhr, options);
                 }
             };
 
