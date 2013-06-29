@@ -85,7 +85,7 @@ Actions have:
 ### Backbone.Siren.Validate
 
 Backbone.Siren.Validate will automatically validate your Model's attributes.
-It does this by parsing your Siren object and expecting fields to follow the [Siren-Validation @todo submit spec + add link] spec.
+It does this by parsing your Siren object and expecting fields to follow the [siren-validation spec](https://github.com/kevinswiber/siren/pull/12).
 
 By Default, Siren.Validate will always validate on `save`, but only validate on `set` if `{validate: true}` is set in the options parameter.
 
