@@ -1,6 +1,6 @@
 {
 	"name": "Backbone.Siren"
-	, "travis": true
+	, "travis": false
 	, "issues": true
 	, "google_analytics": "UA-42021999-1"
 }
