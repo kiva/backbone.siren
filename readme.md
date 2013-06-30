@@ -69,6 +69,7 @@ bbSirenModel.request();
 ```
 
 Returns of an array of all the nested/linked entities.
+```
 bbSirenModel.entities();
 ```
 
