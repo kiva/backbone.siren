@@ -162,13 +162,17 @@ Note that since an entity's `rel` and `name` are relative to its parent, there i
 
 ### Backbone.Siren.Validate
 
-Backbone.Siren.Validate will automatically validate your Model's attributes.
-It does this by parsing your Siren object and expecting fields to follow the [siren-validation spec](https://github.com/kevinswiber/siren/pull/12).
+This module needs a full re-write.
 
-By Default, Siren.Validate will always validate on `save`, but only validate on `set` if `{validate: true}` is set in the options parameter.
+<del>
+	Backbone.Siren.Validate will automatically validate your Model's attributes.
+	It does this by parsing your Siren object and expecting fields to follow the [siren-validation spec](https://github.com/kevinswiber/siren/pull/12).
 
-All standard actions/events will happen when validating a Backbone.Siren model. [http://backbonejs.org/#Model-validate]
-This means that .validate() won't return anything on success but will return a mapping of field name to [ValidityState](https://developer.mozilla.org/en-US/docs/DOM/ValidityState) objects on failure.
+	By Default, Siren.Validate will always validate on `save`, but only validate on `set` if `{validate: true}` is set in the options parameter.
+
+	All standard actions/events will happen when validating a Backbone.Siren model. [http://backbonejs.org/#Model-validate]
+	This means that .validate() won't return anything on success but will return a mapping of field name to [ValidityState](https://developer.mozilla.org/en-US/docs/DOM/ValidityState) objects on failure.
+</del>
 
 ### Backbone.Siren.FormView
 
