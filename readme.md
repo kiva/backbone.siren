@@ -3,8 +3,6 @@
 
 A client side adapter that converts resource representations from [Siren JSON](https://github.com/kevinswiber/siren) to [Backbone Models](http://backbonejs.org/#Model) and [Collections](http://backbonejs.org/#Collection).
 
-## This project is still in the design phase.  Things will break.
-
 ## Use
 
 To use Backbone.Siren:
@@ -15,41 +13,116 @@ bbSirenModel = new Backbone.Siren.Model(sirenObject);
 bbSirenCollection = new Backbone.Siren.Collection(sirenObject);
 ```
 
-In addition to your standard set of Backbone.Model and Backbone.Collection methods, you have few extra methods that help you interact with your Siren representations.
+Or, you can just point Backbone.Siren to a url that returns a Siren resource and let it do the rest:
+
+```
+Backbone.Siren.resolve('http://my.api.io/user');
+```
+
 
 ### Working with Models
 
 ```
 bbSirenModel = new Backbone.Siren.Model(sirenObject);
+```
 
+In addition to you standard set of [Backbone.Model](http://backbonejs.org/#Model) methods, bbSiren provides you with the following:
+
+Returns an array of classes as defined on the Siren entity.
+```
 bbSirenModel.classes();
+```
+
+Returns a boolean, confirming wether or not an entity has a given class.
+```
 bbSirenModel.hasClass();
+```
+
+Returns an entities title, as defined on the Siren entity.
+```
 bbSirenModel.title();
-bbSirenModel.rel();
-bbSirenModel.actions();
-bbSirenModel.getActionByName();
-bbSirenModel.getAllByAction();
-bbSirenModel.request();
+```
+
+Returns an array of links, as defined on the Siren entity.
+```
 bbSirenModel.links();
+```
+
+Returns an array of available actions, as defined on the Siren entity.
+```
+bbSirenModel.actions();
+```
+
+Returns a Siren action object.
+```
+bbSirenModel.getActionByName();
+```
+
+Similar to the standard Backbone.Model.toJSON() method, but allows filtering properties by "actionName".
+```
+bbSirenModel.toJSON([actionName]);
+```
+
+Gets a linked resource by name, returns a promise object.
+```
+bbSirenModel.request();
+```
+
+Returns of an array of all the nested/linked entities.
 bbSirenModel.entities();
 ```
-Backbone.Siren will parse all nested and linked entities, if the entity is a Collection (has a class of "collection") Backbone.Siren will know to parse it as a Backbone.Siren.Collection.
+
 
 ### Working with collections
 
 ```
 bbSirenCollection = new Backbone.Siren.Collection(sirenObject);
+```
 
+BBSiren will parse all nested and linked entities, if the entity is a Collection (has a class of "collection") Backbone.Siren will know to parse it as a Backbone.Siren.Collection.
+
+In addition to you standard set of [Backbone.Collection](http://backbonejs.org/#Collection) methods, bbSiren provides you with the following:
+
+Returns an array of classes as defined on the Siren entity.
+```
 bbSirenCollection.classes();
+```
+
+Returns a boolean, confirming wether or not an entity has a given class.
+```
 bbSirenCollection.hasClass();
+```
+
+Returns an entities title, as defined on the Siren entity.
+```
 bbSirenCollection.title();
-bbSirenCollection.rel();
-bbSirenCollection.actions();
-bbSirenCollection.getActionByName();
-bbSirenCollection.getAllByAction();
-bbSirenCollection.request();
+```
+
+Returns an array of links, as defined on the Siren entity.
+```
 bbSirenCollection.links();
 ```
+
+Returns an array of available actions, as defined on the Siren entity.
+```
+bbSirenCollection.actions();
+```
+
+Returns a Siren action object.
+```
+bbSirenCollection.getActionByName();
+```
+
+Similar to the standard Backbone.Collection.toJSON() method, but allows filtering properties by "actionName".
+```
+bbSirenCollection.toJSON([actionName]);
+```
+
+Gets a linked resource by name, returns a promise object.
+```
+bbSirenCollection.request();
+```
+
 
 ### Siren Actions
 
@@ -81,6 +154,10 @@ Actions have:
     , forceUpdate: false  // Pass forceUpdate as an option into your .set() method and it will update the model, even if it fails validation
 }
 ```
+
+### Gotchas
+
+Note that since an entity's `rel` and `name` are relative to its parent, there is not a direct call for getting either of these from a Siren entity
 
 ### Backbone.Siren.Validate
 
