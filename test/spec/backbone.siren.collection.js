@@ -71,21 +71,20 @@ describe('Siren Collection: ', function () {
 
     describe('.request()', function () {
         beforeEach(function () {
-            this.stub($, 'ajax').returns('jqXhr');
+	        this.stub(Backbone.Siren, 'resolve').returns('jqXhr');
         });
 
-        it('makes an http request for a linked resource and returns an array of jqXhr objects', function () {
+	    it('makes an http request for a linked resource and returns a deferred object', function () {
             var requests = sirenCollection.request('next');
 
-            expect($.ajax).toHaveBeenCalledWith(sinon.match({url: 'api.kiva.org/lenders/6282/loans?page=5'}));
-            expect(requests).toBeArray();
-            expect(requests[0]).toBe('jqXhr');
+	        expect(Backbone.Siren.resolve).toHaveBeenCalledWith('api.kiva.org/lenders/6282/loans?page=5');
+	        expect(requests).toBe('jqXhr');
         });
 
 
-        it('returns an empty array if no links match the given rel', function () {
+	    it('returns undefined if no links match the given rel', function () {
             var result = sirenCollection.request('fake');
-            expect(result.length).toBe(0);
+	        expect(result).not.toBeDefined();
         });
     });
 

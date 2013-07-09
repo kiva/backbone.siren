@@ -84,21 +84,20 @@ describe('Siren Model: ', function () {
 
     describe('.request()', function () {
         beforeEach(function () {
-            this.stub($, 'ajax').returns('jqXhr');
+            this.stub(Backbone.Siren, 'resolve').returns('jqXhr');
         });
 
-        it('makes an http request for a linked resource and returns an array of jqXhr objects', function () {
+        it('makes an http request for a linked resource and returns a deferred object', function () {
             var requests = sirenModel.request('next');
 
-            expect($.ajax).toHaveBeenCalledWith(sinon.match({url: 'http://api.x.io/orders/43'}));
-            expect(requests).toBeArray();
-            expect(requests[0]).toBe('jqXhr');
+            expect(Backbone.Siren.resolve).toHaveBeenCalledWith('http://api.x.io/orders/43');
+            expect(requests).toBe('jqXhr');
         });
 
 
-        it('returns an empty array if no links match the given rel', function () {
+        it('returns undefined if no links match the given rel', function () {
             var result = sirenModel.request('fake');
-            expect(result.length).toBe(0);
+            expect(result).not.toBeDefined();
         });
     });
 
