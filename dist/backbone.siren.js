@@ -1,5 +1,5 @@
 /*
-* Backbone.Siren v0.2.8
+* Backbone.Siren v0.2.9
 *
 * Copyright (c) 2013 Kiva Microfunds
 * Licensed under the MIT license.
@@ -444,6 +444,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
 
     /**
+     * @todo Haven't had many use-cases yet for links.
+     * As the use-cases arise, this method should be re-thought
      *
      * @param {String} rel
      * @return {Array}
@@ -462,23 +464,26 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
 
     /**
-     * @todo remove this? It assumes you want to fetch a link,
-     * however, the link maybe be to an image, or other resource that we don't need to request, but rather just link to.
+     * Resolves the first link that matches the given rel
+     *
+     * @todo This only works with rel links that are requests to the API.
+     * There will be times when a rel points to a resource outside of the API and that needs to be thought through
+     * @todo This method leaves much to be desired and should be refactored.
      *
      * @param {String} rel
-     * @return {Array} An array of jqXhr objects.
+     * @return {Promise}
      */
     function request(rel) {
-        var requests = []
-        , links = this.links(rel);
+        // Similar to .links() only it only gives us the first "rel" match
+        var link = _.find(this._data.links, function (link) {
+		    return _.indexOf(link.rel, rel) > -1;
+	     });
 
-        _.each(links, function (link) {
-            requests.push($.getJSON(link.href, function (sirenResponse) {
-                Backbone.Siren.parseEntity(sirenResponse);
-            }));
-        });
+	    if (! link) {
+		    return;
+	    }
 
-        return requests;
+        return Backbone.Siren.resolve(link.href);
     }
 
 
