@@ -241,22 +241,26 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 presets.contentType = this.type;
             }
 
-            // Create a temporary clone that will house all our actions related properties
+		    // Create a temporary clone that will house all our actions related properties
 		    // We do this because Backbone will override our model with the response from the server
 		    // @todo we probably want something smarter so that we can update the model but still mitigate funky stuff from happening in the View.
 		    if (parent instanceof Backbone.Model) {
 			    actionModel = parent.clone();
 			    actionModel._data = parent._data;
 			    actionModel._actions = parent._actions;
+
+			    actionModel.on('request', function (model, jqXhr, options) {
+				    parent.trigger('request', model, jqXhr, options);
+				    parent.trigger('request:' + actionName, model, jqXhr, options);
+			    });
 		    } else {
 			    // parent is a collection, no need to clone it.
 			    actionModel = parent;
-		    }
 
-		    actionModel.on('request', function (model, jqXhr, options) {
-			    parent.trigger('request', model, jqXhr, options);
-			    parent.trigger('request:' + actionName, model, jqXhr, options);
-		    });
+			    parent.on('request', function (model, jqXhr, options) {
+				    parent.trigger('request:' + actionName, model, jqXhr, options);
+			    });
+		    }
 
             options = _.extend(presets, options);
             attributes = _.extend(parent.toJSON({actionName: this.name}), attributes);
