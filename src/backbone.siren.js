@@ -253,9 +253,9 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 			    actionModel = parent;
 		    }
 
-		    actionModel.on('request', function () {
-			    parent.trigger('request');
-			    parent.trigger('request:' + actionName);
+		    actionModel.on('request', function (model, jqXhr, options) {
+			    parent.trigger('request', model, jqXhr, options);
+			    parent.trigger('request:' + actionName, model, jqXhr, options);
 		    });
 
             options = _.extend(presets, options);
