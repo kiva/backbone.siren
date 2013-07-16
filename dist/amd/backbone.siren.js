@@ -1,5 +1,5 @@
 /*
-* Backbone.Siren v0.2.9
+* Backbone.Siren v0.2.10
 *
 * Copyright (c) 2013 Kiva Microfunds
 * Licensed under the MIT license.
@@ -262,9 +262,9 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
     			    actionModel = parent;
     		    }
     
-    		    actionModel.on('request', function () {
-    			    parent.trigger('request');
-    			    parent.trigger('request:' + actionName);
+    		    actionModel.on('request', function (model, jqXhr, options) {
+    			    parent.trigger('request', model, jqXhr, options);
+    			    parent.trigger('request:' + actionName, model, jqXhr, options);
     		    });
     
                 options = _.extend(presets, options);
