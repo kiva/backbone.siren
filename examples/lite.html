@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+
+</head>
+
+<body>
+
+<div class="wrap"></div>
+
+
+<script src="/components/jquery/jquery.js"></script>
+<script src="/components/underscore/underscore.js"></script>
+<script src="/components/backbone/backbone.js"></script>
+<script src="/src/backbone.siren.js"></script>
+<script>
+
+
+	var demoUrl = 'demo.siren.json';
+	var settings, sirenUrl = 'settings.siren.json';
+	var alps, alpsUrl = 'http://siren-alps.herokuapp.com/';
+
+	// set the pattern library
+	if (Backbone.Siren.validate) {
+		Backbone.Siren.validate.setPatterns(patternLibrary);
+	}
+
+	var demoRequest = Backbone.Siren.resolve(demoUrl);
+	var settingsRequest = Backbone.Siren.resolve(sirenUrl);
+	var alpsRequest = Backbone.Siren.resolve(alpsUrl);
+
+	settingsRequest.done(function (settingsModel) {
+		window.settingsModel = settingsModel;
+	});
+
+	demoRequest.done(function (demoModel) {
+		window.demoModel = demoModel;
+	});
+
+	alpsRequest.done(function (alpsModel) {
+		window.alpsModel = alpsModel;
+	});
+
+</script>
+</body>
+</html>
