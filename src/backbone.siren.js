@@ -1016,8 +1016,10 @@ Backbone.Siren = (function (_, Backbone, undefined) {
              */
             , filter: function (arg) {
                 if (typeof arg ==  'function') {
-                    return _.filter(this, arg);
+                    return _.filter(this.models, arg); // @todo still needs a fix to pass along the entire "arguments" array (so you can also pass "first" as the 3rd arg)
                 } else {
+	                // @todo also probably needs to be "this.models" instead of "this" but no time to test right now
+	                // @todo even more importantly, however, this logic needs to be @deprecated as it duplicates .where()
                     return filter(this, arg);
                 }
             }
