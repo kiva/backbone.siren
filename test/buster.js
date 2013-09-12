@@ -4,9 +4,9 @@ config['development'] = {
     env: 'browser'
     , rootPath: '../'
     , deps: [
-        'components/jquery/jquery.js'
-        , 'components/underscore/underscore.js'
-        , 'components/backbone/backbone.js'
+        'bower_components/jquery/jquery.js'
+        , 'bower_components/underscore/underscore.js'
+        , 'bower_components/backbone/backbone.js'
         , 'src/patternLibrary.js'
     ]
     , sources: ['src/backbone.siren.js', 'src/backbone.siren.formView.js', 'src/backbone.siren.validate.js']
@@ -25,9 +25,9 @@ config['development'] = {
 //    env: 'browser'
 //    , rootPath: '../'
 //    , deps: [
-//        'components/jquery/jquery.js'
-//        , 'components/underscore/underscore.js'
-//        , 'components/backbone/backbone.js'
+//        'bower_components/jquery/jquery.js'
+//        , 'bower_components/underscore/underscore.js'
+//        , 'bower_components/backbone/backbone.js'
 //    ]
 //    , sources: ['build/backbone.siren.min.js']
 //    , tests: ['test/spec/**/*.js']
