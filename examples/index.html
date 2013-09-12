@@ -6,109 +6,30 @@
 
 <body>
 
-    <div class="wrap"></div>
+<div class="wrap"></div>
 
 
-    <script src="/components/jquery/jquery.js"></script>
-    <script src="/components/underscore/underscore.js"></script>
-    <script src="/components/backbone/backbone.js"></script>
-    <script src="/src/backbone.siren.js"></script>
-    <script src="/src/backbone.siren.validate.js"></script>
-    <script src="/src/backbone.siren.formView.js"></script>
-    <script src="/src/patternLibrary.js"></script>
-    <script src="backbone.stickit.js"></script>
-    <script>
+<script src="/bower_components/jquery/jquery.js"></script>
+<script src="/bower_components/underscore/underscore.js"></script>
+<script src="/bower_components/backbone/backbone.js"></script>
+<script src="/src/backbone.siren.js"></script>
+<script src="/src/backbone.siren.validate.js"></script>
+<script src="/src/backbone.siren.formView.js"></script>
+<script src="/src/patternLibrary.js"></script>
+<script src="backbone.stickit.js"></script>
+<script>
 
-	    Backbone.Stickit.addHandler({
-		    selector: '*',
-		    setOptions: {validate:true, actionName: 'edit-lender'}
-	    });
+	Backbone.Stickit.addHandler({
+		selector: '*',
+		setOptions: {validate:true, actionName: 'edit-lender'}
+	});
 
-        var demoUrl = 'demo.siren.json';
-        var collection, collectionUrl = 'collection.siren.json';
-        var settings, sirenUrl = 'settings.siren.json';
-        var alps, alpsUrl = 'http://siren-alps.herokuapp.com/';
-        var formView;
+	var settingUrl
+	, demoUrl = 'demo.siren.json';
 
-        // set the pattern library
-        if (Backbone.Siren.validate) {
-            Backbone.Siren.validate.setPatterns(patternLibrary);
-        }
+	var api = new Backbone.SirenApi('http://blah.blah.com');
+	api.resolve('test');
 
-        var demoRequest = Backbone.Siren.resolve(demoUrl);
-        var settingsRequest = Backbone.Siren.resolve(sirenUrl);
-
-        $.when(settingsRequest, demoRequest).done(function(bbSiren, demoSiren) {
-            settings = bbSiren;
-
-            var action = settings.getActionByName('edit-lender');
-            var data = {
-                action: action
-                , attributes: {
-                    title: 'Edit Lender'
-                    , id: ''
-                }
-                , fieldAttributes: {
-                    firstName: {
-                        id: 'firstNameId'
-                        , label: 'First Name'
-                    }
-                    , lastName: {
-                        id: 'lastNameId'
-                        , label: 'Last Name'
-                    }
-                    , someCb: {
-                        model: demoSiren
-                        , id: 'someCbId'
-                        , label: 'Some Checkbox'
-                    }
-                }
-                , validateOnChange: true
-            };
-
-            // formView1 - passing in the data as a parameter to the constructor function
-            window.formView1 = new Backbone.Siren.FormView(data);
-
-
-            // formView2 - setting the data inside the initialize routine
-            FormView = Backbone.Siren.FormView.extend({
-                initialize: function (obj) {
-                    this.initializeForm(data);
-                    this.render();
-		            this.stickit(bbSiren, {
-			            '[name="username"]': 'username'
-			            , '[name="firstname"]': 'firstname'
-			            , '[name="lastname"]': 'lastname'
-			            , '[name="email"]': 'email'
-			            , '[name="extra"]': 'extra'
-			            , '[name="info_i1_n1"]': 'info_i1_n1'
-			            , '[name="info_i2"]': 'info_i2'
-			            , '[name="someCb"]': 'someCb'
-			            , '[name="someImage"]': 'someImage'
-			            , '[name="someRadio"]': 'someRadio'
-			            , '[name="someFancyRadio"]': 'someFancyRadio'
-			            , '[name="myMulti"]': 'myMulti'
-		            });
-                }
-            });
-
-            window.formView2 = new FormView();
-
-//            $('.wrap').append(formView1.$el);
-            $('.wrap').append('<br /><br /> ');
-//            $('.wrap').append(formView2.$el);
-        });
-
-
-        // demo out deferred models/collections
-        collection = new Backbone.Siren.Collection();
-        collection.resolve({url: 'http://bbsiren/examples/settings.siren.json#collection'});
-
-
-//        $.getJSON(alpsUrl, function (results) {
-//            alps = new Backbone.Siren.Model(results);
-//        });
-
-    </script>
+</script>
 </body>
 </html>
