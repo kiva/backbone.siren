@@ -9,7 +9,7 @@ config['development'] = {
         , 'bower_components/backbone/backbone.js'
         , 'src/patternLibrary.js'
     ]
-    , sources: ['src/backbone.siren.js', 'src/backbone.siren.formView.js', 'src/backbone.siren.validate.js']
+    , sources: ['src/backbone.siren.js', 'src/backbone.siren.formView.js', 'src/backbone.siren.validate.js', 'src/backbone.sirenApi.js']
     , specs: ['test/spec/**/*.js']
     , extensions: [ require('buster-coverage') ]
     , "buster-coverage": {
