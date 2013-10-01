@@ -800,9 +800,15 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                             handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
                         })
                         .fail(function (jqXhr) {
-                            var entity = JSON.parse(jqXhr.responseText || '{}')
-                            , bbSiren = Backbone.Siren.parse(entity);
+                            var entity, bbSiren;
 
+		                    try {
+			                    entity = JSON.parse(jqXhr.responseText);
+		                    } catch (exception) {
+			                    entity = {};
+		                    }
+
+		                    bbSiren = Backbone.Siren.parse(entity);
                             deferred.reject(bbSiren, jqXhr);
                             chainedDeferred.reject(bbSiren, jqXhr);
                         });
