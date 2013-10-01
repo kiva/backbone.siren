@@ -1,5 +1,5 @@
 /*
-* Backbone.Siren v0.2.11
+* Backbone.Siren v0.2.12
 *
 * Copyright (c) 2013 Kiva Microfunds
 * Licensed under the MIT license.
@@ -809,9 +809,15 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                                 handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
                             })
                             .fail(function (jqXhr) {
-                                var entity = JSON.parse(jqXhr.responseText || '{}')
-                                , bbSiren = Backbone.Siren.parse(entity);
+                                var entity, bbSiren;
     
+    		                    try {
+    			                    entity = JSON.parse(jqXhr.responseText);
+    		                    } catch (exception) {
+    			                    entity = {};
+    		                    }
+    
+    		                    bbSiren = Backbone.Siren.parse(entity);
                                 deferred.reject(bbSiren, jqXhr);
                                 chainedDeferred.reject(bbSiren, jqXhr);
                             });
