@@ -303,8 +303,8 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         if (entity.href) {
             url = entity.href;
         } else if (entity.links) {
-            link = entity.links.filter(function (link) {
-                return !!(link.rel && link.rel.filter(function (relType) {
+            link = _.filter(entity.links, function (link) {
+                return !!(link.rel && _.filter(link.rel, function (relType) {
                     return relType == 'self';
                 }).length);
             })[0];
