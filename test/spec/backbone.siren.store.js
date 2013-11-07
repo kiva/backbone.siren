@@ -4,6 +4,9 @@ buster.spec.expose();
 describe('Backbone.Siren: ', function () {
 	'use strict';
 
+	// @todo quick fix for upgrade to buster 0.7
+	var expect = buster.expect;
+
 	describe('.filter', function () {
 
 		it('filters down stored models by doing a regex match on all stored models', function () {

@@ -4,6 +4,8 @@ buster.spec.expose();
 describe('Siren Validate: ', function () {
     'use strict';
 
+	// @todo quick fix for upgrade to buster 0.7
+	var expect = buster.expect;
 
     var validityState = {
         valueMissing: false

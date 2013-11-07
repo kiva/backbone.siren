@@ -4,6 +4,9 @@ buster.spec.expose();
 describe('Siren Model: ', function () {
     'use strict';
 
+	// @todo quick fix for upgrade to buster 0.7
+	var expect = buster.expect;
+
     var settingsModelSiren = {
             "class":["order", "special"]
             ,"properties":{"orderNumber":42,"itemCount":3,"status":"pending"}

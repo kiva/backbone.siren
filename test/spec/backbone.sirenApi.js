@@ -1,6 +1,9 @@
 describe('sirenApi', function () {
 	'use strict';
 
+	// @todo quick fix for upgrade to buster 0.7
+	var expect = buster.expect;
+
 	it('constructs a sirenApi instance', function () {
 		var apiRoot = 'api.org';
 		var options = {apiRoot: apiRoot};
