@@ -278,7 +278,7 @@ describe('Siren Collection: ', function () {
 			, actions: [
 				{
 					name: 'updateSettings'
-					, class: ['batch']
+					, 'class': ['batch']
 					, method: 'POST'
 					, href: 'http://x.io/communicationSettings'
 				}

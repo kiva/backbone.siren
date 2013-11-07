@@ -1,6 +1,7 @@
 {
 	"bitwise": true
 	, "curly": true
+	, "es3": true
 	, "immed": true
 	, "latedef": true
 	, "maxcomplexity": 12
