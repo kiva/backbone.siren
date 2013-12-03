@@ -241,6 +241,10 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 presets.contentType = this.type;
             }
 
+		    if (presets.type == 'PATCH') {
+			    options.patch = true;
+		    }
+
 		    // Create a temporary clone that will house all our actions related properties
 		    // We do this because Backbone will override our model with the response from the server
 		    // @todo we probably want something smarter so that we can update the model but still mitigate funky stuff from happening in the View.
