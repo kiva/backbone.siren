@@ -996,6 +996,17 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                 }
     
     
+    		    /**
+    		     * Not feeling great about overriding the default implementation of .isNew(), but some non-new models may not have an id.
+    		     * Thus, a better indicator (at least for now) of whether a model is new might be if it has a url or not.
+    		     *
+    		     * @returns {boolean}
+    		     */
+    		    , isNew: function () {
+    			    return !this.url();
+    		    }
+    
+    
                 /**
                  * http://backbonejs.org/#Model-constructor
                  *
