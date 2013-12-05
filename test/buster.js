@@ -9,12 +9,12 @@ config['development'] = {
         , 'bower_components/backbone/backbone.js'
         , 'src/patternLibrary.js'
     ]
-    , sources: ['src/backbone.siren.js', 'src/backbone.siren.formView.js', 'src/backbone.siren.validate.js', 'src/backbone.sirenApi.js']
+    , sources: ['src/backbone.siren.js', 'src/backbone.siren.formView.js', 'src/backbone.siren.validate.js']
     , specs: ['test/spec/**/*.js']
     , extensions: [ require('buster-coverage') ]
-    , "buster-coverage": {
-        outputDirectory: "test/coverage"
-        , format: "lcov"
+    , 'buster-coverage': {
+        outputDirectory: 'test/coverage'
+        , format: 'lcov'
         , combinedResultsOnly: true
     }
 };

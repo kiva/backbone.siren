@@ -690,7 +690,12 @@ Backbone.Siren = (function (_, Backbone, undefined) {
     }
 
 
-    return {
+	var BbSiren = Backbone.Siren = function (options) {
+		this.init(options);
+	};
+
+
+	_.extend(BbSiren, {
         settings: {
             showWarnings: true
         }
@@ -1144,5 +1149,22 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 			    this.parseActions();
             }
         })
-    };
+    });
+
+
+	BbSiren.prototype = {
+		init: function (apiRoot, options) {
+			this.apiRoot = apiRoot;
+			this.settings = options;
+		}
+
+
+		, resolve: function (entityName) {
+			BbSiren.resolve(this.apiRoot + '/' + entityName);
+		}
+	};
+
+
+	return BbSiren;
+
 }(_, Backbone));
