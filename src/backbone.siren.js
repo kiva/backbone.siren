@@ -1,90 +1,107 @@
 Backbone.Siren = (function (_, Backbone, undefined) {
     'use strict';
 
-    // The store-cache
-    var _store = {}
-    , _pending = {}
-
 
     /**
-     * Super simple store.  Good enough for now.
      *
      * @type {Object}
      * @private
      */
-    , store = {
-
-        /**
-         *
-         * @param {Backbone.Siren.Model} model
-         * @return {Backbone.Siren.Model}
-         */
-        add: function (model) {
-            _store[model.url()] = model;
+    var warn = function () {
+        if (Backbone.Siren.settings.showWarnings && console) {
+            console.warn.apply(console, arguments);
         }
+    };
 
 
-        /**
-         *
-         * @param {String} sirenObjOrUrl
-         * @return {Backbone.Siren.Model}
-         */
-        , get: function (sirenObjOrUrl) {
-            return _store[typeof sirenObjOrUrl == 'object'? getUrl(sirenObjOrUrl): sirenObjOrUrl];
-        }
+	/**
+	 * Stores Siren objects in memory
+	 *
+	 * @constructor
+	 */
+	function Store() {
+		this.data = {};
+		this.requests = {};
+	}
 
 
+	Store.prototype = {
+
+		/**
+		 *
+		 * @param {Backbone.Siren.Model|Backbone.Siren.Collection} sirenObj
+		 * @return {Backbone.Siren.Model}
+		 */
+		add: function (sirenObj) {
+			var self = this;
+
+			if (BbSiren.isCollection(sirenObj)) {
+				sirenObj.each(function (sirenModel) {
+					self.add(sirenModel);
+				});
+			}
+
+			this.data[sirenObj.url()] = sirenObj;
+			return sirenObj;
+		}
+
+
+		/**
+		 *
+		 * @param {String} sirenObjOrUrl
+		 * @return {Backbone.Siren.Model}
+		 */
+		, get: function (sirenObjOrUrl) {
+			return this.data[typeof sirenObjOrUrl == 'object'? getUrl(sirenObjOrUrl): sirenObjOrUrl];
+		}
+
+
+		/**
+		 * Filters Siren objects by their index value (aka their self-url)
+		 *
+		 * @param regex
+		 * @returns {Array}
+		 */
 		, filter: function (regex) {
-			return _.filter(_store, function (val, key) {
+			return _.filter(this.data, function (val, key) {
 				return regex.test(key);
 			});
 		}
 
 
-        /**
-         *
-         * @param {Backbone.Siren.Model|Object|String} ModelOrSirenObjOrUrl
-         * @return {Boolean}
-         */
-        , exists: function (ModelOrSirenObjOrUrl) {
-            return !!this.get((ModelOrSirenObjOrUrl instanceof Backbone.Siren.Model) ? ModelOrSirenObjOrUrl.url() : ModelOrSirenObjOrUrl);
-        }
+		/**
+		 *
+		 * @param {Backbone.Siren.Model|Object|String} ModelOrSirenObjOrUrl
+		 * @return {Boolean}
+		 */
+		, exists: function (ModelOrSirenObjOrUrl) {
+			return !!this.get((ModelOrSirenObjOrUrl instanceof Backbone.Siren.Model)
+				? ModelOrSirenObjOrUrl.url()
+				: ModelOrSirenObjOrUrl);
+		}
 
 
-        /**
-         *
-         * @return {Array}
-         */
-        , all: function () {
-            return _store;
-        }
+		/**
+		 *
+		 * @param url
+		 * @param request
+		 * @returns {Promise}
+		 */
+		, addRequest: function (url, request) {
+			this.requests[url] = request;
+			return request;
+		}
 
 
-        , clear: function () {
-            _store = {};
-        }
-
-
-        , addRequest: function (url, request) {
-            _pending[url] = request;
-        }
-
-
-        , getRequest: function (url) {
-            return _pending[url];
-        }
-    }
-
-    /**
-     *
-     * @type {Object}
-     * @private
-     */
-    , warn = function () {
-        if (Backbone.Siren.settings.showWarnings && console) {
-            console.warn.apply(console, arguments);
-        }
-    };
+		/**
+		 *
+		 * @param url
+		 * @returns {Promise}
+		 */
+		, getRequest: function (url) {
+			return this.requests[url];
+		}
+	};
 
 
     /**
@@ -114,6 +131,11 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
     Action.prototype = {
 
+	    /**
+	     *
+	     * @param {String} classname
+	     * @returns {boolean}
+	     */
 	    hasClass: function (classname) {
 		    return _.indexOf(this['class'], classname) > -1;
 	    }
@@ -121,7 +143,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
         /**
          *
-         * @param name
+         * @param {String} name
          * @return {*}
          */
         , getFieldByName: function (name) {
@@ -663,6 +685,10 @@ Backbone.Siren = (function (_, Backbone, undefined) {
     function nestedResolve(bbSiren, chain, deferred, options) {
         options = options || {};
 
+	    if (! options.store) {
+		    options.store = bbSiren.store;
+	    }
+
         var entityName = chain.shift();
         var subEntity = bbSiren.get(entityName);
         if (! subEntity) {
@@ -690,8 +716,9 @@ Backbone.Siren = (function (_, Backbone, undefined) {
     }
 
 
-	var BbSiren = Backbone.Siren = function (options) {
-		this.init(options);
+	var BbSiren = Backbone.Siren = function (apiRoot, options) {
+		this.store = new Backbone.Siren.Store();
+		this.init(apiRoot, options);
 	};
 
 
@@ -699,9 +726,19 @@ Backbone.Siren = (function (_, Backbone, undefined) {
         settings: {
             showWarnings: true
         }
-
-        , store: store
         , warn: warn
+
+
+		/**
+		 *
+		 * @param json
+		 * @returns {Boolean}
+		 */
+		, isCollection: function (json) {
+			return _hasClass(json, 'collection');
+		}
+
+		, Store: Store
         , Action: Action
 
 
@@ -711,16 +748,16 @@ Backbone.Siren = (function (_, Backbone, undefined) {
          * @param {Object} entity
          * @returns {Backbone.Siren.Model|Backbone.Siren.Collection|Backbone.Siren.Error}
          */
-        , parse: function (entity) {
+        , parse: function (entity, store) {
             var bbSiren;
 
             if (_hasClass(entity, 'collection')) {
-                bbSiren = new Backbone.Siren.Collection(entity);
+                bbSiren = new Backbone.Siren.Collection(entity, {store: store});
             } else if (_hasClass(entity, 'error')) {
                 // @todo how should we represent errors?  For now, treat them as regular Models...
-                bbSiren = new Backbone.Siren.Model(entity);
+                bbSiren = new Backbone.Siren.Model(entity, {store: store});
             } else {
-                bbSiren = new Backbone.Siren.Model(entity);
+                bbSiren = new Backbone.Siren.Model(entity, {store: store});
             }
 
             return bbSiren;
@@ -759,14 +796,26 @@ Backbone.Siren = (function (_, Backbone, undefined) {
          *
          * @param {String} url
          * @param {Object} options
+         * @param {Object} options.store - store instance @todo remove the need to have this parameter
          */
         , resolve: function resolve(url, options) {
             options = options || {};
 
-            var state, deferred, storedPromise, bbSiren
+            var store, state, deferred, storedPromise, bbSiren
             , chain = Backbone.Siren.parseChain(url)
             , rootUrl = chain.shift()
             , chainedDeferred = options.deferred;
+
+			// @todo temporary hack while we rewrite the store api.
+			if (options.store) {
+				store = options.store;
+			} else {
+				store = {
+					getRequest: function () { /* no-op */ }
+					, addRequest: function () { /* no-op */ }
+					, get: function () { /* no-op */ }
+				};
+			}
 
             storedPromise = store.getRequest(rootUrl);
             if (storedPromise) {
@@ -797,11 +846,9 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 });
             } else {
                 if (options.forceFetch || !(bbSiren = store.get(rootUrl))) { // Assign value to bbSiren
-
                     // By creating our own Deferred() we can map standard responses to bbSiren error models along each step of the chain
                     deferred = new $.Deferred();
                     store.addRequest(rootUrl, deferred.promise());
-
                     Backbone.Siren.ajax(rootUrl, options)
                         .done(function (entity) {
                             var bbSiren = Backbone.Siren.parse(entity);
@@ -885,7 +932,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                             deferred.resolve(self.setEntity(bbSiren, getRel(entity), getName(entity)));
                         });
                 } else {
-                    bbSiren = Backbone.Siren.parse(entity);
+                    bbSiren = Backbone.Siren.parse(entity, options.store);
                     bbSirenPromise = deferred.resolve(this.setEntity(bbSiren, getRel(entity), getName(entity)));
                 }
 
@@ -928,13 +975,15 @@ Backbone.Siren = (function (_, Backbone, undefined) {
                 this._data = sirenObj; // Stores the entire siren object in raw json
                 this._entities = [];
 
-                this.resolveEntities(options);
+				this.resolveEntities(options);
 
-                // Only store if we have the complete entity
-                // According to the spec, linked entities have an href, nested entities have a "self" link.
-                if (sirenObj.links && !sirenObj.href) {
-                    store.add(this);
-                }
+				if (options.store) {
+					// Only store if we have the complete entity
+					// According to the spec, linked entities have an href, nested entities have a "self" link.
+					if (sirenObj.links && !sirenObj.href) {
+						options.store.add(this);
+					}
+				}
 
                 return sirenObj.properties;
             }
@@ -1115,7 +1164,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 		     * POST batch action (including deletion of many resources)
 		     * GET many resources
 		     *
-		     * @param {Object} attributes
+		     * @param {Object} attrs
 		     * @param {Object} options
 		     */
 		    , save: function(attrs, options) {
@@ -1138,7 +1187,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             /**
              * http://backbonejs.org/#Collection-constructor
              *
-             * @param {Object} attributes
+             * @param {Object} sirenObj
              * @param {Object} options
              */
             , constructor: function (sirenObj, options) {
@@ -1153,14 +1202,39 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 
 
 	BbSiren.prototype = {
+
+		/**
+		 *
+		 *
+		 * @param apiRoot
+		 * @param options
+		 */
 		init: function (apiRoot, options) {
 			this.apiRoot = apiRoot;
 			this.settings = options;
 		}
 
 
+		/**
+		 *
+		 * @param entityName
+		 */
 		, resolve: function (entityName) {
-			BbSiren.resolve(this.apiRoot + '/' + entityName);
+			var self = this;
+
+			return BbSiren.resolve(this.apiRoot + '/' + entityName, {store: this.store})
+				.done(function (json) {
+					self.parse(json);
+				});
+		}
+
+
+		/**
+		 *
+		 * @param {JSON} json
+		 */
+		, parse: function (json) {
+			return BbSiren.parse(json);
 		}
 	};
 

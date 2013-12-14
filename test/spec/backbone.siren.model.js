@@ -1,5 +1,4 @@
 /*jshint quotmark: false */
-buster.spec.expose();
 
 describe('Siren Model: ', function () {
     'use strict';
@@ -24,12 +23,12 @@ describe('Siren Model: ', function () {
 			    ,{"rel":["next"],"href":"http://api.x.io/orders/43"}
             ]
         }
-    , sirenModel;
+    , sirenModel, store;
 
 
     beforeEach(function () {
-        Backbone.Siren.store.clear();
-        sirenModel = new Backbone.Siren.Model(settingsModelSiren);
+	    store = new Backbone.Siren.Store();
+        sirenModel = new Backbone.Siren.Model(settingsModelSiren, {store: store});
     });
 
 
@@ -262,42 +261,61 @@ describe('Siren Model: ', function () {
 
 
         it('returns the bbSiren object from the store if it\'s already cached', function () {
-            this.stub($, 'ajax').returns(new $.Deferred().promise());
+	        var xhr = sinon.useFakeXMLHttpRequest()
+	        , requests = []
+	        , subEntity = {
+		        name: 'testEntity'
+		        , links: [
+			        {rel: ['self'], href: 'http://boston.com'}
+		        ]
+	        };
 
-            var subEntity = {
-                name: 'testEntity'
-                , links: [
-                    {rel: ['self'], href: 'http://boston.com'}
-                ]
-            };
+	        xhr.onCreate = function (xhr) {
+		        requests.push(xhr);
+	        };
 
-            sirenModel.resolveEntity(subEntity);
+            sirenModel.resolveEntity(subEntity, {autoFetch: 'all', store: store});
 
-            $.ajax.reset();
-            sirenModel.resolveEntity(subEntity, {autoFetch: 'all'});
+	        // Provide a fake response
+	        requests[0].respond(200
+		        , { "Content-Type": "application/json" }
+		        , JSON.stringify(subEntity)
+	        );
+
+	        this.spy($, 'ajax');
+	        sirenModel.resolveEntity(subEntity, {autoFetch: 'all', store: store});
             expect($.ajax).not.toHaveBeenCalled();
         });
 
 
         it('returns the bbSiren object from the store if it\'s already cached plus sets it on the parent if it\'s not already there', function () {
-            this.stub($, 'ajax').returns(new $.Deferred().promise());
+	        var xhr = sinon.useFakeXMLHttpRequest()
+			, requests = []
+		    , subEntity = {
+		        name: 'testEntity'
+		        , links: [
+			        {rel: ['self'], href: 'http://boston.com'}
+		        ]
+		    };
 
-            var subEntity = {
-                name: 'testEntity'
-                , links: [
-                    {rel: ['self'], href: 'http://boston.com'}
-                ]
-            };
+	        xhr.onCreate = function (xhr) {
+		        requests.push(xhr);
+	        };
 
-            sirenModel.resolveEntity(subEntity);
+            sirenModel.resolveEntity(subEntity, {autoFetch: 'all', store: store});
+
+	        // Provide a fake response
+	        requests[0].respond(200
+		        , { "Content-Type": "application/json" }
+		        , JSON.stringify(subEntity)
+	        );
 
             // Remove the entities name from the _entities array
             sirenModel.unset(subEntity.name);
             expect(sirenModel.get(subEntity.name)).not.toBeDefined();
 
-
             // Resolving again should add the entity name back in
-            sirenModel.resolveEntity(subEntity, {autoFetch: 'all'});
+            sirenModel.resolveEntity(subEntity, {autoFetch: 'all', store: store});
             expect(sirenModel.get(subEntity.name)).toBeDefined();
         });
 
@@ -330,7 +348,7 @@ describe('Siren Model: ', function () {
     describe('.resolveChain()', function () {
 
         it('makes serialized requests through the descendant chain', function () {
-            var chainedRequest = sirenModel.resolveChain('#customer');
+            var chainedRequest = sirenModel.resolveChain('#customer', {store: store});
 
             chainedRequest.done(function (bbSiren) {
                 expect(bbSiren.url()).toBe(sirenModel.get('customer').url());

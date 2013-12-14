@@ -18,14 +18,15 @@ describe('Backbone.Siren: ', function () {
         });
 
 
+	    // @todo - we no longer add them to the model on Backbone.Model.parse, instead its done on Backbone.Model.prototype.parse
         it('adds Backbone.Siren object to the store IF its a model', function () {
+	        var store = new Backbone.Siren.Store();
             var urlKey = settingsModelSiren.links[0].href;
 
-            Backbone.Siren.store.clear(); // @todo revisit the need to "clear" once the api for the store is finalized.
-            expect(Backbone.Siren.store.exists(urlKey)).toBeFalse();
+            expect(store.exists(urlKey)).toBeFalse();
 
-            Backbone.Siren.parse(settingsModelSiren);
-            expect(Backbone.Siren.store.exists(urlKey)).toBeTrue();
+            Backbone.Siren.parse(settingsModelSiren, store);
+            expect(store.exists(urlKey)).toBeTrue();
         });
     });
 

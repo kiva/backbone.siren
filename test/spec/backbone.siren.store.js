@@ -10,24 +10,26 @@ describe('Backbone.Siren: ', function () {
 	describe('.filter', function () {
 
 		it('filters down stored models by doing a regex match on all stored models', function () {
-			new Backbone.Siren.Model({properties: {}, links: [{rel: ['self'], href: 'http://one'}]});
-			new Backbone.Siren.Model({properties: {}, links: [{rel: ['self'], href: 'http://one/two'}]});
-			new Backbone.Siren.Model({properties: {}, links: [{rel: ['self'], href: 'http://one/two/three'}]});
-			new Backbone.Siren.Model({properties: {}, links: [{rel: ['self'], href: 'http://four'}]});
+			var store = new Backbone.Siren.Store();
+
+			new Backbone.Siren.Model({properties: {}, links: [{rel: ['self'], href: 'http://one'}]}, {store: store});
+			new Backbone.Siren.Model({properties: {}, links: [{rel: ['self'], href: 'http://one/two'}]}, {store: store});
+			new Backbone.Siren.Model({properties: {}, links: [{rel: ['self'], href: 'http://one/two/three'}]}, {store: store});
+			new Backbone.Siren.Model({properties: {}, links: [{rel: ['self'], href: 'http://four'}]}, {store: store});
 
 			var result;
 
-			result = Backbone.Siren.store.filter(/notFound/);
+			result = store.filter(/notFound/);
 			expect(result).toBeArray();
 			expect(result.length).toBe(0);
 
-			result = Backbone.Siren.store.filter(/one/);
+			result = store.filter(/one/);
 			expect(result.length).toBe(3);
 
-			result = Backbone.Siren.store.filter(/one\/two\/three/);
+			result = store.filter(/one\/two\/three/);
 			expect(result.length).toBe(1);
 
-			result = Backbone.Siren.store.filter(/four/);
+			result = store.filter(/four/);
 			expect(result.length).toBe(1);
 		});
 	});
