@@ -1,4 +1,4 @@
-Backbone.Siren = (function (_, Backbone, undefined) {
+(function (_, Backbone, undefined) {
     'use strict';
 
 
@@ -530,7 +530,7 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 			deferred.resolve(bbSiren);
 		});
 
-		if (options.forceFetch || (this._data && this._data.href && !this._data.links)) {
+		if (options.forceFetch || !this.isLinked) {
 			this.fetch(options);
 		} else if (! _.isEmpty(this._data)) {
 			// Its already been hydrated
@@ -969,23 +969,20 @@ Backbone.Siren = (function (_, Backbone, undefined) {
             /**
              * http://backbonejs.org/#Model-parse
              *
-             * @param {Object} sirenObj
+             * @param {Object} json
              */
-            , parse: function (sirenObj, options) {
-                this._data = sirenObj; // Stores the entire siren object in raw json
+            , parse: function (json, options) {
+                this._data = json; // Stores the entire siren object in raw json
                 this._entities = [];
+				this.isLinked = json.links && !json.href;
 
 				this.resolveEntities(options);
 
 				if (options.store) {
-					// Only store if we have the complete entity
-					// According to the spec, linked entities have an href, nested entities have a "self" link.
-					if (sirenObj.links && !sirenObj.href) {
-						options.store.add(this);
-					}
+					options.store.add(this);
 				}
 
-                return sirenObj.properties;
+                return json.properties;
             }
 
 
@@ -1237,8 +1234,5 @@ Backbone.Siren = (function (_, Backbone, undefined) {
 			return BbSiren.parse(json);
 		}
 	};
-
-
-	return BbSiren;
 
 }(_, Backbone));
