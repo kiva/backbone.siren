@@ -19,16 +19,9 @@
 <script src="backbone.stickit.js"></script>
 <script>
 
-	Backbone.Stickit.addHandler({
-		selector: '*',
-		setOptions: {validate:true, actionName: 'edit-lender'}
-	});
-
-	var settingUrl
-	, demoUrl = 'demo.siren.json';
-
-	var api = new Backbone.SirenApi('http://blah.blah.com');
-	api.resolve('test');
+	window.api = new Backbone.Siren('/examples');
+	api.resolve('collection.siren.json');
+	api.resolve('settings.siren.json');
 
 </script>
 </body>
