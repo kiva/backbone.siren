@@ -530,7 +530,7 @@
 			deferred.resolve(bbSiren);
 		});
 
-		if (options.forceFetch || !this.isLinked) {
+		if (options.forceFetch || this.isLoaded) {
 			this.fetch(options);
 		} else if (! _.isEmpty(this._data)) {
 			// Its already been hydrated
@@ -851,7 +851,7 @@
                     store.addRequest(rootUrl, deferred.promise());
                     Backbone.Siren.ajax(rootUrl, options)
                         .done(function (entity) {
-                            var bbSiren = Backbone.Siren.parse(entity);
+                            var bbSiren = Backbone.Siren.parse(entity, store);
                             deferred.resolve(bbSiren);
                             handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
                         })
@@ -864,7 +864,7 @@
 			                    entity = {};
 		                    }
 
-		                    bbSiren = Backbone.Siren.parse(entity);
+		                    bbSiren = Backbone.Siren.parse(entity, store);
                             deferred.reject(bbSiren, jqXhr);
                             chainedDeferred.reject(bbSiren, jqXhr);
                         });
@@ -974,7 +974,7 @@
             , parse: function (json, options) {
                 this._data = json; // Stores the entire siren object in raw json
                 this._entities = [];
-				this.isLinked = json.links && !json.href;
+				this.isLoaded = !!(json.links && !json.href);
 
 				this.resolveEntities(options);
 
@@ -1100,16 +1100,23 @@
             /**
              * http://backbonejs.org/#Collection-parse
              *
-             * @param {Object} sirenObj
+             * @param {Object} json
              */
-            , parse: function (sirenObj) {
-                this._data = sirenObj; // Store the entire siren object in raw json
-                this._meta = sirenObj.properties || {};
+            , parse: function (json, options) {
+				options = options || {};
+
+                this._data = json; // Store the entire siren object in raw json
+                this._meta = json.properties || {};
+				this.isLoaded = !!(json.links && !json.href);
 
                 var models = [];
-                _.each(sirenObj.entities, function (entity) {
-                    models.push(new Backbone.Siren.Model(entity));
+                _.each(json.entities, function (entity) {
+                    models.push(new Backbone.Siren.Model(entity, options));
                 });
+
+				if (options.store) {
+					options.store.add(this);
+				}
 
                 return models;
             }
@@ -1120,8 +1127,7 @@
              * However, there are times we need to store "meta" data about the collection such as
              * the paging "offset".
              *
-             * @param {*} prop
-             * @param {*} value
+             * @param {*} name
              * @return {Object}
              */
             , meta: function (name) {
@@ -1217,21 +1223,7 @@
 		 * @param entityName
 		 */
 		, resolve: function (entityName) {
-			var self = this;
-
-			return BbSiren.resolve(this.apiRoot + '/' + entityName, {store: this.store})
-				.done(function (json) {
-					self.parse(json);
-				});
-		}
-
-
-		/**
-		 *
-		 * @param {JSON} json
-		 */
-		, parse: function (json) {
-			return BbSiren.parse(json);
+			return BbSiren.resolve(this.apiRoot + '/' + entityName, {store: this.store});
 		}
 	};
 
