@@ -513,21 +513,16 @@ _.extend(BbSiren, {
         , rootUrl = chain.shift()
         , chainedDeferred = options.deferred;
 
-		// @todo temporary hack while we rewrite the store api.
 		if (options.store) {
 			store = options.store;
-		} else {
-			store = {
-				getRequest: function () { /* no-op */ }
-				, addRequest: function () { /* no-op */ }
-				, get: function () { /* no-op */ }
-			};
 		}
 
-        storedPromise = store.getRequest(rootUrl);
-        if (storedPromise) {
-            state = storedPromise.state();
-        }
+		if (store) {
+			storedPromise = store.getRequest(rootUrl);
+			if (storedPromise) {
+				state = storedPromise.state();
+			}
+		}
 
         // The request has already been made and we are ok to use it.
         if (_.isEmpty(chain) && ((state == 'resolved' && !options.forceFetch) || state == 'pending')) {
@@ -552,17 +547,24 @@ _.extend(BbSiren, {
                 nestedResolve(bbSiren, chain, chainedDeferred, options);
             });
         } else {
-            bbSiren = store.get(rootUrl);
+	        if (store) {
+		        bbSiren = store.get(rootUrl);
+	        }
+
             if (bbSiren && bbSiren.isLoaded && !options.forceFetch) {
 	            // Use the stored bbSiren object
 	            handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
             } else {
 	            // By creating our own Deferred() we can map standard responses to bbSiren error models along each step of the chain
 	            deferred = new $.Deferred();
-	            store.addRequest(rootUrl, deferred.promise());
+
+	            if (store) {
+					store.addRequest(rootUrl, deferred.promise());
+	            }
+
 	            Backbone.Siren.ajax(rootUrl, options)
 		            .done(function (entity) {
-			            var bbSiren = Backbone.Siren.parse(entity, options.store); // using options.store because we don't want to pass along our hacky fake store object
+			            var bbSiren = Backbone.Siren.parse(entity, store);
 			            deferred.resolve(bbSiren);
 			            handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
 		            })
@@ -575,7 +577,7 @@ _.extend(BbSiren, {
 				            entity = {};
 			            }
 
-			            bbSiren = Backbone.Siren.parse(entity, options.store); // using options.store because we don't want to pass along our hacky fake store object
+			            bbSiren = Backbone.Siren.parse(entity, store);
 			            deferred.reject(bbSiren, jqXhr);
 			            chainedDeferred.reject(bbSiren, jqXhr);
 		            });
@@ -603,7 +605,6 @@ _.extend(BbSiren, {
 
         /**
          *
-         * @param {Object} sirenObj
          * @param {Object} options
          */
         , resolveEntities: function (options) {
@@ -760,7 +761,7 @@ _.extend(BbSiren, {
         /**
          * http://backbonejs.org/#Model-constructor
          *
-         * @param {Object} attributes
+         * @param {Object} sirenObj
          * @param {Object} options
          */
         , constructor: function (sirenObj, options) {
