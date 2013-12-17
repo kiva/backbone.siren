@@ -88,6 +88,13 @@
 		 * @returns {Promise}
 		 */
 		, addRequest: function (url, request) {
+			var self = this;
+
+			// Remove the request from the request store once its been resolved
+			request.done(function () {
+				self.requests[url] = null;
+			});
+
 			this.requests[url] = request;
 			return request;
 		}
