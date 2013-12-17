@@ -1,10 +1,12 @@
+'use strict';
+
 /**
  *
  * @param {Backbone.Siren.Model|Backbone.Siren.Collection} parent
  * @param actionData
  * @constructor
  */
-function Action(actionData, parent) {
+var Action = Backbone.Siren.Action = function (actionData, parent) {
 	var someModel;
 
 	_.extend(this, {'class': [], method: 'GET', type: 'application/x-www-form-urlencoded'}, actionData);
@@ -20,7 +22,7 @@ function Action(actionData, parent) {
 	}
 
 	this.parent = parent;
-}
+};
 
 
 Action.prototype = {
@@ -194,6 +196,3 @@ Action.prototype = {
 		return jqXhr;
 	}
 };
-
-
-Backbone.Siren.Action = Action;

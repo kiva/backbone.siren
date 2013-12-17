@@ -37,16 +37,14 @@ module.exports = function(grunt) {
 
 
         , uglify: {
-            target: {
-                options: {
-                    banner: '<%= meta.banner %>'
-                }
-                , files: {
-                    'dist/backbone.siren.min.js': ['dist/backbone.siren.js']
-                    , 'dist/amd/backbone.siren.min.js': ['dist/amd/backbone.siren.js']
-                }
+            options: {
+                banner: '<%= meta.banner %>'
             }
-        }
+		    , files: {
+			    'dist/iife/backbone.siren.min.js': ['dist/iife/backbone.siren.js']
+			    , 'dist/amd/backbone.siren.min.js': ['dist/amd/backbone.siren.js']
+		    }
+	    }
 
 
         , rig: {
@@ -55,8 +53,8 @@ module.exports = function(grunt) {
                     banner: '<%= meta.banner %>'
                 },
                 files: {
-                    'dist/backbone.siren.js': ['build/_core.js']
-                    , 'dist/amd/backbone.siren.js': ['build/_amd.js']
+                    'dist/iife/backbone.siren.js': ['build/_iife.js']
+	                , 'dist/amd/backbone.siren.js': ['build/_amd.js']
                 }
             }
         }

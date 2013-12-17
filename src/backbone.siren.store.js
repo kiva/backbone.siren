@@ -1,12 +1,14 @@
+'use strict';
+
 /**
  * Stores Siren objects in memory
  *
  * @constructor
  */
-function Store() {
+var Store = Backbone.Siren.Store = function () {
 	this.data = {};
 	this.requests = {};
-}
+};
 
 
 Store.prototype = {
@@ -93,6 +95,3 @@ Store.prototype = {
 		return this.requests[url];
 	}
 };
-
-
-Backbone.Siren.Store = Store;

@@ -29,6 +29,7 @@
 		"define"
 		, "Backbone"
 		, "_"
+		, "getUrl"
 
 		, "afterEach"
 		, "beforeEach"
