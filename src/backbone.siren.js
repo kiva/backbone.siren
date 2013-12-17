@@ -482,8 +482,10 @@ _.extend(BbSiren, {
 
 
     /**
+     * Given a url string, splits it and returns an array.
      *
-     *
+     * @param {String} chain
+     * @returns {Array}
      */
     , parseChain: function (chain) {
 	    if (typeof chain == 'string') {
