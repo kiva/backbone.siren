@@ -1,5 +1,9 @@
 //= ../src/backbone.siren.js
 
+//= ../src/backbone.siren.action.js
+
+//= ../src/backbone.siren.store.js
+
 /*
 
 @todo These need more work.
