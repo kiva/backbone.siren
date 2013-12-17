@@ -852,33 +852,34 @@
                     nestedResolve(bbSiren, chain, chainedDeferred, options);
                 });
             } else {
-                if (options.forceFetch || !(bbSiren = store.get(rootUrl))) { // Assign value to bbSiren
-                    // By creating our own Deferred() we can map standard responses to bbSiren error models along each step of the chain
-                    deferred = new $.Deferred();
-                    store.addRequest(rootUrl, deferred.promise());
-                    Backbone.Siren.ajax(rootUrl, options)
-                        .done(function (entity) {
-                            var bbSiren = Backbone.Siren.parse(entity, store);
-                            deferred.resolve(bbSiren);
-                            handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
-                        })
-                        .fail(function (jqXhr) {
-                            var entity, bbSiren;
+	            bbSiren = store.get(rootUrl);
+	            if (bbSiren && bbSiren.isLoaded && !options.forceFetch) {
+		            // Use the stored bbSiren object
+		            handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
+	            } else {
+		            // By creating our own Deferred() we can map standard responses to bbSiren error models along each step of the chain
+		            deferred = new $.Deferred();
+		            store.addRequest(rootUrl, deferred.promise());
+		            Backbone.Siren.ajax(rootUrl, options)
+			            .done(function (entity) {
+				            var bbSiren = Backbone.Siren.parse(entity, options.store); // using options.store because we don't want to pass along our hacky fake store object
+				            deferred.resolve(bbSiren);
+				            handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
+			            })
+			            .fail(function (jqXhr) {
+				            var entity, bbSiren;
 
-		                    try {
-			                    entity = JSON.parse(jqXhr.responseText);
-		                    } catch (exception) {
-			                    entity = {};
-		                    }
+				            try {
+					            entity = JSON.parse(jqXhr.responseText);
+				            } catch (exception) {
+					            entity = {};
+				            }
 
-		                    bbSiren = Backbone.Siren.parse(entity, store);
-                            deferred.reject(bbSiren, jqXhr);
-                            chainedDeferred.reject(bbSiren, jqXhr);
-                        });
-                } else {
-                    // Use the stored bbSiren object
-                    handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
-                }
+				            bbSiren = Backbone.Siren.parse(entity, options.store); // using options.store because we don't want to pass along our hacky fake store object
+				            deferred.reject(bbSiren, jqXhr);
+				            chainedDeferred.reject(bbSiren, jqXhr);
+			            });
+	            }
             }
 
             return chainedDeferred.promise();
