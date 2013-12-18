@@ -496,24 +496,44 @@ _.extend(BbSiren, {
     }
 
 
-    /**
-     * @TODO Dire need of cleanup
-     *
-     * We cache bbSiren models in the store, we also cache requests to the api.
-     * Caching the requests allows us asynchronous access to ALL requests not just those that have resolved.
-     * This implementation needs to be revisited.  Maybe more of this logic can be moved over to the store.
-     *
-     * @param {String} url
-     * @param {Object} options
-     * @param {Object} options.store - store instance @todo remove the need to have this parameter
-     */
-    , resolve: function resolve(url, options) {
-        options = options || {};
+	/**
+	 *
+	 * @param {Array|String} urls
+	 * @param {Object} options
+	 * @returns {Promise}
+	 */
+    , resolve: function (urls, options) {
+		if (typeof urls == 'string') {
+			return BbSiren.resolveOne(urls, options);
+		}
 
-        var store, state, deferred, storedPromise, bbSiren
-        , chain = Backbone.Siren.parseChain(url)
-        , rootUrl = chain.shift()
-        , chainedDeferred = options.deferred;
+		var self = this
+		, requestsArray = _.map(urls, function (url) {
+			return self.resolveOne(url, options);
+		});
+
+		return $.when.apply($, requestsArray);
+    }
+
+
+	/**
+	 * @TODO Dire need of cleanup
+	 *
+	 * We cache bbSiren models in the store, we also cache requests to the api.
+	 * Caching the requests allows us asynchronous access to ALL requests not just those that have resolved.
+	 * This implementation needs to be revisited.  Maybe more of this logic can be moved over to the store.
+	 *
+	 * @param {String} url
+	 * @param {Object} options
+	 * @param {Object} options.store - store instance @todo remove the need to have this parameter
+	 */
+	, resolveOne: function (url, options) {
+		options = options || {};
+
+		var store, state, deferred, storedPromise, bbSiren
+		, chain = Backbone.Siren.parseChain(url)
+		, rootUrl = chain.shift()
+		, chainedDeferred = options.deferred;
 
 		if (options.store) {
 			store = options.store;
@@ -526,68 +546,68 @@ _.extend(BbSiren, {
 			}
 		}
 
-        // The request has already been made and we are ok to use it.
-        if (_.isEmpty(chain) && ((state == 'resolved' && !options.forceFetch) || state == 'pending')) {
-            if (chainedDeferred) {
-                return storedPromise.done(function (bbSiren) {
-                    chainedDeferred.resolve(bbSiren);
-                });
-            } else {
-                return storedPromise;
-            }
-        }
+		// The request has already been made and we are ok to use it.
+		if (_.isEmpty(chain) && ((state == 'resolved' && !options.forceFetch) || state == 'pending')) {
+			if (chainedDeferred) {
+				return storedPromise.done(function (bbSiren) {
+					chainedDeferred.resolve(bbSiren);
+				});
+			} else {
+				return storedPromise;
+			}
+		}
 
-        // We need a deferred object to track the final result of our request (bc it can be chained)
-        if (! chainedDeferred) {
-            chainedDeferred = new $.Deferred();
-        }
+		// We need a deferred object to track the final result of our request (bc it can be chained)
+		if (! chainedDeferred) {
+			chainedDeferred = new $.Deferred();
+		}
 
-        if (state == 'pending') {
-            // Check for a pending request, piggy-back on it's promise if it exists.
+		if (state == 'pending') {
+			// Check for a pending request, piggy-back on it's promise if it exists.
 
-            storedPromise.done(function (bbSiren) {
-                nestedResolve(bbSiren, chain, chainedDeferred, options);
-            });
-        } else {
-	        if (store) {
-		        bbSiren = store.get(rootUrl);
-	        }
+			storedPromise.done(function (bbSiren) {
+				nestedResolve(bbSiren, chain, chainedDeferred, options);
+			});
+		} else {
+			if (store) {
+				bbSiren = store.get(rootUrl);
+			}
 
-            if (bbSiren && bbSiren.isLoaded && !options.forceFetch) {
-	            // Use the stored bbSiren object
-	            handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
-            } else {
-	            // By creating our own Deferred() we can map standard responses to bbSiren error models along each step of the chain
-	            deferred = new $.Deferred();
+			if (bbSiren && bbSiren.isLoaded && !options.forceFetch) {
+				// Use the stored bbSiren object
+				handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
+			} else {
+				// By creating our own Deferred() we can map standard responses to bbSiren error models along each step of the chain
+				deferred = new $.Deferred();
 
-	            if (store) {
+				if (store) {
 					store.addRequest(rootUrl, deferred.promise());
-	            }
+				}
 
-	            Backbone.Siren.ajax(rootUrl, options)
-		            .done(function (entity) {
-			            var bbSiren = Backbone.Siren.parse(entity, store);
-			            deferred.resolve(bbSiren);
-			            handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
-		            })
-		            .fail(function (jqXhr) {
-			            var entity, bbSiren;
+				Backbone.Siren.ajax(rootUrl, options)
+					.done(function (entity) {
+						var bbSiren = Backbone.Siren.parse(entity, store);
+						deferred.resolve(bbSiren);
+						handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
+					})
+					.fail(function (jqXhr) {
+						var entity, bbSiren;
 
-			            try {
-				            entity = JSON.parse(jqXhr.responseText);
-			            } catch (exception) {
-				            entity = {};
-			            }
+						try {
+							entity = JSON.parse(jqXhr.responseText);
+						} catch (exception) {
+							entity = {};
+						}
 
-			            bbSiren = Backbone.Siren.parse(entity, store);
-			            deferred.reject(bbSiren, jqXhr);
-			            chainedDeferred.reject(bbSiren, jqXhr);
-		            });
-            }
-        }
+						bbSiren = Backbone.Siren.parse(entity, store);
+						deferred.reject(bbSiren, jqXhr);
+						chainedDeferred.reject(bbSiren, jqXhr);
+					});
+			}
+		}
 
-        return chainedDeferred.promise();
-    }
+		return chainedDeferred.promise();
+	}
 
     , Model: Backbone.Model.extend({
 
@@ -913,14 +933,30 @@ BbSiren.prototype = {
 	}
 
 
+	, entityNameToUrl: function (entityName) {
+		return this.apiRoot + '/' + entityName;
+	}
+
+
 	/**
 	 *
-	 * @param entityName
+	 * @param {String|Array} entityNames
 	 */
-	, resolve: function (entityName, options) {
+	, resolve: function (entityNames, options) {
 		options = options || {};
-
 		options.store = this.store;
-		return BbSiren.resolve(this.apiRoot + '/' + entityName, options);
+
+		var self = this
+		, urls = [];
+
+		if (typeof entityNames == 'string') {
+			urls = this.entityNameToUrl(entityNames);
+		} else {
+			urls = _.map(entityNames, function(entityName) {
+				return self.entityNameToUrl(entityName);
+			});
+		}
+
+		return BbSiren.resolve(urls, options);
 	}
 };
