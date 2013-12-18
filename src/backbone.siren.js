@@ -917,7 +917,10 @@ BbSiren.prototype = {
 	 *
 	 * @param entityName
 	 */
-	, resolve: function (entityName) {
-		return BbSiren.resolve(this.apiRoot + '/' + entityName, {store: this.store});
+	, resolve: function (entityName, options) {
+		options = options || {};
+
+		options.store = this.store;
+		return BbSiren.resolve(this.apiRoot + '/' + entityName, options);
 	}
 };
