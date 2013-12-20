@@ -221,8 +221,6 @@ function request(rel) {
 
 
 /**
- * @TODO fix
- *  - currently, collections do not get cached by the store
  *
  * Wrapper for .fetch(), adds the following:
  * 1) Checks the local store
@@ -240,7 +238,7 @@ function resolve(options) {
 		deferred.resolve(bbSiren);
 	});
 
-	if (options.forceFetch || this.isLoaded) {
+	if (options.forceFetch || !this.isLoaded) {
 		this.fetch(options);
 	} else if (! _.isEmpty(this._data)) {
 		// Its already been hydrated
