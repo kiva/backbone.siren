@@ -439,30 +439,60 @@ _.extend(BbSiren, {
 
 	/**
 	 *
-	 * @param json
+	 * @param {Object} obj
 	 * @returns {Boolean}
 	 */
-	, isCollection: function (json) {
-		return _hasClass(json, 'collection');
+	, isHydratedObject: function (obj) {
+		return !!((obj.cid || obj.models) && obj._data);
+	}
+
+
+	/**
+	 *
+	 * @param {Object} obj
+	 * @returns {Boolean}
+	 */
+	, isHydratedCollection: function (obj) {
+		return obj instanceof Backbone.Siren.Collection;
+	}
+
+
+	/**
+	 *
+	 * @param {Object} obj
+	 * @returns {Boolean}
+	 */
+	, isRawCollection: function (obj) {
+		return _hasClass(obj, 'collection');
+	}
+
+
+	/**
+	 *
+	 * @param obj
+	 * @returns {Boolean}
+	 */
+	, isRawError: function (obj) {
+		return _hasClass(obj, 'error');
 	}
 
 
     /**
      * Creates a Backbone.Siren model, collection, or error from a Siren object
      *
-     * @param {Object} entity
+     * @param {Object} rawEntity
      * @returns {Backbone.Siren.Model|Backbone.Siren.Collection|Backbone.Siren.Error}
      */
-    , parse: function (entity, store) {
+    , parse: function (rawEntity, store) {
         var bbSiren;
 
-        if (_hasClass(entity, 'collection')) {
-            bbSiren = new Backbone.Siren.Collection(entity, {store: store});
-        } else if (_hasClass(entity, 'error')) {
+        if (BbSiren.isRawCollection(rawEntity)) {
+            bbSiren = new Backbone.Siren.Collection(rawEntity, {store: store});
+        } else if (BbSiren.isRawError(rawEntity)) {
             // @todo how should we represent errors?  For now, treat them as regular Models...
-            bbSiren = new Backbone.Siren.Model(entity, {store: store});
+            bbSiren = new Backbone.Siren.Model(rawEntity, {store: store});
         } else {
-            bbSiren = new Backbone.Siren.Model(entity, {store: store});
+            bbSiren = new Backbone.Siren.Model(rawEntity, {store: store});
         }
 
         return bbSiren;

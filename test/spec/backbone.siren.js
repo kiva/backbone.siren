@@ -8,6 +8,78 @@ describe('Backbone.Siren: ', function () {
 	var expect = buster.expect;
 
     var settingsModelSiren = {"class":["order", "special"],"properties":{"orderNumber":42,"itemCount":3,"status":"pending"},"entities":[{"class":["items","collection"],"rel":["http://x.io/rels/order-items", "name:order-items"],"href":"http://api.x.io/orders/42/items"},{"class":["info","customer"],"rel":["http://x.io/rels/customer", "name:customer"],"properties":{"customerId":"pj123","name":"Peter Joseph"},"links":[{"rel":["self"],"href":"http://api.x.io/customers/pj123"}]}],"actions":[{"name":"add-item","title":"Add Item","method":"POST","href":"http://api.x.io/orders/42/items","type":"application/x-www-form-urlencoded","fields":[{name: "addedLater"}, {"name":"orderNumber","type":"hidden","value":"42"},{"name":"productCode","type":"text"},{"name":"quantity","type":"number"}]}],"links":[{"rel":["self"],"href":"http://api.x.io/orders/42"},{"rel":["previous"],"href":"http://api.x.io/orders/41"},{"rel":["next"],"href":"http://api.x.io/orders/43"}]};
+	var sirenCollection = {
+		"class": ["collection"]
+		, "entities": [
+			{
+				"links": [
+					{"rel":["self"],"href":"http://api.x.io/orders/41"}
+				]
+			}
+			, {
+				"links": [
+					{"rel":["self"],"href":"http://api.x.io/orders/42"}
+				]
+			}
+		]
+	};
+
+
+	describe('.isHydratedObject', function () {
+
+		it('checks if an object is an instantiated Backbone.Siren object', function () {
+			var bbSirenModel = new Backbone.Siren.Model(settingsModelSiren);
+
+			expect(Backbone.Siren.isHydratedObject(settingsModelSiren)).toBeFalse();
+			expect(Backbone.Siren.isHydratedObject(bbSirenModel)).toBeTrue();
+
+			var bbSirenCollection = new Backbone.Siren.Collection(sirenCollection);
+
+			expect(Backbone.Siren.isHydratedObject(sirenCollection)).toBeFalse();
+			expect(Backbone.Siren.isHydratedObject(bbSirenCollection)).toBeTrue();
+		});
+	});
+
+
+	describe('.isHydratedCollection', function () {
+
+		it('checks if a backbone.siren object is a collection', function () {
+			var bbSirenModel = new Backbone.Siren.Model(settingsModelSiren);
+			var bbSirenCollection = new Backbone.Siren.Collection(sirenCollection);
+
+			expect(Backbone.Siren.isHydratedCollection(settingsModelSiren)).toBeFalse();
+			expect(Backbone.Siren.isHydratedCollection(sirenCollection)).toBeFalse();
+			expect(Backbone.Siren.isHydratedCollection(bbSirenModel)).toBeFalse();
+			expect(Backbone.Siren.isHydratedCollection(bbSirenCollection)).toBeTrue();
+		});
+	});
+
+
+	describe('.isRawCollection', function () {
+
+		it('checks if a siren json object is a collection', function () {
+			var bbSirenModel = new Backbone.Siren.Model(settingsModelSiren);
+			var bbSirenCollection = new Backbone.Siren.Collection(sirenCollection);
+
+			expect(Backbone.Siren.isRawCollection(settingsModelSiren)).toBeFalse();
+			expect(Backbone.Siren.isRawCollection(bbSirenModel)).toBeFalse();
+			expect(Backbone.Siren.isRawCollection(bbSirenCollection)).toBeFalse();
+			expect(Backbone.Siren.isRawCollection(sirenCollection)).toBeTrue();
+		});
+	});
+
+
+	describe('.isRawError', function () {
+
+		it('checks if a raw siren object is an error', function () {
+			var bbSirenModel = new Backbone.Siren.Model(settingsModelSiren);
+			var bbSirenCollection = new Backbone.Siren.Collection(sirenCollection);
+
+			expect(Backbone.Siren.isRawError(settingsModelSiren)).toBeFalse();
+			expect(Backbone.Siren.isRawError(bbSirenModel)).toBeFalse();
+			expect(Backbone.Siren.isRawError({class: ['error']})).toBeTrue();
+		});
+	});
 
 
     describe('.parse', function () {
