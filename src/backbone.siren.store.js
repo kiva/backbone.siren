@@ -15,20 +15,20 @@ Store.prototype = {
 
 	/**
 	 *
-	 * @param {Backbone.Siren.Model|Backbone.Siren.Collection} sirenObj
+	 * @param {Backbone.Siren.Model|Backbone.Siren.Collection} bbSirenObj
 	 * @return {Backbone.Siren.Model}
 	 */
-	add: function (sirenObj) {
+	add: function (bbSirenObj) {
 		var self = this;
 
-		if (Backbone.Siren.isCollection(sirenObj)) {
-			sirenObj.each(function (sirenModel) {
+		if (Backbone.Siren.isHydratedCollection(bbSirenObj)) {
+			bbSirenObj.each(function (sirenModel) {
 				self.add(sirenModel);
 			});
 		}
 
-		this.data[sirenObj.url()] = sirenObj;
-		return sirenObj;
+		this.data[bbSirenObj.url()] = bbSirenObj;
+		return bbSirenObj;
 	}
 
 
