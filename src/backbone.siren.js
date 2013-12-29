@@ -272,21 +272,38 @@ function resolve(options) {
 }
 
 
-function nestedResolve(bbSiren, chain, deferred, options) {
+/**
+ * Given a bbSiren Model and a chain, resolves the next entity in the chain
+ * @todo set this up to work with Collections (should already work if "entityName" is an id, but needs to be thoroughly tested)
+ *
+ * @param deferred
+ * @param bbSiren
+ * @param chain
+ * @param options
+ * @returns {*}
+ */
+function nestedResolve(deferred, bbSiren, chain, options) {
 	options = options || {};
 
 	if (! options.store) {
 		options.store = bbSiren.store;
 	}
 
-	var entityName = chain.shift();
-	var subEntity = bbSiren.get(entityName);
+	var entityName = chain.shift()
+	, subEntity = bbSiren.get(entityName);
+
 	if (! subEntity) {
 		throw 'The entity you are looking for, "' + entityName + '" is not a sub-entity at ' + bbSiren.url() + '.';
 	}
 
+	// Stringify the new chain array so it can be appended to the new request.
+	chain = chain.join('#');
+	if (chain) {
+		chain = '#' + chain;
+	}
+
 	options.deferred = deferred;
-	return Backbone.Siren.resolve(subEntity.url() + '#' + chain.join('#'), options);
+	return Backbone.Siren.resolve(subEntity.url() + chain, options);
 }
 
 
@@ -298,7 +315,7 @@ function nestedResolve(bbSiren, chain, deferred, options) {
  * @returns {Promise}
  */
 function resolveChain(chain, options) {
-    return nestedResolve(this, Backbone.Siren.parseChain(chain), new $.Deferred(), options);
+    return nestedResolve(new $.Deferred(), this, Backbone.Siren.parseChain(chain), options);
 }
 
 
@@ -419,7 +436,7 @@ function handleRootRequestSuccess(bbSiren, chain, deferred, options) {
     if (_.isEmpty(chain)) {
         deferred.resolve(bbSiren);
     } else {
-        nestedResolve(bbSiren, chain, deferred, options);
+        nestedResolve(deferred, bbSiren, chain, options);
     }
 }
 
@@ -574,7 +591,7 @@ _.extend(BbSiren, {
 			}
 		}
 
-		// The request has already been made and we are ok to use it.
+		// The request has already been made and there are no more chained requests, we are ok use it
 		if (_.isEmpty(chain) && ((state == 'resolved' && !options.forceFetch) || state == 'pending')) {
 			if (chainedDeferred) {
 				return storedPromise.done(function (bbSiren) {
@@ -594,7 +611,7 @@ _.extend(BbSiren, {
 			// Check for a pending request, piggy-back on it's promise if it exists.
 
 			storedPromise.done(function (bbSiren) {
-				nestedResolve(bbSiren, chain, chainedDeferred, options);
+				nestedResolve(chainedDeferred, bbSiren, chain, options);
 			});
 		} else {
 			if (store) {
