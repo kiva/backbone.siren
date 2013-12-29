@@ -116,7 +116,7 @@ describe('Backbone.Siren: ', function () {
 
 	describe('.parseChain()', function () {
 
-		it('parses a url chain string', function () {
+		it('parses a url chain string into an array', function () {
 			var chain = Backbone.Siren.parseChain('http://api.io/resource');
 			expect(chain).toEqual(['http://api.io/resource']);
 		});
