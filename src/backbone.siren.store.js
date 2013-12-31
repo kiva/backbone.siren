@@ -57,13 +57,11 @@ Store.prototype = {
 
 	/**
 	 *
-	 * @param {Backbone.Siren.Model|Object|String} ModelOrSirenObjOrUrl
+	 * @param {Backbone.Siren.Model|Backbone.Siren.Collection|String} ModelOrSirenObjOrUrl
 	 * @return {Boolean}
 	 */
 	, exists: function (ModelOrSirenObjOrUrl) {
-		return !!this.get((ModelOrSirenObjOrUrl instanceof Backbone.Siren.Model)
-			? ModelOrSirenObjOrUrl.url()
-			: ModelOrSirenObjOrUrl);
+		return !!this.get(Backbone.Siren.isHydratedObject(ModelOrSirenObjOrUrl) ? ModelOrSirenObjOrUrl.url() : ModelOrSirenObjOrUrl);
 	}
 
 

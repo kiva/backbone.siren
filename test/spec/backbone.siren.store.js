@@ -46,6 +46,42 @@ describe('Backbone.Siren.Store: ', function () {
 	});
 
 
+	describe('.exists', function () {
+		var store;
+
+		beforeEach(function () {
+			store = new Backbone.Siren.Store();
+		});
+		
+
+		it('checks if a bbSiren object with the given url already exists in the store', function () {
+			var model = new Backbone.Siren.Model({links: [{rel: ['self'], href: "api.io/one"}]});
+
+			expect(store.exists(model.url())).toBeFalse();
+			store.add(model);
+			expect(store.exists(model.url())).toBeTrue();
+		});
+
+
+		it('checks if a model already exists in the store', function () {
+			var model = new Backbone.Siren.Model({links: [{rel: ['self'], href: "api.io/one"}]});
+
+			expect(store.exists(model)).toBeFalse();
+			store.add(model);
+			expect(store.exists(model)).toBeTrue();
+		});
+
+
+		it('checks if a collection already exists in the store', function () {
+			var collection = new Backbone.Siren.Collection({'class': ['collection'], links: [{rel: ['self'], href: "api.io/my-collection"}]});
+
+			expect(store.exists(collection)).toBeFalse();
+			store.add(collection);
+			expect(store.exists(collection)).toBeTrue();
+		});
+	});
+
+
 	describe('.filter', function () {
 
 		it('filters down stored models by doing a regex match on all stored models', function () {
