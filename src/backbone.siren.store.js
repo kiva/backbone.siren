@@ -34,18 +34,18 @@ Store.prototype = {
 
 	/**
 	 *
-	 * @param {String} sirenObjOrUrl
+	 * @param {Object|String} rawEntityOrUrl
 	 * @return {Backbone.Siren.Model}
 	 */
-	, get: function (sirenObjOrUrl) {
-		return this.data[typeof sirenObjOrUrl == 'object'? getUrl(sirenObjOrUrl): sirenObjOrUrl];
+	, get: function (rawEntityOrUrl) {
+		return this.data[typeof rawEntityOrUrl == 'object'? getUrl(rawEntityOrUrl): rawEntityOrUrl];
 	}
 
 
 	/**
 	 * Filters Siren objects by their index value (aka their self-url)
 	 *
-	 * @param regex
+	 * @param {Regex} regex
 	 * @returns {Array}
 	 */
 	, filter: function (regex) {

@@ -23,7 +23,7 @@ describe('Backbone.Siren.Store: ', function () {
 
 	describe('.add - Collection', function () {
 
-		it('adds a collection to the store', function () {
+		it('adds a collection to the store, which includes adding all sub-entities', function () {
 			var store = new Backbone.Siren.Store()
 			, bbSirenCollection = new Backbone.Siren.Collection({
 				'class': ['collection']
