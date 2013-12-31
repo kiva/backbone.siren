@@ -88,11 +88,10 @@ describe('Backbone.Siren: ', function () {
 
 		it('checks if a raw siren object is an error', function () {
 			var bbSirenModel = new Backbone.Siren.Model(settingsModelSiren);
-			var bbSirenCollection = new Backbone.Siren.Collection(sirenCollection);
 
 			expect(Backbone.Siren.isRawError(settingsModelSiren)).toBeFalse();
 			expect(Backbone.Siren.isRawError(bbSirenModel)).toBeFalse();
-			expect(Backbone.Siren.isRawError({class: ['error']})).toBeTrue();
+			expect(Backbone.Siren.isRawError({'class': ['error']})).toBeTrue();
 		});
 	});
 
@@ -265,6 +264,6 @@ describe('Backbone.Siren: ', function () {
 			});
 
 			return promise;
-		})
+		});
 	});
 });

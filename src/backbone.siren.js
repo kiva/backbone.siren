@@ -5,7 +5,8 @@
  * @type {Object}
  * @private
  */
-var warn = function () {
+var BbSiren
+, warn = function () {
     if (BbSiren.settings.showWarnings && console) {
         console.warn.apply(console, arguments);
     }
@@ -419,7 +420,7 @@ function parseActions() {
 }
 
 
-var BbSiren = Backbone.Siren = function (apiRoot, options) {
+BbSiren = Backbone.Siren = function (apiRoot, options) {
 	this.store = new Backbone.Siren.Store();
 	this.init(apiRoot, options);
 };
@@ -643,7 +644,7 @@ _.extend(BbSiren, {
 						deferred.resolve(bbSiren);
 
 						options.deferred = chainedDeferred;
-						bbSiren.resolveNextInChain(chain, options)
+						bbSiren.resolveNextInChain(chain, options);
 					})
 					.fail(function (jqXhr) {
 						var entity, bbSiren;

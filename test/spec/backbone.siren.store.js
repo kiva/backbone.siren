@@ -12,7 +12,7 @@ describe('Backbone.Siren.Store: ', function () {
 
 		it('adds a model to the store', function () {
 			var store = new Backbone.Siren.Store()
-			, bbSirenModel = new Backbone.Siren.Model({properties: {}, links: [{rel: ['self'], href: 'http://one'}]})
+			, bbSirenModel = new Backbone.Siren.Model({properties: {}, links: [{rel: ['self'], href: 'http://one'}]});
 
 			store.add(bbSirenModel);
 
@@ -26,7 +26,7 @@ describe('Backbone.Siren.Store: ', function () {
 		it('adds a collection to the store', function () {
 			var store = new Backbone.Siren.Store()
 			, bbSirenCollection = new Backbone.Siren.Collection({
-				class: ['collection']
+				'class': ['collection']
 				, entities: [
 					{properties: {}, links: [{rel: ['self'], href: 'http://one'}]}
 					, {properties: {}, links: [{rel: ['self'], href: 'http://two'}]}
