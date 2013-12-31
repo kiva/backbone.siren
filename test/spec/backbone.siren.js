@@ -133,31 +133,95 @@ describe('Backbone.Siren: ', function () {
 		});
 
 
-		it('returns the chain argument, unchanged, if its not a string', function () {
+		it('throws a SyntaxError if the argument is not a string', function () {
 			var param = ['http://api.io/resource'];
-			var chain = Backbone.Siren.parseChain(param);
-			expect(chain).toEqual(param);
+
+			expect(function () {
+				Backbone.Siren.parseChain(param);
+			}).toThrow('TypeError');
 		});
 	});
 
 
-    describe('.resolve', function () {
-        var server;
+	describe('.stringifyChain()', function () {
 
-        beforeEach(function () {
-            server = sinon.fakeServer.create();
-            server.respondWith(JSON.stringify(settingsModelSiren));
-        });
+		it('converts a chain array into a url string', function () {
+			var chain = Backbone.Siren.stringifyChain(['http://api.io/resource']);
+			expect(chain).toEqual('http://api.io/resource');
+		});
 
-	    // @todo this test broke when upgrading to jquery 2.0, see: https://github.com/cjohansen/Sinon.JS/issues/271
-	    // Uncomment once buster updates to latest version of sinon.
-        it('//uses the first chain item as the "root" url to the chained request', function () {
-            var bbSirenRequest = Backbone.Siren.resolve('http://blah');
-            server.respond();
 
-            bbSirenRequest.done(function (bbSiren) {
-               expect(bbSiren instanceof Backbone.Siren.Model).toBeTrue();
-            });
-        });
-    });
+		it('stringifies a nested chain array', function () {
+			var chain;
+
+			chain = Backbone.Siren.stringifyChain(['http://api.io/resource', 'nested']);
+			expect(chain).toEqual('http://api.io/resource#nested');
+
+			chain = Backbone.Siren.stringifyChain(['http://api.io/resource', 'nested', 'nested2', 'nested3']);
+			expect(chain).toEqual('http://api.io/resource#nested#nested2#nested3');
+		});
+
+
+		it('throws a SyntaxError if the arguments not an array', function () {
+			expect(function () {
+				Backbone.Siren.parseChain(param);
+			}).toThrow('TypeError');
+		});
+	});
+
+
+	describe('.resolve', function () {
+
+		it('calls .resolveOne if passed a string', function () {
+			this.stub(Backbone.Siren, 'resolveOne');
+			this.stub(Backbone.Siren, 'resolveMany');
+
+			Backbone.Siren.resolve('http://api.io/frogger');
+
+			expect(Backbone.Siren.resolveOne).toHaveBeenCalledWith('http://api.io/frogger');
+			expect(Backbone.Siren.resolveMany).not.toHaveBeenCalled();
+		});
+
+
+		it('calls .resolveMany if passed an array', function () {
+			this.stub(Backbone.Siren, 'resolveOne');
+			this.stub(Backbone.Siren, 'resolveMany');
+
+			Backbone.Siren.resolve(['http://api.io/frogger', 'http://api.io/pacman', 'http://api.io/centipede']);
+
+			expect(Backbone.Siren.resolveOne).not.toHaveBeenCalled();
+			expect(Backbone.Siren.resolveMany).toHaveBeenCalledWith(['http://api.io/frogger', 'http://api.io/pacman', 'http://api.io/centipede']);
+		});
+	});
+
+
+	describe('.resolveOne', function () {
+		var server;
+
+		beforeEach(function () {
+			server = sinon.fakeServer.create();
+			server.respondWith(JSON.stringify(settingsModelSiren));
+		});
+
+
+		it('uses the first chain item as the "root" url to the chained request', function () {
+			var bbSirenRequest = Backbone.Siren.resolve('http://blah');
+			server.respond();
+
+			bbSirenRequest.done(function (bbSiren) {
+				expect(bbSiren instanceof Backbone.Siren.Model).toBeTrue();
+			});
+		});
+	});
+
+
+	describe('.resolveMany', function () {
+
+		it('is passed an array and calls .resolveOne() for each itme in that array', function () {
+			this.stub(Backbone.Siren, 'resolveOne');
+
+			Backbone.Siren.resolveMany(['http://api.io/frogger', 'http://api.io/pacman', 'http://api.io/centipede']);
+			expect(Backbone.Siren.resolveOne).toHaveBeenCalledThrice();
+		});
+	});
 });

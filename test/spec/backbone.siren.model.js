@@ -88,13 +88,13 @@ describe('Siren Model: ', function () {
 
     describe('.request()', function () {
         beforeEach(function () {
-            this.stub(Backbone.Siren, 'resolve').returns('jqXhr');
+            this.stub(Backbone.Siren, 'resolveOne').returns('jqXhr');
         });
 
         it('makes an http request for a linked resource and returns a deferred object', function () {
             var requests = sirenModel.request('next');
 
-            expect(Backbone.Siren.resolve).toHaveBeenCalledWith('http://api.x.io/orders/43');
+            expect(Backbone.Siren.resolveOne).toHaveBeenCalledWith('http://api.x.io/orders/43');
             expect(requests).toBe('jqXhr');
         });
 
@@ -341,18 +341,6 @@ describe('Siren Model: ', function () {
             sirenModel.setEntity({properties: {one: 'uno'}});
 
             expect(sirenModel.get('testEntity')).not.toBeDefined();
-        });
-    });
-
-
-    describe('.resolveChain()', function () {
-
-        it('makes serialized requests through the descendant chain', function () {
-            var chainedRequest = sirenModel.resolveChain('#customer', {store: store});
-
-            chainedRequest.done(function (bbSiren) {
-                expect(bbSiren.url()).toBe(sirenModel.get('customer').url());
-            });
         });
     });
 

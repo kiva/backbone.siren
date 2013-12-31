@@ -6,7 +6,7 @@
  * @private
  */
 var warn = function () {
-    if (Backbone.Siren.settings.showWarnings && console) {
+    if (BbSiren.settings.showWarnings && console) {
         console.warn.apply(console, arguments);
     }
 };
@@ -216,7 +216,7 @@ function request(rel) {
 	    return;
     }
 
-    return Backbone.Siren.resolve(link.href);
+    return BbSiren.resolveOne(link.href);
 }
 
 
@@ -248,18 +248,18 @@ function resolve(options) {
 		// Very much like .fetch() only it adds support for chaining nested entities
 
 		var self = this
-		, chain = Backbone.Siren.parseChain(options.url)
+		, chain = BbSiren.parseChain(options.url)
 		, finalEntity = chain.pop();
 
 		delete options.url;
 
-		if (finalEntity && ! chain.length) {
+		if (finalEntity && _.isEmpty(chain)) {
 			this.resolve(_.extend(_.clone(options), {url: finalEntity, forceFetch: true})).done(function (bbSiren) {
 				// Resolve the original deferred object.
 				deferred.resolve(bbSiren);
 			});
 		} else if (finalEntity) {
-			Backbone.Siren.resolve(chain, options).done(function (model) {
+			BbSiren.resolveOne(BbSiren.stringifyChain(chain), options).done(function (model) {
 				self.resolve(_.extend(_.clone(options), {url: model.get(finalEntity).url(), forceFetch: true})).done(function (bbSiren) {
 					// Resolve the original deferred object.
 					deferred.resolve(bbSiren);
@@ -280,7 +280,7 @@ function resolve(options) {
  * @param bbSiren
  * @param chain
  * @param options
- * @returns {*}
+ * @returns {Promise}
  */
 function nestedResolve(deferred, bbSiren, chain, options) {
 	options = options || {};
@@ -289,33 +289,23 @@ function nestedResolve(deferred, bbSiren, chain, options) {
 		options.store = bbSiren.store;
 	}
 
-	var entityName = chain.shift()
+	var entityName = chain[0]
 	, subEntity = bbSiren.get(entityName);
 
 	if (! subEntity) {
 		throw 'The entity you are looking for, "' + entityName + '" is not a sub-entity at ' + bbSiren.url() + '.';
 	}
 
+	chain[0] = subEntity.url();
+
 	// Stringify the new chain array so it can be appended to the new request.
-	chain = chain.join('#');
+	chain = BbSiren.stringifyChain(chain);
 	if (chain) {
 		chain = '#' + chain;
 	}
 
 	options.deferred = deferred;
-	return Backbone.Siren.resolve(subEntity.url() + chain, options);
-}
-
-
-/**
- * Goes down the given chain and resolves all entities, relative to the current entity.
- *
- * @param chain
- * @param options
- * @returns {Promise}
- */
-function resolveChain(chain, options) {
-    return nestedResolve(new $.Deferred(), this, Backbone.Siren.parseChain(chain), options);
+	return BbSiren.resolveOne(subEntity.url() + chain, options);
 }
 
 
@@ -409,7 +399,7 @@ function parseActions() {
     }
 
     _.each(this._data.actions, function (action) {
-        var bbSirenAction = new Backbone.Siren.Action(action, self);
+        var bbSirenAction = new BbSiren.Action(action, self);
 
         _actions.push(bbSirenAction);
 
@@ -529,16 +519,31 @@ _.extend(BbSiren, {
     /**
      * Given a url string, splits it and returns an array.
      *
-     * @param {String} chain
+     * @param {String} str
      * @returns {Array}
      */
-    , parseChain: function (chain) {
-	    if (typeof chain == 'string') {
-		    chain = chain.replace(/^#|#$/, '').split('#');
-	    }
+    , parseChain: function (str) {
+		if (typeof str != 'string') {
+			new SyntaxError('Must be a string');
+		}
 
-	    return chain;
+		return str.replace(/^#|#$/, '').split('#');
     }
+
+
+	/**
+	 * Given a chain array, joins it and returns a url string
+	 *
+	 * @param chain
+	 * @returns {String}
+	 */
+	, stringifyChain: function (chain) {
+		if (! _.isArray(chain)) {
+			new SyntaxError('Must be an array');
+		}
+
+		return chain.join('#');
+	}
 
 
 	/**
@@ -548,9 +553,21 @@ _.extend(BbSiren, {
 	 * @returns {Promise}
 	 */
     , resolve: function (urls, options) {
-		if (typeof urls == 'string') {
-			return BbSiren.resolveOne(urls, options);
+		if (_.isArray(urls)) {
+			return BbSiren.resolveMany(urls, options);
 		}
+
+		return BbSiren.resolveOne(urls, options);
+    }
+
+
+	/**
+	 *
+	 * @param {Array} urls
+	 * @param {Object} options
+	 */
+	, resolveMany: function (urls, options) {
+		options = options || {};
 
 		var self = this
 		, requestsArray = _.map(urls, function (url) {
@@ -558,7 +575,7 @@ _.extend(BbSiren, {
 		});
 
 		return $.when.apply($, requestsArray);
-    }
+	}
 
 
 	/**
@@ -576,7 +593,7 @@ _.extend(BbSiren, {
 		options = options || {};
 
 		var store, state, deferred, storedPromise, bbSiren
-		, chain = Backbone.Siren.parseChain(url)
+		, chain = BbSiren.parseChain(url)
 		, rootUrl = chain.shift()
 		, chainedDeferred = options.deferred;
 
@@ -629,9 +646,9 @@ _.extend(BbSiren, {
 					store.addRequest(rootUrl, deferred.promise());
 				}
 
-				Backbone.Siren.ajax(rootUrl, options)
+				BbSiren.ajax(rootUrl, options)
 					.done(function (entity) {
-						var bbSiren = Backbone.Siren.parse(entity, store);
+						var bbSiren = BbSiren.parse(entity, store);
 						deferred.resolve(bbSiren);
 						handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
 					})
@@ -644,7 +661,7 @@ _.extend(BbSiren, {
 							entity = {};
 						}
 
-						bbSiren = Backbone.Siren.parse(entity, store);
+						bbSiren = BbSiren.parse(entity, store);
 						deferred.reject(bbSiren, jqXhr);
 						chainedDeferred.reject(bbSiren, jqXhr);
 					});
@@ -667,7 +684,6 @@ _.extend(BbSiren, {
         , parseActions: parseActions
         , request: request
 	    , resolve: resolve
-        , resolveChain: resolveChain
 
 
         /**
@@ -703,12 +719,12 @@ _.extend(BbSiren, {
             , deferred = new $.Deferred();
 
             if ((entity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
-                Backbone.Siren.resolve(getUrl(entity), options)
+                BbSiren.resolveOne(getUrl(entity), options)
                     .done(function (bbSiren) {
                         deferred.resolve(self.setEntity(bbSiren, getRel(entity), getName(entity)));
                     });
             } else {
-                bbSiren = Backbone.Siren.parse(entity, options.store);
+                bbSiren = BbSiren.parse(entity, options.store);
                 bbSirenPromise = deferred.resolve(this.setEntity(bbSiren, getRel(entity), getName(entity)));
             }
 
@@ -854,7 +870,6 @@ _.extend(BbSiren, {
         , parseActions: parseActions
         , request: request
 	    , resolve: resolve
-        , resolveChain: resolveChain
 
 
         /**

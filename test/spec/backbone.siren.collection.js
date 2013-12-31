@@ -74,13 +74,13 @@ describe('Siren Collection: ', function () {
 
     describe('.request()', function () {
         beforeEach(function () {
-	        this.stub(Backbone.Siren, 'resolve').returns('jqXhr');
+	        this.stub(Backbone.Siren, 'resolveOne').returns('jqXhr');
         });
 
 	    it('makes an http request for a linked resource and returns a deferred object', function () {
             var requests = sirenCollection.request('next');
 
-	        expect(Backbone.Siren.resolve).toHaveBeenCalledWith('api.kiva.org/lenders/6282/loans?page=5');
+	        expect(Backbone.Siren.resolveOne).toHaveBeenCalledWith('api.kiva.org/lenders/6282/loans?page=5');
 	        expect(requests).toBe('jqXhr');
         });
 
