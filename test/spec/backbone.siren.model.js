@@ -7,22 +7,22 @@ describe('Siren Model: ', function () {
 	var expect = buster.expect;
 
     var settingsModelSiren = {
-            "class":["order", "special"]
-            ,"properties":{"orderNumber":42,"itemCount":3,"status":"pending"}
-            ,"entities":[
-                {"class":["items","collection"],"rel":["http://x.io/rels/order-items", "name:order-items"],"href":"http://api.x.io/orders/42/items"}
-                ,{"class":["info","customer"],"rel":["http://x.io/rels/customer", "name:customer"],"properties":{"customerId":"pj123","name":"Peter Joseph"},"links":[{"rel":["self"],"href":"http://api.x.io/customers/pj123"}]}
-            ]
-            ,"actions":[
-			    {name: 'simple-add', method: 'POST', href: 'http://api.x.io/orders', fields: [{name: 'orderNumber'}]}
-                , {"name":"add-item","title":"Add Item","method":"POST","href":"http://api.x.io/orders/42/items","type":"application/x-www-form-urlencoded","fields":[{name: "addedLater"}, {"name":"orderNumber","type":"hidden","value":"42"},{"name":"productCode","type":"text"},{"name":"quantity","type":"number"}]}
-            ]
-            ,"links":[
-                {"rel":["self"],"href":"http://api.x.io/orders/42"}
-			    ,{"rel":["previous"],"href":"http://api.x.io/orders/41"}
-			    ,{"rel":["next"],"href":"http://api.x.io/orders/43"}
-            ]
-        }
+        "class":["order", "special"]
+        ,"properties":{"orderNumber":42,"itemCount":3,"status":"pending"}
+        ,"entities":[
+            {"class":["items","collection"],"rel":["http://x.io/rels/order-items", "name:order-items"],"href":"http://api.x.io/orders/42/items"}
+            ,{"class":["info","customer"],"rel":["http://x.io/rels/customer", "name:customer"],"properties":{"customerId":"pj123","name":"Peter Joseph"},"links":[{"rel":["self"],"href":"http://api.x.io/customers/pj123"}]}
+        ]
+        ,"actions":[
+		    {name: 'simple-add', method: 'POST', href: 'http://api.x.io/orders', fields: [{name: 'orderNumber'}]}
+            , {"name":"add-item","title":"Add Item","method":"POST","href":"http://api.x.io/orders/42/items","type":"application/x-www-form-urlencoded","fields":[{name: "addedLater"}, {"name":"orderNumber","type":"hidden","value":"42"},{"name":"productCode","type":"text"},{"name":"quantity","type":"number"}]}
+        ]
+        ,"links":[
+            {"rel":["self"],"href":"http://api.x.io/orders/42"}
+		    ,{"rel":["previous"],"href":"http://api.x.io/orders/41"}
+		    ,{"rel":["next"],"href":"http://api.x.io/orders/43"}
+        ]
+    }
     , sirenModel, store;
 
 
@@ -343,6 +343,54 @@ describe('Siren Model: ', function () {
             expect(sirenModel.get('testEntity')).not.toBeDefined();
         });
     });
+
+
+	describe('.resolveNextInChain', function () {
+
+		it('resolves the next entity in the chain', function () {
+			this.stub(Backbone.Siren, 'resolveOne');
+
+			sirenModel.resolveNextInChain(['customer']);
+			expect(Backbone.Siren.resolveOne).toHaveBeenCalledWith('http://api.x.io/customers/pj123');
+		});
+
+
+		it('appends any remaining chained entities to the next request', function () {
+			this.stub(Backbone.Siren, 'resolveOne');
+
+			sirenModel.resolveNextInChain(['customer', 'blah', 'shmah']);
+			expect(Backbone.Siren.resolveOne).toHaveBeenCalledWith('http://api.x.io/customers/pj123#blah#shmah');
+		});
+
+
+		it('resolves with the current entity if the chain is "empty" (uses _.isEmpty)', function () {
+			var promise = sirenModel.resolveNextInChain([]);
+
+			promise.done(function (bbSiren) {
+				expect(bbSiren).toEqual(sirenModel);
+			});
+
+			return promise;
+		});
+
+
+		it('resolves with the current entity if the chain is a non-array', function () {
+			var promise = sirenModel.resolveNextInChain('not-an-array');
+
+			promise.done(function (bbSiren) {
+				expect(bbSiren).toEqual(sirenModel);
+			});
+
+			return promise;
+		});
+
+
+		it('throws if the next entity in the chain is not an entity on the current Model', function () {
+			expect(function () {
+				sirenModel.resolveNextInChain(['non-existent-subentity']);
+			}).toThrow('ReferenceError');
+		});
+	});
 
 
     it('sets a Backbone Model\'s "attributes" hash to the siren "properties"', function () {

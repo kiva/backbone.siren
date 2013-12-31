@@ -273,39 +273,42 @@ function resolve(options) {
 
 
 /**
- * Given a bbSiren Model and a chain, resolves the next entity in the chain
+ * Given a chain, resolves the next entity in the chain
  * @todo set this up to work with Collections (should already work if "entityName" is an id, but needs to be thoroughly tested)
  *
- * @param deferred
- * @param bbSiren
- * @param chain
- * @param options
+ * @param {Array} chain
+ * @param {Object} options
  * @returns {Promise}
  */
-function nestedResolve(deferred, bbSiren, chain, options) {
+function resolveNextInChain(chain, options) {
 	options = options || {};
 
-	if (! options.store) {
-		options.store = bbSiren.store;
+	var entityName, subEntity, url;
+
+	if (! options.deferred) {
+		options.deferred = new $.Deferred();
 	}
 
-	var entityName = chain[0]
-	, subEntity = bbSiren.get(entityName);
+	if (!_.isArray(chain) || _.isEmpty(chain)) {
+		return options.deferred.resolve(this);
+	}
+
+	entityName = chain.shift();
+	subEntity = BbSiren.isCollection(this)
+		? this.at(entityName)
+		: this.get(entityName);
 
 	if (! subEntity) {
-		throw 'The entity you are looking for, "' + entityName + '" is not a sub-entity at ' + bbSiren.url() + '.';
+		throw new ReferenceError('The entity you are looking for, "' + entityName + '" is not a sub-entity at ' + this.url() + '.');
 	}
-
-	chain[0] = subEntity.url();
 
 	// Stringify the new chain array so it can be appended to the new request.
-	chain = BbSiren.stringifyChain(chain);
-	if (chain) {
-		chain = '#' + chain;
-	}
+	url = BbSiren.stringifyChain(chain);
+	url = url
+		? subEntity.url() + '#' + url
+		: subEntity.url();
 
-	options.deferred = deferred;
-	return BbSiren.resolveOne(subEntity.url() + chain, options);
+	return BbSiren.resolveOne(url, options);
 }
 
 
@@ -415,22 +418,6 @@ function parseActions() {
 }
 
 
-/**
- *
- * @param {Backbone.Siren.Model} bbSiren
- * @param {Array} chain
- * @param {Object} deferred
- * @param {Object} options
- */
-function handleRootRequestSuccess(bbSiren, chain, deferred, options) {
-    if (_.isEmpty(chain)) {
-        deferred.resolve(bbSiren);
-    } else {
-        nestedResolve(deferred, bbSiren, chain, options);
-    }
-}
-
-
 var BbSiren = Backbone.Siren = function (apiRoot, options) {
 	this.store = new Backbone.Siren.Store();
 	this.init(apiRoot, options);
@@ -459,7 +446,7 @@ _.extend(BbSiren, {
 	 * @param {Object} obj
 	 * @returns {Boolean}
 	 */
-	, isHydratedCollection: function (obj) {
+	, isCollection: function (obj) {
 		return obj instanceof Backbone.Siren.Collection;
 	}
 
@@ -534,7 +521,7 @@ _.extend(BbSiren, {
 	/**
 	 * Given a chain array, joins it and returns a url string
 	 *
-	 * @param chain
+	 * @param {Array} chain
 	 * @returns {String}
 	 */
 	, stringifyChain: function (chain) {
@@ -628,7 +615,8 @@ _.extend(BbSiren, {
 			// Check for a pending request, piggy-back on it's promise if it exists.
 
 			storedPromise.done(function (bbSiren) {
-				nestedResolve(chainedDeferred, bbSiren, chain, options);
+				options.deferred = chainedDeferred;
+				bbSiren.resolveNextInChain(chain, options);
 			});
 		} else {
 			if (store) {
@@ -636,8 +624,10 @@ _.extend(BbSiren, {
 			}
 
 			if (bbSiren && bbSiren.isLoaded && !options.forceFetch) {
+
 				// Use the stored bbSiren object
-				handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
+				options.deferred = chainedDeferred;
+				bbSiren.resolveNextInChain(chain, options);
 			} else {
 				// By creating our own Deferred() we can map standard responses to bbSiren error models along each step of the chain
 				deferred = new $.Deferred();
@@ -647,10 +637,12 @@ _.extend(BbSiren, {
 				}
 
 				BbSiren.ajax(rootUrl, options)
-					.done(function (entity) {
-						var bbSiren = BbSiren.parse(entity, store);
+					.done(function (rawEntity) {
+						var bbSiren = BbSiren.parse(rawEntity, store);
 						deferred.resolve(bbSiren);
-						handleRootRequestSuccess(bbSiren, chain, chainedDeferred, options);
+
+						options.deferred = chainedDeferred;
+						bbSiren.resolveNextInChain(chain, options)
 					})
 					.fail(function (jqXhr) {
 						var entity, bbSiren;
@@ -684,6 +676,7 @@ _.extend(BbSiren, {
         , parseActions: parseActions
         , request: request
 	    , resolve: resolve
+		, resolveNextInChain: resolveNextInChain
 
 
         /**
@@ -707,25 +700,25 @@ _.extend(BbSiren, {
         /**
          * @todo this is a mess
          *
-         * @param {Object} entity
+         * @param {Object} rawEntity
          * @param {Object} options
          * @returns {$.Deferred}
          */
-        , resolveEntity: function (entity, options) {
+        , resolveEntity: function (rawEntity, options) {
             options = options || {};
 
             var bbSiren, bbSirenPromise
             , self = this
             , deferred = new $.Deferred();
 
-            if ((entity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
-                BbSiren.resolveOne(getUrl(entity), options)
+            if ((rawEntity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
+                BbSiren.resolveOne(getUrl(rawEntity), options)
                     .done(function (bbSiren) {
-                        deferred.resolve(self.setEntity(bbSiren, getRel(entity), getName(entity)));
+                        deferred.resolve(self.setEntity(bbSiren, getRel(rawEntity), getName(rawEntity)));
                     });
             } else {
-                bbSiren = BbSiren.parse(entity, options.store);
-                bbSirenPromise = deferred.resolve(this.setEntity(bbSiren, getRel(entity), getName(entity)));
+                bbSiren = BbSiren.parse(rawEntity, options.store);
+                bbSirenPromise = deferred.resolve(this.setEntity(bbSiren, getRel(rawEntity), getName(rawEntity)));
             }
 
             return bbSirenPromise;
@@ -870,6 +863,7 @@ _.extend(BbSiren, {
         , parseActions: parseActions
         , request: request
 	    , resolve: resolve
+		, resolveNextInChain: resolveNextInChain
 
 
         /**

@@ -41,16 +41,16 @@ describe('Backbone.Siren: ', function () {
 	});
 
 
-	describe('.isHydratedCollection', function () {
+	describe('.isCollection', function () {
 
 		it('checks if a backbone.siren object is a collection', function () {
 			var bbSirenModel = new Backbone.Siren.Model(settingsModelSiren);
 			var bbSirenCollection = new Backbone.Siren.Collection(sirenCollection);
 
-			expect(Backbone.Siren.isHydratedCollection(settingsModelSiren)).toBeFalse();
-			expect(Backbone.Siren.isHydratedCollection(sirenCollection)).toBeFalse();
-			expect(Backbone.Siren.isHydratedCollection(bbSirenModel)).toBeFalse();
-			expect(Backbone.Siren.isHydratedCollection(bbSirenCollection)).toBeTrue();
+			expect(Backbone.Siren.isCollection(settingsModelSiren)).toBeFalse();
+			expect(Backbone.Siren.isCollection(sirenCollection)).toBeFalse();
+			expect(Backbone.Siren.isCollection(bbSirenModel)).toBeFalse();
+			expect(Backbone.Siren.isCollection(bbSirenCollection)).toBeTrue();
 		});
 	});
 

@@ -21,7 +21,7 @@ Store.prototype = {
 	add: function (bbSirenObj) {
 		var self = this;
 
-		if (Backbone.Siren.isHydratedCollection(bbSirenObj)) {
+		if (Backbone.Siren.isCollection(bbSirenObj)) {
 			bbSirenObj.each(function (sirenModel) {
 				self.add(sirenModel);
 			});

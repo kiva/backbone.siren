@@ -7,15 +7,23 @@ describe('Siren Collection: ', function () {
 	// @todo quick fix for upgrade to buster 0.7
 	var expect = buster.expect;
 
-    var loansCollectionSiren = {"class": ["collection"], "properties": {"offset":4}, "entities":[
+    var store, sirenCollection
+	, loansCollectionSiren = {"class": ["collection"], "properties": {"offset":4}, "entities":[
 		    {"rel":["api.kiva.org/rels/loans"],"properties":{"id":39032,"imgSrc":"kiva.org/img/w800/16310.jpg","name":"Garbanzo Smith","activity":"catering","description":"Guadalupe is 30 years old, married and has three children attending school: Lendy, 6, is in elementary school, Laory is in 5th grade and Cristina is in 2nd "},"entities":[{"rel":["api.kiva.org/rels/images"],"href":"api.kiva/images/16310"},{"rel":["api.kiva.org/rels/payments"],"href":"api.kiva.org/loans/39032/loans"},{"rel":["api.kiva.org/rels/borrowers"],"href":"api.kiva.org/loans/39032/borrowers"},{"rel":["api.kiva.org/rels/terms"],"properties":{"disbursal_amount":5000,"disbursal_currency":"MXN","disbursal_date":"2011-11-29T08:00:00Z","loan_amount":375},"links":[{"rel":["self"],"href":"api.kiva.org/loans/39032/terms"}]}],"links":[{"rel":["self"],"href":"api.kiva.org/loans/39032"}]}
 		    , {"rel":["api.kiva.org/rels/loans"],"properties":{"id":39922,"imgSrc":"kiva.org/img/w800/16310.jpg","name":"Garbanzo Smith","activity":"catering","description":"Guadalupe is 30 years old, married and has three children attending school: Lendy, 6, is in elementary school, Laory is in 5th grade and Cristina is in 2nd "},"entities":[{"rel":["api.kiva.org/rels/images"],"href":"api.kiva/images/16310"},{"rel":["api.kiva.org/rels/payments"],"href":"api.kiva.org/loans/39922/loans"},{"rel":["api.kiva.org/rels/borrowers"],"href":"api.kiva.org/loans/39922/borrowers"},{"rel":["api.kiva.org/rels/terms"],"properties":{"disbursal_amount":5000,"disbursal_currency":"MXN","disbursal_date":"2011-11-29T08:00:00Z","loan_amount":375},"links":[{"rel":["self"],"href":"api.kiva.org/loans/39922/terms"}]}],"links":[{"rel":["self"],"href":"api.kiva.org/loans/39922"}]}
-		    , {"rel":["api.kiva.org/rels/loans"],"properties":{"id":521056,"imgSrc":"kiva.org/img/w800/16310.jpg","name":"Garbanzo Smith","activity":"catering","description":"Guadalupe is 30 years old, married and has three children attending school: Lendy, 6, is in elementary school, Laory is in 5th grade and Cristina is in 2nd "},"entities":[{"rel":["api.kiva.org/rels/images"],"href":"api.kiva/images/16310"},{"rel":["api.kiva.org/rels/payments"],"href":"api.kiva.org/loans/521056/loans"},{"rel":["api.kiva.org/rels/borrowers"],"href":"api.kiva.org/loans/521056/borrowers"},{"rel":["api.kiva.org/rels/terms"],"properties":{"disbursal_amount":5000,"disbursal_currency":"MXN","disbursal_date":"2011-11-29T08:00:00Z","loan_amount":375},"links":[{"rel":["self"],"href":"api.kiva.org/loans/521056/terms"}]}],"links":[{"rel":["self"],"href":"api.kiva.org/loans/521056"}]}], "actions": [{"name": "do-stuff", "fields": [{"name": "offset"}]}], "links":[{"rel":["self"],"href":"api.kiva.org/lenders/6282/loans?page=4"},{"rel":["previous"],"href":"api.kiva.org/lenders/6282/loans?page=3"},{"rel":["next"],"href":"api.kiva.org/lenders/6282/loans?page=5"}]}
-    , sirenCollection;
+		    , {"rel":["api.kiva.org/rels/loans"],"properties":{"id":521056,"imgSrc":"kiva.org/img/w800/16310.jpg","name":"Garbanzo Smith","activity":"catering","description":"Guadalupe is 30 years old, married and has three children attending school: Lendy, 6, is in elementary school, Laory is in 5th grade and Cristina is in 2nd "},"entities":[{"rel":["api.kiva.org/rels/images"],"href":"api.kiva/images/16310"},{"rel":["api.kiva.org/rels/payments"],"href":"api.kiva.org/loans/521056/loans"},{"rel":["api.kiva.org/rels/borrowers"],"href":"api.kiva.org/loans/521056/borrowers"},{"rel":["api.kiva.org/rels/terms"],"properties":{"disbursal_amount":5000,"disbursal_currency":"MXN","disbursal_date":"2011-11-29T08:00:00Z","loan_amount":375},"links":[{"rel":["self"],"href":"api.kiva.org/loans/521056/terms"}]}],"links":[{"rel":["self"],"href":"api.kiva.org/loans/521056"}]}], "actions": [{"name": "do-stuff", "fields": [{"name": "offset"}]}
+	    ]
+		, "links":[
+		    {"rel":["self"],"href":"api.kiva.org/lenders/6282/loans?page=4"}
+		    , {"rel":["previous"],"href":"api.kiva.org/lenders/6282/loans?page=3"}
+		    , {"rel":["next"],"href":"api.kiva.org/lenders/6282/loans?page=5"}
+		]
+	};
 
 
     beforeEach(function () {
-        sirenCollection = new Backbone.Siren.Collection(loansCollectionSiren);
+	    store = new Backbone.Siren.Store();
+        sirenCollection = new Backbone.Siren.Collection(loansCollectionSiren, {store: store});
     });
 
 
@@ -199,6 +207,54 @@ describe('Siren Collection: ', function () {
             expect(warnStub).toHaveBeenCalled();
         });
     });
+
+
+	describe('.resolveNextInChain', function () {
+
+		it('resolves the next entity in the chain', function () {
+			this.stub(Backbone.Siren, 'resolveOne');
+
+			sirenCollection.resolveNextInChain([1]);
+			expect(Backbone.Siren.resolveOne).toHaveBeenCalledWith('api.kiva.org/loans/39922');
+		});
+
+
+		it('appends any remaining chained entities to the next request', function () {
+			this.stub(Backbone.Siren, 'resolveOne');
+
+			sirenCollection.resolveNextInChain([1, 'blah', 'shmah']);
+			expect(Backbone.Siren.resolveOne).toHaveBeenCalledWith('api.kiva.org/loans/39922#blah#shmah');
+		});
+
+
+		it('resolves with the current entity if the chain is "empty" (uses _.isEmpty)', function () {
+			var promise = sirenCollection.resolveNextInChain([]);
+
+			promise.done(function (bbSiren) {
+				expect(bbSiren).toEqual(sirenCollection);
+			});
+
+			return promise;
+		});
+
+
+		it('resolves with the current entity if the chain is a non-array', function () {
+			var promise = sirenCollection.resolveNextInChain('not-an-array');
+
+			promise.done(function (bbSiren) {
+				expect(bbSiren).toEqual(sirenCollection);
+			});
+
+			return promise;
+		});
+
+
+		it('throws if the next entity in the chain is not an entity on the current Model', function () {
+			expect(function () {
+				sirenCollection.resolveNextInChain(['non-existent-subentity']);
+			}).toThrow('ReferenceError');
+		});
+	});
 
 
 	describe('.save()', function () {
