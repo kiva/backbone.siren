@@ -1,6 +1,6 @@
 var config = module.exports;
 
-config['development'] = {
+config.development = {
     env: 'browser'
     , rootPath: '../'
     , deps: [
@@ -20,15 +20,29 @@ config['development'] = {
 };
 
 
-//@todo add back when grunt-buster supports test groups
-//config['build'] = {
-//    env: 'browser'
-//    , rootPath: '../'
-//    , deps: [
-//        'bower_components/jquery/jquery.js'
-//        , 'bower_components/underscore/underscore.js'
-//        , 'bower_components/backbone/backbone.js'
-//    ]
-//    , sources: ['build/backbone.siren.min.js']
-//    , tests: ['test/spec/**/*.js']
-//};
+// @todo - enable these
+
+config.dist_amd = {
+    env: 'browser'
+    , rootPath: '../'
+    , deps: [
+        'bower_components/jquery/jquery.js'
+        , 'bower_components/underscore/underscore.js'
+        , 'bower_components/backbone/backbone.js'
+    ]
+    , sources: ['dist/amd/backbone.siren.min.js']
+    , tests: ['test/spec/**/*.js']
+};
+
+
+config.dist_iife = {
+	env: 'browser'
+	, rootPath: '../'
+	, deps: [
+		'bower_components/jquery/jquery.js'
+		, 'bower_components/underscore/underscore.js'
+		, 'bower_components/backbone/backbone.js'
+	]
+	, sources: ['dist/iife/backbone.siren.min.js']
+	, tests: ['test/spec/**/*.js']
+};

@@ -22,9 +22,24 @@ module.exports = function(grunt) {
 
 
         , buster: {
-            test: {
-                reporter: 'specification'
-            }
+		    dev: {
+			    test: {
+				    'config-group': 'development'
+				    , reporter: 'specification'
+			    }
+		    }
+		    , dist_amd: {
+			    test: {
+				    'config-group': 'dist_amd'
+				    , reporter: 'specification'
+			    }
+		    }
+		    , dist_iife: {
+			    test: {
+				    'config-group': 'dist_iife'
+				    , reporter: 'specification'
+			    }
+		    }
         }
 
 
@@ -37,12 +52,14 @@ module.exports = function(grunt) {
 
 
         , uglify: {
-            options: {
-                banner: '<%= meta.banner %>'
-            }
-		    , files: {
-			    'dist/iife/backbone.siren.min.js': ['dist/iife/backbone.siren.js']
-			    , 'dist/amd/backbone.siren.min.js': ['dist/amd/backbone.siren.js']
+		    minify: {
+			    options: {
+				    banner: '<%= meta.banner %>'
+			    }
+			    , files: {
+				    'dist/iife/backbone.siren.min.js': ['dist/iife/backbone.siren.js']
+				    , 'dist/amd/backbone.siren.min.js': ['dist/amd/backbone.siren.js']
+			    }
 		    }
 	    }
 
@@ -65,6 +82,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-rigger');
 
-    grunt.registerTask('test', ['jshint', 'buster']);
+    grunt.registerTask('test', ['jshint', 'buster:dev']);
     grunt.registerTask('build', ['rig', 'uglify']);
 };
