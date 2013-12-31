@@ -260,6 +260,7 @@ function resolve(options) {
 			});
 		} else if (finalEntity) {
 			BbSiren.resolveOne(BbSiren.stringifyChain(chain), options).done(function (model) {
+				// @todo %bug% model.get() might sometimes need to be collection.at()
 				self.resolve(_.extend(_.clone(options), {url: model.get(finalEntity).url(), forceFetch: true})).done(function (bbSiren) {
 					// Resolve the original deferred object.
 					deferred.resolve(bbSiren);
