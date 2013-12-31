@@ -46,6 +46,34 @@ describe('Backbone.Siren.Store: ', function () {
 	});
 
 
+	describe('.get', function () {
+		var store;
+
+		beforeEach(function () {
+			store = new Backbone.Siren.Store();
+		});
+
+
+		it('gets a bbSiren object with the given url from the store', function () {
+			var model = new Backbone.Siren.Model({links: [{rel: ['self'], href: "api.io/one"}]});
+
+			expect(store.get(model.url())).not.toBeDefined();
+			store.add(model);
+			expect(store.exists(model.url())).toBeDefined();
+		});
+
+
+		it('gets a bbSiren object matching the given raw entity from the store', function () {
+			var model = new Backbone.Siren.Model({links: [{rel: ['self'], href: "api.io/one"}]});
+
+			expect(store.get(model._data)).not.toBeDefined();
+			store.add(model);
+			expect(store.exists(model._data)).toBeDefined();
+		});
+
+	});
+
+
 	describe('.exists', function () {
 		var store;
 
