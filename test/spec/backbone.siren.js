@@ -7,7 +7,22 @@ describe('Backbone.Siren: ', function () {
 	// @todo quick fix for upgrade to buster 0.7
 	var expect = buster.expect;
 
-    var settingsModelSiren = {"class":["order", "special"],"properties":{"orderNumber":42,"itemCount":3,"status":"pending"},"entities":[{"class":["items","collection"],"rel":["http://x.io/rels/order-items", "name:order-items"],"href":"http://api.x.io/orders/42/items"},{"class":["info","customer"],"rel":["http://x.io/rels/customer", "name:customer"],"properties":{"customerId":"pj123","name":"Peter Joseph"},"links":[{"rel":["self"],"href":"http://api.x.io/customers/pj123"}]}],"actions":[{"name":"add-item","title":"Add Item","method":"POST","href":"http://api.x.io/orders/42/items","type":"application/x-www-form-urlencoded","fields":[{name: "addedLater"}, {"name":"orderNumber","type":"hidden","value":"42"},{"name":"productCode","type":"text"},{"name":"quantity","type":"number"}]}],"links":[{"rel":["self"],"href":"http://api.x.io/orders/42"},{"rel":["previous"],"href":"http://api.x.io/orders/41"},{"rel":["next"],"href":"http://api.x.io/orders/43"}]};
+    var settingsModelSiren = {
+	    "class":["order", "special"]
+	    ,"properties":{"orderNumber":42,"itemCount":3,"status":"pending"}
+	    ,"entities":[
+		    {"class":["items","collection"],"rel":["http://x.io/rels/order-items", "name:order-items"],"href":"http://api.x.io/orders/42/items"}
+		    ,{"class":["info","customer"],"rel":["http://x.io/rels/customer", "name:customer"],"properties":{"customerId":"pj123","name":"Peter Joseph"},"links":[{"rel":["self"],"href":"http://api.x.io/customers/pj123"}]}
+	    ]
+	    ,"actions":[
+		    {"name":"add-item","title":"Add Item","method":"POST","href":"http://api.x.io/orders/42/items","type":"application/x-www-form-urlencoded","fields":[{name: "addedLater"}, {"name":"orderNumber","type":"hidden","value":"42"},{"name":"productCode","type":"text"},{"name":"quantity","type":"number"}]}]
+	    ,"links":[
+		    {"rel":["self"],"href":"http://api.x.io/orders/42"}
+		    ,{"rel":["previous"],"href":"http://api.x.io/orders/41"}
+		    ,{"rel":["next"],"href":"http://api.x.io/orders/43"}
+	    ]
+    };
+
 	var sirenCollection = {
 		"class": ["collection"]
 		, "entities": [
@@ -205,23 +220,51 @@ describe('Backbone.Siren: ', function () {
 
 
 		it('uses the first chain item as the "root" url to the chained request', function () {
-			var bbSirenRequest = Backbone.Siren.resolve('http://blah');
+			var bbSirenRequest = Backbone.Siren.resolveOne('irrelevant-goes-to-fake-server');
 			server.respond();
 
 			bbSirenRequest.done(function (bbSiren) {
 				expect(bbSiren instanceof Backbone.Siren.Model).toBeTrue();
+				expect(bbSiren.url()).toBe('http://api.x.io/orders/42');
 			});
+
+			return bbSirenRequest;
 		});
 	});
 
 
 	describe('.resolveMany', function () {
 
-		it('is passed an array and calls .resolveOne() for each itme in that array', function () {
+		it('is passed an array and calls .resolveOne() for each item in that array', function () {
 			this.stub(Backbone.Siren, 'resolveOne');
 
 			Backbone.Siren.resolveMany(['http://api.io/frogger', 'http://api.io/pacman', 'http://api.io/centipede']);
 			expect(Backbone.Siren.resolveOne).toHaveBeenCalledThrice();
 		});
+
+
+		it('each call to .resolveOne() gets its own options object and will not affect the options object of the other .resolveOne() calls', function () {
+			// Specifically, since objects are passed by reference, we do not want the options.deferred property from one .resolveOne() call leaking over to the other .resolveOne calls
+
+			var promise
+			, store = new Backbone.Siren.Store()
+			, modelOne = new Backbone.Siren.Model({links: [{rel: ['self'], href: 'http://api.io/entityOne'}]})
+			, modelTwo = new Backbone.Siren.Model({links: [{rel: ['self'], href: 'http://api.io/entityTwo'}]})
+			, modelThree = new Backbone.Siren.Model({links: [{rel: ['self'], href: 'http://api.io/entityThree'}]});
+
+			store.add(modelOne);
+			store.add(modelTwo);
+			store.add(modelThree);
+
+			promise = Backbone.Siren.resolveMany(['http://api.io/entityOne', 'http://api.io/entityTwo', 'http://api.io/entityThree'], {store: store});
+
+			promise.done(function (_modelOne, _modelTwo, _modelThree) {
+				expect(_modelOne).toEqual(modelOne);
+				expect(_modelTwo).toEqual(modelTwo);
+				expect(_modelThree).toEqual(modelThree);
+			});
+
+			return promise;
+		})
 	});
 });

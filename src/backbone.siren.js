@@ -559,7 +559,7 @@ _.extend(BbSiren, {
 
 		var self = this
 		, requestsArray = _.map(urls, function (url) {
-			return self.resolveOne(url, options);
+			return self.resolveOne(url, _.clone(options));
 		});
 
 		return $.when.apply($, requestsArray);
