@@ -5,7 +5,7 @@
 
 A client side adapter that converts resource representations from [Siren JSON](https://github.com/kevinswiber/siren) to [Backbone Models](http://backbonejs.org/#Model) and [Collections](http://backbonejs.org/#Collection).
 
-## Use
+## Basic Use
 
 To use Backbone.Siren:
 
@@ -18,172 +18,84 @@ bbSirenCollection = new Backbone.Siren.Collection(sirenObject);
 Or, you can just point Backbone.Siren to a url that returns a Siren resource and let it do the rest:
 
 ```
-Backbone.Siren.resolve('http://my.api.io/user');
+Backbone.Siren.resolve('http://my.api.io/user/123');
 ```
 
-
-### Working with Models
-
-```
-bbSirenModel = new Backbone.Siren.Model(sirenObject);
-```
-
-In addition to you standard set of [Backbone.Model](http://backbonejs.org/#Model) methods, bbSiren provides you with the following:
-
-Returns an array of classes as defined on the Siren entity.
-```
-bbSirenModel.classes();
-```
-
-Returns a boolean, confirming wether or not an entity has a given class.
-```
-bbSirenModel.hasClass();
-```
-
-Returns an entities title, as defined on the Siren entity.
-```
-bbSirenModel.title();
-```
-
-Returns an array of links, as defined on the Siren entity.
-```
-bbSirenModel.links();
-```
-
-Returns an array of available actions, as defined on the Siren entity.
-```
-bbSirenModel.actions();
-```
-
-Returns a Siren action object.
-```
-bbSirenModel.getActionByName();
-```
-
-Similar to the standard Backbone.Model.toJSON() method, but allows filtering properties by "actionName".
-```
-bbSirenModel.toJSON([actionName]);
-```
-
-Gets a linked resource by name, returns a promise object.
-```
-bbSirenModel.request();
-```
-
-Returns of an array of all the nested/linked entities.
-```
-bbSirenModel.entities();
-```
-
-
-### Working with collections
+If you're building an app that uses a Siren API on the backend:
 
 ```
-bbSirenCollection = new Backbone.Siren.Collection(sirenObject);
+var sirenApi = new Backbone.Siren('http://my.api.io');
+
+// Request particular endpoints.  In this case `http://my.api.io/user/123` and `http://my.api.io/basket/111`
+userModel = sirenApi.resolve('user/123');
+basketModel = sirenApi.resolve('basket/111');
 ```
 
-BBSiren will parse all nested and linked entities, if the entity is a Collection (has a class of "collection") Backbone.Siren will know to parse it as a Backbone.Siren.Collection.
-
-In addition to you standard set of [Backbone.Collection](http://backbonejs.org/#Collection) methods, bbSiren provides you with the following:
-
-Returns an array of classes as defined on the Siren entity.
-```
-bbSirenCollection.classes();
-```
-
-Returns a boolean, confirming wether or not an entity has a given class.
-```
-bbSirenCollection.hasClass();
-```
-
-Returns an entities title, as defined on the Siren entity.
-```
-bbSirenCollection.title();
-```
-
-Returns an array of links, as defined on the Siren entity.
-```
-bbSirenCollection.links();
-```
-
-Returns an array of available actions, as defined on the Siren entity.
-```
-bbSirenCollection.actions();
-```
-
-Returns a Siren action object.
-```
-bbSirenCollection.getActionByName();
-```
-
-Similar to the standard Backbone.Collection.toJSON() method, but allows filtering properties by "actionName".
-```
-bbSirenCollection.toJSON([actionName]);
-```
-
-Gets a linked resource by name, returns a promise object.
-```
-bbSirenCollection.request();
-```
-
-
-### Siren Actions
-
-Siren actions are set directly as properties to your Model or Collection.
+## Example
 
 ```
-var editUserAction = bbSirenModel.getActionByName('edit-user');
+var sirenApi = new Backbone.Siren('http://my.api.io');
 
-// Get a specific field
-var firstNameField = editUserAction.getFieldByName('firstName');
+var UserView = Backbone.View.extend({
 
-// Execute the action
-var jqXhrResult = editUserAction.execute();
+	template: _.template(...)
 
+	, render: function() {
+		this.$el.html(this.template(this.model.attributes));
+		return this;
+	}
+
+	, initialize: function () {
+		var self = this;
+
+		sirenApi.resolve('user/123').done(function (userModel) {
+			self.model  = userModel;
+			self.render();
+		});
+	}
+});
+
+var userView = new UserView();
 ```
 
-Actions have:
+## Backbone.Siren.FormView
 
-```
-.parent     // the parent model to the action
-```
-
-
-### Options
-
-```
-{
-    autoFetch: 'linked'   // Will automatically fetch sub-entities if enabled. Can be set to 'linked' or 'all'.
-    , forceUpdate: false  // Pass forceUpdate as an option into your .set() method and it will update the model, even if it fails validation
-}
-```
-
-### Gotchas
-
-Note that since an entity's `rel` and `name` are relative to its parent, there is not a direct call for getting either of these from a Siren entity
-
-### Backbone.Siren.Validate
-
-This module needs a full re-write.
-
-<del>
-	Backbone.Siren.Validate will automatically validate your Model's attributes.
-	It does this by parsing your Siren object and expecting fields to follow the [siren-validation spec](https://github.com/kevinswiber/siren/pull/12).
-
-	By Default, Siren.Validate will always validate on `save`, but only validate on `set` if `{validate: true}` is set in the options parameter.
-
-	All standard actions/events will happen when validating a Backbone.Siren model. [http://backbonejs.org/#Model-validate]
-	This means that .validate() won't return anything on success but will return a mapping of field name to [ValidityState](https://developer.mozilla.org/en-US/docs/DOM/ValidityState) objects on failure.
-</del>
-
-### Backbone.Siren.FormView
+Siren allows you to declare what "actions" your can be taken on a model.  Backbone.Siren provides a simple way to render a form for one of these actions.
 
 Backbone.Siren.FormView will generate a default form if passed a bbSiren Model (does not work with bbSiren Collections).
+
+
 
 The methods `.template()` and `.render()` can be overwritten to customize the look of your form.
 You can also overwrite the `.handleFormSubmit()` and `.formElementChange()` methods which will, by default, submit the form and set model attributes respectively.
 
-#### Options
+### FormView Example
+
+Generates a form that will execute the `updateUser` action when the `.submitButton` is clicked.
+
+```
+var UpdateUserFormView = Backbone.Siren.FormView.extend({
+
+	event: {
+        'click .submitButton': this.action.execute()
+	}
+
+	, initialize: function () {
+        var self = this
+        , updateUserAction = accountModel.getActionByName('updateUser');
+
+	    qi.sirenApi.resolve('user/123').done(function (userModel) {
+			self.initializeForm({action: updateUserAction});
+			self.render();
+        });
+	}
+});
+
+var updateUserFormView = new UpdateUserFormView();
+
+```
+
+### Options
 
 ```
 {
