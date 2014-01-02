@@ -58,6 +58,15 @@ var UserView = Backbone.View.extend({
 var userView = new UserView();
 ```
 
+### Options
+
+```
+{
+    autoFetch: 'linked'   // Will automatically fetch sub-entities if enabled. Can be set to 'linked' or 'all'.
+    , forceUpdate: false  // Pass forceUpdate as an option into your .set() method and it will update the model, even if it fails validation
+}
+```
+
 ## Backbone.Siren.FormView
 
 Siren allows you to declare what "actions" your can be taken on a model.  Backbone.Siren provides a simple way to render a form for one of these actions.
@@ -95,7 +104,7 @@ var updateUserFormView = new UpdateUserFormView();
 
 ```
 
-### Options
+### FormView Options
 
 ```
 {
