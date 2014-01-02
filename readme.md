@@ -273,4 +273,4 @@ Parse the coverage report and Generate an html file.  Save it to `test/coverage`
 
 Changes should follow existing patterns and pass jshint.
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/kiva/backbone.siren/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+ [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/kiva/backbone.siren/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
