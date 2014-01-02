@@ -28,6 +28,16 @@ describe('Siren Action: ', function () {
     });
 
 
+	describe('.hasClass', function () {
+		it('tells us if the action has the given class', function () {
+			expect(bbSirenAction.hasClass('test')).toBeFalse();
+
+			bbSirenAction['class'] = ['test'];
+			expect(bbSirenAction.hasClass('test')).toBeTrue();
+		});
+	});
+
+
     describe('.execute()', function () {
         beforeEach(function () {
             this.stub($, 'ajax').returns('jqXhr');
