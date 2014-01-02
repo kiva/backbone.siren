@@ -169,6 +169,58 @@ describe('Siren Model: ', function () {
     });
 
 
+	describe('.parse()', function () {
+		var obj = {};
+
+		beforeEach(function () {
+			obj.resolveEntities = this.spy();
+			obj.url = this.stub().returns('http://fake.url');
+
+			this.stub(Backbone.Siren.Model.prototype, 'resolveEntities');
+		});
+
+
+		it('parses the raw entity and initializes some settings on the model', function () {
+			Backbone.Siren.Model.prototype.parse.call(obj, settingsModelSiren, {});
+
+			expect(obj._data).toEqual(settingsModelSiren);
+			expect(obj._entities).toBeArray();
+		});
+
+
+		it('resolves all sub-entities', function () {
+			var options = {someSetting: 'blah'};
+
+			Backbone.Siren.Model.prototype.parse.call(obj, settingsModelSiren, options);
+			expect(obj.resolveEntities).toHaveBeenCalledWith(options);
+		});
+
+
+		it('sets the isLoaded flag', function () {
+			this.stub(Backbone.Siren, 'isLoaded').returns('maybeitismaybeitisnt');
+
+			Backbone.Siren.Model.prototype.parse.call(obj, settingsModelSiren, {});
+			expect(obj.isLoaded).toEqual('maybeitismaybeitisnt');
+		});
+
+
+		it('returns all of the entity\'s properties', function () {
+			var result = Backbone.Siren.Model.prototype.parse.call(obj, settingsModelSiren, {});
+
+			expect(result).toEqual(settingsModelSiren.properties);
+		});
+
+
+		it('adds the model to the store, if there is one', function () {
+			var options = {store: new Backbone.Siren.Store()};
+
+			Backbone.Siren.Model.prototype.parse.call(obj, settingsModelSiren, options);
+
+			expect(options.store.get('http://fake.url')).toBeDefined();
+		});
+	});
+
+
     describe('.toJSON()', function () {
 	    it('returns an object with all the model\'s attributes', function () {
 		    var props = {boom: "ba", bastic: "da"};
@@ -326,6 +378,41 @@ describe('Siren Model: ', function () {
             }).toThrow();
         });
     });
+
+
+	describe('.resolveEntities', function () {
+		it('resolves all child entities', function () {
+			var options = {testOptions: 'blah'};
+
+			store.data = {};
+
+			this.stub(sirenModel, 'resolveEntity');
+			sirenModel.resolveEntities(options);
+
+			expect(sirenModel.resolveEntity).toHaveBeenCalledTwice();
+			expect(sirenModel.resolveEntity).toHaveBeenCalledWith(sirenModel.get('order-items')._data, options);
+			expect(sirenModel.resolveEntity).toHaveBeenCalledWith(sirenModel.get('customer')._data, options);
+		});
+
+
+		it('triggers a "resolve" event when all child entities have been resolved.', function () {
+			var deferred = new $.Deferred()
+			, callback = this.stub();
+
+			this.stub(sirenModel, 'resolveEntity').returns(deferred);
+
+			sirenModel.on('resolve', callback);
+			sirenModel.resolveEntities();
+
+			deferred.done(function () {
+				expect(callback).toHaveBeenCalled();
+			});
+
+			deferred.resolve();
+
+			return deferred.promise();
+		});
+	});
 
 
     describe('.setEntity()', function () {

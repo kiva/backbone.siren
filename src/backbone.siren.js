@@ -444,6 +444,17 @@ _.extend(BbSiren, {
 
 
 	/**
+	 * Is the object fully loaded or is it a partial representation?
+	 *
+	 * @param {Object} rawEntity
+	 * @returns {Boolean}
+	 */
+	, isLoaded: function (rawEntity) {
+		return !!(rawEntity.links && !rawEntity.href);
+	}
+
+
+	/**
 	 *
 	 * @param {Object} obj
 	 * @returns {Boolean}
@@ -689,8 +700,8 @@ _.extend(BbSiren, {
             var self = this
             , resolvedEntities = [];
 
-            _.each(this._data.entities, function(entity) {
-                resolvedEntities.push(self.resolveEntity(entity, options));
+            _.each(this._data.entities, function(rawEntity) {
+                resolvedEntities.push(self.resolveEntity(rawEntity, options));
             });
 
             return $.when(resolvedEntities).done(function () {
@@ -728,6 +739,7 @@ _.extend(BbSiren, {
 
 
         /**
+         * Sets the entity on the model
          *
          * @param {Backbone.Siren.Model} bbSiren
          * @param {Array} rel
@@ -756,12 +768,12 @@ _.extend(BbSiren, {
         /**
          * http://backbonejs.org/#Model-parse
          *
-         * @param {Object} json
+         * @param {Object} rawEntity
          */
-        , parse: function (json, options) {
-            this._data = json; // Stores the entire siren object in raw json
+        , parse: function (rawEntity, options) {
+            this._data = rawEntity; // Keep a reference to the original raw siren entity
             this._entities = [];
-			this.isLoaded = !!(json.links && !json.href);
+			this.isLoaded = BbSiren.isLoaded(rawEntity);
 
 			this.resolveEntities(options);
 
@@ -769,7 +781,7 @@ _.extend(BbSiren, {
 				options.store.add(this);
 			}
 
-            return json.properties;
+            return rawEntity.properties;
         }
 
 
@@ -871,17 +883,17 @@ _.extend(BbSiren, {
         /**
          * http://backbonejs.org/#Collection-parse
          *
-         * @param {Object} json
+         * @param {Object} rawEntity
          */
-        , parse: function (json, options) {
+        , parse: function (rawEntity, options) {
 			options = options || {};
 
-            this._data = json; // Store the entire siren object in raw json
-            this._meta = json.properties || {};
-			this.isLoaded = !!(json.links && !json.href);
+            this._data = rawEntity; // Save a reference to the original raw entity
+            this._meta = rawEntity.properties || {};
+			this.isLoaded = BbSiren.isLoaded(rawEntity);
 
             var models = [];
-            _.each(json.entities, function (entity) {
+            _.each(rawEntity.entities, function (entity) {
                 models.push(new Backbone.Siren.Model(entity, options));
             });
 
@@ -989,6 +1001,13 @@ BbSiren.prototype = {
 	}
 
 
+	/**
+	 * @todo - entityName should be changed, maybe to entityPath (because an entity name is already a loaded word as it already has a definition)
+	 * Expands an entity name into a url
+	 *
+	 * @param {String} entityName
+	 * @returns {string}
+	 */
 	, entityNameToUrl: function (entityName) {
 		return this.apiRoot + '/' + entityName;
 	}

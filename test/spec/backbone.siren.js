@@ -56,6 +56,22 @@ describe('Backbone.Siren: ', function () {
 	});
 
 
+	describe('.isLoaded', function () {
+
+		it('it tells us if a raw entity is fully loaded or if it is a partial representation', function () {
+			var fullyLoadedEntity = {
+				links: []
+			}
+			, partialEntity = {
+				href: ''
+			};
+
+			expect(Backbone.Siren.isLoaded(partialEntity)).toBeFalse();
+			expect(Backbone.Siren.isLoaded(fullyLoadedEntity)).toBeTrue();
+		});
+	});
+
+
 	describe('.isCollection', function () {
 
 		it('checks if a backbone.siren object is a collection', function () {

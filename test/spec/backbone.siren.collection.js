@@ -153,6 +153,51 @@ describe('Siren Collection: ', function () {
     });
 
 
+	describe('.parse()', function () {
+		var obj = {};
+
+		beforeEach(function () {
+			obj.resolveEntities = this.spy();
+			obj.url = this.stub().returns('http://fake.url');
+
+			this.stub(Backbone.Siren.Model.prototype, 'resolveEntities');
+		});
+
+
+		it('parses the raw entity and initializes some settings on the model', function () {
+			Backbone.Siren.Collection.prototype.parse.call(obj, loansCollectionSiren, {});
+
+			expect(obj._data).toEqual(loansCollectionSiren);
+			expect(obj._meta).toBeDefined();
+		});
+
+
+		it('sets the isLoaded flag', function () {
+			this.stub(Backbone.Siren, 'isLoaded').returns('maybeitismaybeitisnt');
+
+			Backbone.Siren.Collection.prototype.parse.call(obj, loansCollectionSiren, {});
+			expect(obj.isLoaded).toEqual('maybeitismaybeitisnt');
+		});
+
+
+		it('returns all of the collection\'s models', function () {
+			var result = Backbone.Siren.Collection.prototype.parse.call(obj, loansCollectionSiren, {});
+
+			expect(result).toBeArray();
+			expect(result.length).toBe(3);
+		});
+
+
+		it('adds the collection to the store, if there is one', function () {
+			var options = {store: new Backbone.Siren.Store()};
+
+			Backbone.Siren.Collection.prototype.parse.call(obj, loansCollectionSiren, options);
+
+			expect(options.store.get('http://fake.url')).toBeDefined();
+		});
+	});
+
+
     describe('.toJSON()', function () {
         it('gets all "properties" for a given "action", grouped by object and adding "id"', function () {
             var expectedProperties = [
