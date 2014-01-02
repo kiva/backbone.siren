@@ -27,8 +27,12 @@ If you're building an app that uses a Siren API on the backend:
 var sirenApi = new Backbone.Siren('http://my.api.io');
 
 // Request particular endpoints.  In this case `http://my.api.io/user/123` and `http://my.api.io/basket/111`
-userModel = sirenApi.resolve('user/123');
-basketModel = sirenApi.resolve('basket/111');
+sirenApi.resolve('user/123').done(function (userModel) {});
+sirenApi.resolve('basket/111').done(function (basketModel) {});
+
+// Or
+userModel = sirenApi.resolve(['user/123', 'basket/111']).done(function (userModel, basketModel) {});
+
 ```
 
 ## Example
@@ -195,5 +199,17 @@ Parse the coverage report and Generate an html file.  Save it to `test/coverage`
 ### Code quality
 
 Changes should follow existing patterns and pass jshint.
+
+## Changelog
+
+### 0.3.0 (1/2/2014)
+
+* .resolve() now accepts an array of urls (#21)
+* You can now have multiple store instances
+* `new Backbone.Siren()` will now create a new API client instance with its own store (#22)
+* Collections and partial entities are now cached in the store (#19 and #35)
+* Request promises are now removed from the store once a request is fulfilled. (#35)
+* Improved test coverage
+* Other [bug fixes](https://github.com/kiva/backbone.siren/issues?milestone=1&page=1&state=closed)
 
  [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/kiva/backbone.siren/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
