@@ -26,6 +26,7 @@
   "devDependencies": {
     "buster": "~0.7.8",
     "buster-coverage": "~0.1.0",
+    "coveralls": "~2.6.1",
     "grunt": "~0.4.1",
     "grunt-buster": "~0.3.1",
     "grunt-contrib-jshint": "~0.7.2",
