@@ -53,6 +53,11 @@ describe('Backbone.Siren: ', function () {
 			expect(Backbone.Siren.isHydratedObject(sirenCollection)).toBeFalse();
 			expect(Backbone.Siren.isHydratedObject(bbSirenCollection)).toBeTrue();
 		});
+
+
+		it('returns false if no arguments is provided', function () {
+			expect(Backbone.Siren.isHydratedObject()).toBeFalse();
+		});
 	});
 
 

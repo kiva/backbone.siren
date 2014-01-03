@@ -389,7 +389,7 @@ _.extend(BbSiren, {
 	 * @returns {Boolean}
 	 */
 	, isHydratedObject: function (obj) {
-		return !!((obj.cid || obj.models) && obj._data);
+		return !!(obj && (obj.cid || obj.models) && obj._data);
 	}
 
 
@@ -758,7 +758,7 @@ _.extend(BbSiren, {
                 _.each(action.fields, function (field) {
                     var val = self.get(field.name);
 
-                    json[field.name] = (val instanceof Backbone.Siren.Model || (val instanceof Backbone.Siren.Collection))
+                    json[field.name] = BbSiren.isHydratedObject(val)
                         ? val.toJSON({actionName: field.action})
                         : val;
                 });

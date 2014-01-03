@@ -14,8 +14,9 @@ describe('Siren Model: ', function () {
             ,{"class":["info","customer"],"rel":["http://x.io/rels/customer", "name:customer"],"properties":{"customerId":"pj123","name":"Peter Joseph"},"links":[{"rel":["self"],"href":"http://api.x.io/customers/pj123"}]}
         ]
         ,"actions":[
-		    {name: 'simple-add', method: 'POST', href: 'http://api.x.io/orders', fields: [{name: 'orderNumber'}]}
-            , {"name":"add-item","title":"Add Item","method":"POST","href":"http://api.x.io/orders/42/items","type":"application/x-www-form-urlencoded","fields":[{name: "addedLater"}, {"name":"orderNumber","type":"hidden","value":"42"},{"name":"productCode","type":"text"},{"name":"quantity","type":"number"}]}
+		    {name: "simple-add", method: "POST", href: "http://api.x.io/orders", fields: [{name: "orderNumber"}]}
+            , {"name": "add-item","title":"Add Item","method":"POST","href":"http://api.x.io/orders/42/items","type":"application/x-www-form-urlencoded","fields":[{name: "addedLater"}, {"name":"orderNumber","type":"hidden","value":"42"},{"name":"productCode","type":"text"},{"name":"quantity","type":"number"}]}
+			, {"name": "update-customer","method": "POST", "href": "http://api.x.io/customers", fields: [{name: "customer"}]}
         ]
         ,"links":[
             {"rel":["self"],"href":"http://api.x.io/orders/42"}
@@ -290,6 +291,11 @@ describe('Siren Model: ', function () {
             expectedProperties.addedLater = 'uno';
             expect(sirenModel.toJSON({actionName: 'add-item'})).toMatch(expectedProperties);
         });
+
+
+		it('if passed an action name, is recursive on any entities that correspond to the action', function () {
+			expect(sirenModel.toJSON({actionName: 'update-customer'})).toEqual({customer: sirenModel.get('customer').attributes});
+		});
 
 
         it('returns an empty object if the model does not have any matching attributes for the given action', function () {
