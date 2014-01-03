@@ -163,11 +163,9 @@ describe('Backbone.Siren: ', function () {
 		});
 
 
-		it('throws a SyntaxError if the argument is not a string', function () {
-			var param = ['http://api.io/resource'];
-
+		it('throws a TypeError if the argument is not a string', function () {
 			expect(function () {
-				Backbone.Siren.parseChain(param);
+				Backbone.Siren.parseChain({'not-a-string': true});
 			}).toThrow('TypeError');
 		});
 	});
@@ -194,7 +192,7 @@ describe('Backbone.Siren: ', function () {
 
 		it('throws a SyntaxError if the arguments not an array', function () {
 			expect(function () {
-				Backbone.Siren.parseChain(param);
+				Backbone.Siren.stringifyChain('not-an-array');
 			}).toThrow('TypeError');
 		});
 	});

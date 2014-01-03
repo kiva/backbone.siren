@@ -476,7 +476,7 @@ _.extend(BbSiren, {
      */
     , parseChain: function (str) {
 		if (typeof str != 'string') {
-			new SyntaxError('Must be a string');
+			new TypeError('Must be a string');
 		}
 
 		return str.replace(/^#|#$/, '').split('#');
@@ -491,7 +491,7 @@ _.extend(BbSiren, {
 	 */
 	, stringifyChain: function (chain) {
 		if (! _.isArray(chain)) {
-			new SyntaxError('Must be an array');
+			new TypeError('Must be an array');
 		}
 
 		return chain.join('#');
