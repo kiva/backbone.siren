@@ -202,13 +202,16 @@ Changes should follow existing patterns and pass jshint.
 
 ## Changelog
 
-### 0.3.0 (1/2/2014)
+### 0.3.0
 
 * .resolve() now accepts an array of urls (#21)
 * You can now have multiple store instances
 * `new Backbone.Siren()` will now create a new API client instance with its own store (#22)
 * Collections and partial entities are now cached in the store (#19 and #35)
 * Request promises are now removed from the store once a request is fulfilled. (#35)
+* Entity filtering via .entities() is now done using `class` instead of `classname`
+* dropped the ability to filter links by rel when calling .links()
+* dropped the ability filter actions when calling .actions()
 * Improved test coverage
 * Other [bug fixes](https://github.com/kiva/backbone.siren/issues?milestone=1&page=1&state=closed)
 
