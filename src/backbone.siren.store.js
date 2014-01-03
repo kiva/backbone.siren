@@ -38,7 +38,8 @@ Store.prototype = {
 	 * @return {Backbone.Siren.Model}
 	 */
 	, get: function (rawEntityOrUrl) {
-		return this.data[typeof rawEntityOrUrl == 'object'? getUrl(rawEntityOrUrl): rawEntityOrUrl];
+		/*global getRawEntityUrl*/
+		return this.data[typeof rawEntityOrUrl == 'object'? getRawEntityUrl(rawEntityOrUrl): rawEntityOrUrl];
 	}
 
 

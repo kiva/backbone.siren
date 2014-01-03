@@ -55,10 +55,9 @@ describe('Siren Collection: ', function () {
         });
 
 
-        it('returns an empty array if there are no classes', function () {
+        it('returns undefined if there are no classes', function () {
             var mySirenCollection = new Backbone.Siren.Collection({});
-            expect(mySirenCollection.classes()).toBeArray();
-            expect(mySirenCollection.classes().length).toBe(0);
+            expect(mySirenCollection.classes()).not.toBeDefined();
         });
     });
 

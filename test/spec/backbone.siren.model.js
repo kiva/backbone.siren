@@ -62,8 +62,7 @@ describe('Siren Model: ', function () {
 
         it('returns an empty array if there are no classes', function () {
             var mySirenModel = new Backbone.Siren.Model({});
-            expect(mySirenModel.classes()).toBeArray();
-            expect(mySirenModel.classes().length).toBe(0);
+            expect(mySirenModel.classes()).not.toBeDefined();
         });
     });
 
