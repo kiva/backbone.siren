@@ -67,6 +67,20 @@ describe('Siren Model: ', function () {
     });
 
 
+	describe('.rel()', function () {
+		it('returns an array of the models\'s rel', function () {
+			var myRawSiren = {rel: ['doooodie', 'frogs']};
+			var mySirenModel = new Backbone.Siren.Model(myRawSiren);
+			expect(mySirenModel.rel()).toEqual(['doooodie', 'frogs']);
+		});
+
+
+		it('returns undefined if rel is not defined', function () {
+			expect(sirenModel.rel()).not.toBeDefined();
+		});
+	});
+
+
     describe('.links()', function () {
         it('returns an array of the model\'s links', function () {
             var expectedLinks = settingsModelSiren.links;
@@ -107,10 +121,18 @@ describe('Siren Model: ', function () {
 
     describe('.hasClass()', function () {
         it('returns whether a model has a given class', function () {
-            expect(sirenModel.hasClass('wtf')).toBe(false);
-            expect(sirenModel.hasClass('order')).toBe(true);
+            expect(sirenModel.hasClass('wtf')).toBeFalse();
+            expect(sirenModel.hasClass('order')).toBeTrue();
         });
     });
+
+
+	describe('.hasRel()', function () {
+		it('returns whether a model has a given class', function () {
+			expect(sirenModel.get('order-items').hasRel('wtf')).toBeFalse();
+			expect(sirenModel.get('order-items').hasRel('http://x.io/rels/order-items')).toBeTrue();
+		});
+	});
 
 
     describe('.entities', function () {

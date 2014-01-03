@@ -62,6 +62,20 @@ describe('Siren Collection: ', function () {
     });
 
 
+	describe('.rel()', function () {
+		it('returns an array of the collection\'s rel', function () {
+			var myRawSiren = {'class': ['collection'], rel: ['doooodie', 'frogs']};
+			var mySirenCollection = new Backbone.Siren.Collection(myRawSiren);
+			expect(mySirenCollection.rel()).toEqual(['doooodie', 'frogs']);
+		});
+
+
+		it('returns undefined if rel is not defined', function () {
+			expect(sirenCollection.rel()).not.toBeDefined();
+		});
+	});
+
+
     describe('.links()', function () {
         it('returns an array of the collection\'s links', function () {
             var expectedLinks = loansCollectionSiren.links;
@@ -105,6 +119,17 @@ describe('Siren Collection: ', function () {
             expect(sirenCollection.hasClass('collection')).toBe(true);
         });
     });
+
+
+	describe('.hasRel()', function () {
+		it('returns whether a model has a given class', function () {
+			expect(sirenCollection.hasRel('wtf')).toBeFalse();
+
+			var myRawSiren = {'class': ['collection'], rel: ['wtf', 'whistleDixie']};
+			var mySirenCollection = new Backbone.Siren.Collection(myRawSiren);
+			expect(mySirenCollection.hasRel('whistleDixie')).toBeTrue();
+		});
+	});
 
 
     describe('.title()', function () {

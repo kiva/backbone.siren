@@ -132,7 +132,7 @@ function hasClass(classname) {
  * @returns {Boolean}
  */
 function hasRel(rel) {
-	return _.indexOf(this.rels(), rel) > -1;
+	return _.indexOf(this.rel(), rel) > -1;
 }
 
 
@@ -856,6 +856,7 @@ _.extend(BbSiren, {
     , Collection: Backbone.Collection.extend({
         url: url
         , classes: classes
+		, rel: rel
 		, actions: actions
 		, links: links
 		, title: title
