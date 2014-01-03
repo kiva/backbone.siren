@@ -139,11 +139,19 @@ describe('Siren Model: ', function () {
 
 
     describe('.entities', function () {
-        // @TODO this a crappy test, revisit once there is a decent .filter() or .find() method
-
         it('returns an array of the model\'s sub-entities', function () {
             expect(sirenModel.entities().length).toBe(settingsModelSiren.entities.length);
         });
+
+
+	    it('allows for filtering down of sub-entities', function () {
+		    this.stub(Backbone.Siren.Model.prototype, 'match');
+
+		    var filter = {'some-filter': true};
+
+		    sirenModel.entities(filter);
+		    expect(Backbone.Siren.Model.prototype.match).toHaveBeenCalledWith(filter);
+	    });
     });
 
 
