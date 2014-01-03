@@ -30,10 +30,32 @@ Action.prototype = {
 	/**
 	 *
 	 * @param {String} classname
-	 * @returns {boolean}
+	 * @returns {Boolean}
 	 */
 	hasClass: function (classname) {
 		return _.indexOf(this['class'], classname) > -1;
+	}
+
+
+	/**
+	 * Checks if the Siren Action matches the provided filters.
+	 * Supports matching by class and/or name.
+	 *
+	 * @param {Object} filters
+	 * @returns {Boolean}
+	 */
+	, match: function (filters) {
+		var matched = true;
+
+		if (filters['class']) {
+			matched = this.hasClass(filters['class']);
+		}
+
+		if (filters.name) {
+			matched = this.name == filters.name;
+		}
+
+		return matched;
 	}
 
 

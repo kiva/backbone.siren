@@ -14,10 +14,11 @@ var BbSiren
 
 
 /**
+ * Converts a hyphenated name to camelCase.
  *
  * @static
  * @param name
- * @return {String}
+ * @returns {String}
  */
 function toCamelCase(name) {
     return name.replace(/(\-[a-z])/g, function(match){return match.toUpperCase().replace('-','');});
@@ -25,175 +26,227 @@ function toCamelCase(name) {
 
 
 /**
+ * Gets the url from a raw Siren entity
  *
  * @static
- * @param entity
- * @return {String}
+ * @param rawEntity
+ * @returns {String|undefined}
  */
-function getUrl(entity) {
-    var link, url;
+function getRawEntityUrl(rawEntity) {
+	var link, url;
 
-    if (!entity) {
-	    return;
-    }
+	if (rawEntity.href) {
+		url = rawEntity.href;
+	} else if (rawEntity.links) {
+		link = _.filter(rawEntity.links, function (link) {
+			return !!(link.rel && _.filter(link.rel, function (relType) {
+				return relType == 'self';
+			}).length);
+		})[0];
 
-    if (entity.href) {
-        url = entity.href;
-    } else if (entity.links) {
-        link = _.filter(entity.links, function (link) {
-            return !!(link.rel && _.filter(link.rel, function (relType) {
-                return relType == 'self';
-            }).length);
-        })[0];
+		if (link) {
+			url = link.href;
+		}
+	} else {
+		warn('Missing href or "self" link');
+		url = '';
+	}
 
-        if (link) {
-            url = link.href;
-        }
-    } else {
-        warn('Missing href or "self" link');
-        url = '';
-    }
+	return url;
+}
 
-    return url;
+
+/**
+ * Gets a raw entity's name if it was stored in the rel using the following syntax:
+ * `rel: ['name:<name>']`
+ *
+ * Note: This is probably a temporary solution as Siren does not yet officially support names on entity's.
+ *
+ * @static
+ * @param rawEntity
+ * @returns {String}
+ */
+function getRawEntityRelAsName(rawEntity) {
+	var name;
+
+	_.find(rawEntity.rel, function(rel) {
+		name = /name:(.*)/.exec(rel);
+		return name;
+	});
+
+	return _.last(name);
+}
+
+
+/**
+ * Gets a raw entity's name
+ *
+ * Note: Siren does not yet officially support names on entity's.
+ * There have been conversations about how to support names, once that is resolved this solution (or a better one)
+ * can be made more permanent.
+ *
+ * @static
+ * @param rawEntity
+ * @returns {String}
+ */
+function getRawEntityName(rawEntity) {
+	return rawEntity.name || getRawEntityRelAsName(rawEntity);
+}
+
+
+/**
+ *
+ * @static
+ * @param {Object} rawEntity
+ * @param {String} className
+ * @returns {Boolean}
+ */
+function rawEntityHasClass(rawEntity, className) {
+	return _.indexOf(rawEntity['class'], className) > -1;
 }
 
 
 /**
  * Access to the representation's "self" url, or its "href" if there is one.
  *
- * @return {String}
+ * @returns {String}
  */
 function url() {
-    return getUrl(this._data);
+    return getRawEntityUrl(this._data);
 }
 
 
 /**
  *
- * @static
- * @param {Object} sirenObj Can be a siren entity or siren action object
- * @return {Array}
+ * @param classname
+ * @returns {Boolean}
  */
-function getClassNames(sirenObj) {
-    return sirenObj['class'] || [];
-}
-
-
-/**
- *
- * @param {Backbone.Siren.Model|Backbone.Siren.Collection} bbSiren
- * @param {Object} filters
- * @return {Boolean}
- */
-function hasProperties(bbSiren, filters) {
-	var _hasProperties = true;
-
-	if (filters.className) {
-		_hasProperties = bbSiren.hasClass(filters.className);
-	}
-
-	if (filters.rel) {
-		_hasProperties = bbSiren.hasRel(filters.rel);
-	}
-
-	return _hasProperties;
-}
-
-
-/**
- *
- * @static
- * @param {Array} entities
- * @param {Object} filters
- * @return {Array}
- */
-function filter(entities, filters) {
-    return _.filter(entities, function (entity) {
-        return hasProperties(entity, filters);
-    });
-}
-
-
-/**
- *
- * @static
- * @param sirenObj
- * @param className
- * @return {Boolean}
- */
-function _hasClass(sirenObj, className) {
-	return _.indexOf(getClassNames(sirenObj), className) > -1;
-}
-
-
-/**
- *
- * @param className
- * @return {Boolean}
- */
-function hasClass(className) {
-	return _hasClass(this._data, className);
-}
-
-
-/**
- *
- * @param {Object} action
- * @param {Object} filters
- * @return {Boolean}
- */
-function actionHasProperties(action, filters) {
-    var hasProperties = true;
-
-    if (filters.className) {
-        hasProperties = _hasClass(action, filters.className);
-    }
-
-    if (filters.name) {
-        hasProperties = action.name == filters.name;
-    }
-
-    return hasProperties;
+function hasClass(classname) {
+	return _.indexOf(this.classes(), classname) > -1;
 }
 
 
 /**
  *
  * @param rel
- * @return {Boolean}
+ * @returns {Boolean}
  */
 function hasRel(rel) {
-    return _.indexOf(this.rels(), rel) > -1;
+	return _.indexOf(this.rels(), rel) > -1;
 }
 
 
 /**
- * Accesses the "class" property of the Siren Object
+ * Accesses to the raw entity's "class"
  *
- * @return {Array}
+ * @returns {Array}
  */
 function classes() {
-    return getClassNames(this._data);
+    return this._data['class'];
 }
 
 
 /**
+ * Access to the raw entity's "title"
+ *
+ * @returns {String}
+ */
+function title() {
+	return this._data.title;
+}
+
+
+/**
+ * Access to the raw entity's "rel"
+ */
+function rel() {
+	return this._data.rel;
+}
+
+
+/**
+ * Filters an array of links down to those that match the given "rel"
+ *
+ * @param {Array} links
+ * @param {String} rel
+ * @returns {Array}
+ */
+function filterLinksByRel(links, rel) {
+	return _.filter(links, function (link) {
+		return _.indexOf(link.rel, rel) > -1;
+	});
+}
+
+
+/**
+ * Access to the raw entity's "links"
+ *
  * @todo Haven't had many use-cases yet for links.
  * As the use-cases arise, this method should be re-thought
  *
  * @param {String} rel
- * @return {Array}
+ * @returns {Array}
  */
 function links(rel) {
     var _links = this._data.links;
 
     if (rel) {
-        _links = _.filter(_links, function (link) {
-            return _.indexOf(link.rel, rel) > -1;
-        });
+	    _links = filterLinksByRel(_links, rel);
     }
 
     return _links || [];
+}
+
+
+/**
+ *
+ * @param filters
+ * @returns {*|Array}
+ */
+function actions(filters) {
+	var _actions = this._actions;
+
+	if (filters) {
+		_actions = _.filter(_actions, function (action) {
+			return action.match(filters);
+		});
+	}
+
+	return _actions;
+}
+
+
+/**
+ *
+ * @param {String} name
+ * @returns {Object|undefined}
+ */
+function getActionByName(name) {
+	return _.find(this._actions, function (action) {
+		return action.name == name;
+	});
+}
+
+
+/**
+ * Checks if a Backbone.Siren entity matches the provided filters.
+ * Supports matching by class and/or rel.
+ *
+ * @param {Object} filters
+ * @returns {Boolean}
+ */
+function match(filters) {
+	var matched = true;
+
+	if (filters['class']) {
+		matched = this.hasClass(filters['class']);
+	}
+
+	if (filters.rel) {
+		matched = this.hasRel(filters.rel);
+	}
+
+	return matched;
 }
 
 
@@ -205,7 +258,7 @@ function links(rel) {
  * @todo This method leaves much to be desired and should be refactored.
  *
  * @param {String} rel
- * @return {Promise}
+ * @returns {Promise}
  */
 function request(rel) {
     // Similar to .links() only it only gives us the first "rel" match
@@ -229,6 +282,7 @@ function request(rel) {
  * 3) "sync" event is only fired once
  *
  * @param {Object} options
+ * @returns {Promise}
  */
 function resolve(options) {
 	options = options || {};
@@ -315,85 +369,10 @@ function resolveNextInChain(chain, options) {
 
 
 /**
+ * Is called in the Model or Collection's constructor.
+ * It creates a Backbone.Siren.Action instance from a raw action and attaches it to the Model or Collection (aka "parent").
  *
- * @return {Array}
- */
-function getRel(sirenObj) {
-    return sirenObj.rel || [];
-}
-
-
-/**
- *
- * @static
- * @param sirenObj
- * @return {String}
- */
-function getRelAsName(sirenObj) {
-    var name;
-
-    _.find(getRel(sirenObj), function(rel) {
-        name = /name:(.*)/.exec(rel);
-        return name;
-    });
-
-    return _.last(name);
-}
-
-
-/**
- *
- * @static
- * @param sirenObj
- * @return {String}
- */
-function getName(sirenObj) {
-    return sirenObj.name || getRelAsName(sirenObj);
-}
-
-
-/**
- *
- * @param filters
- * @return {*|Array}
- */
-function actions(filters) {
-    var _actions = this._actions;
-
-    if (filters) {
-        _actions = _.filter(_actions, function (action) {
-            return actionHasProperties(action, filters);
-        });
-    }
-    return _actions;
-}
-
-
-/**
- *
- * @param {String} name
- * @return {Object|undefined}
- */
-function getActionByName(name) {
-    return _.find(this._actions, function (action) {
-        return action.name == name;
-    });
-}
-
-
-/**
- * Access to the representation's "title"
- *
- * @return {String}
- */
-function title() {
-    return this._data.title;
-}
-
-
-/**
- *
- * @return {Array|undefined}
+ * @returns {Array|undefined}
  */
 function parseActions() {
     var self = this
@@ -466,21 +445,21 @@ _.extend(BbSiren, {
 
 	/**
 	 *
-	 * @param {Object} obj
+	 * @param {Object} rawEntity
 	 * @returns {Boolean}
 	 */
-	, isRawCollection: function (obj) {
-		return _hasClass(obj, 'collection');
+	, isRawCollection: function (rawEntity) {
+		return rawEntityHasClass(rawEntity, 'collection');
 	}
 
 
 	/**
 	 *
-	 * @param obj
+	 * @param {Object} rawEntity
 	 * @returns {Boolean}
 	 */
-	, isRawError: function (obj) {
-		return _hasClass(obj, 'error');
+	, isRawError: function (rawEntity) {
+		return rawEntityHasClass(rawEntity, 'error');
 	}
 
 
@@ -507,8 +486,10 @@ _.extend(BbSiren, {
 
 
     /**
+     * Wraps the standard Backbone.ajax()
      *
      * @param {String} url
+     * @returns {Promise}
      */
     , ajax: function (url, options) {
         options = _.extend({url: url, dataType: 'json'}, options);
@@ -680,13 +661,15 @@ _.extend(BbSiren, {
 
         url: url
         , classes: classes
+		, rel: rel
+		, actions: actions
+		, links: links
+		, title: title
         , hasClass: hasClass
         , hasRel: hasRel
-        , title: title
-        , actions: actions
-        , links: links
         , getActionByName: getActionByName
         , parseActions: parseActions
+		, match: match
         , request: request
 	    , resolve: resolve
 		, resolveNextInChain: resolveNextInChain
@@ -695,6 +678,7 @@ _.extend(BbSiren, {
         /**
          *
          * @param {Object} options
+         * @returns {Promise}
          */
         , resolveEntities: function (options) {
             var self = this
@@ -711,11 +695,10 @@ _.extend(BbSiren, {
 
 
         /**
-         * @todo this is a mess
          *
          * @param {Object} rawEntity
          * @param {Object} options
-         * @returns {$.Deferred}
+         * @returns {Promise}
          */
         , resolveEntity: function (rawEntity, options) {
             options = options || {};
@@ -725,13 +708,13 @@ _.extend(BbSiren, {
             , deferred = new $.Deferred();
 
             if ((rawEntity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
-                BbSiren.resolveOne(getUrl(rawEntity), options)
+                BbSiren.resolveOne(getRawEntityUrl(rawEntity), options)
                     .done(function (bbSiren) {
-                        deferred.resolve(self.setEntity(bbSiren, getRel(rawEntity), getName(rawEntity)));
+                        deferred.resolve(self.setEntity(bbSiren, rawEntity.rel, getRawEntityName(rawEntity)));
                     });
             } else {
                 bbSiren = BbSiren.parse(rawEntity, options.store);
-                bbSirenPromise = deferred.resolve(this.setEntity(bbSiren, getRel(rawEntity), getName(rawEntity)));
+                bbSirenPromise = deferred.resolve(this.setEntity(bbSiren, rawEntity.rel, getRawEntityName(rawEntity)));
             }
 
             return bbSirenPromise;
@@ -789,6 +772,7 @@ _.extend(BbSiren, {
          * http://backbonejs.org/#Model-toJSON
          *
          * @param {Object} options
+         * @returns {Object}
          */
         , toJSON: function (options) {
             var action
@@ -820,20 +804,24 @@ _.extend(BbSiren, {
 
 
         /**
-         * Filters the entity's properties and returns only sub-entities
+         * Returns an array of all sub-entities.
+         * It filters them if a filter is provided.
          *
+         * @param {Object} [filters]
          * @return {Array}
          */
         , entities: function (filters) {
-            var entities = _.map(this._entities, function (entityItem){
+            var entitiesArray = _.map(this._entities, function (entityItem){
                 return entityItem.entity;
             });
 
             if (filters) {
-                entities = filter(entities, filters);
+	            entitiesArray = _.filter(entitiesArray, function (entity) {
+		            return entity.match(filters);
+	            });
             }
 
-            return entities;
+            return entitiesArray;
         }
 
 
@@ -868,13 +856,14 @@ _.extend(BbSiren, {
     , Collection: Backbone.Collection.extend({
         url: url
         , classes: classes
+		, actions: actions
+		, links: links
+		, title: title
         , hasClass: hasClass
         , hasRel: hasRel
-        , title: title
-        , links: links
-        , actions: actions
         , getActionByName: getActionByName
         , parseActions: parseActions
+		, match: match
         , request: request
 	    , resolve: resolve
 		, resolveNextInChain: resolveNextInChain
