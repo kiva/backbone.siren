@@ -952,44 +952,44 @@ BbSiren.prototype = {
 
 	/**
 	 *
-	 *
-	 * @param apiRoot
-	 * @param options
+	 * @param {String} apiRoot
+	 * @param {Object} options
 	 */
 	init: function (apiRoot, options) {
 		this.apiRoot = apiRoot;
-		this.settings = options;
+		this.options = options;
 	}
 
 
 	/**
-	 * @todo - entityName should be changed, maybe to entityPath (because an entity name is already a loaded word as it already has a definition)
-	 * Expands an entity name into a url
+	 * Expands an entity path into a url
 	 *
-	 * @param {String} entityName
-	 * @returns {string}
+	 * @param {String} entityPath
+	 * @returns {String}
 	 */
-	, entityNameToUrl: function (entityName) {
-		return this.apiRoot + '/' + entityName;
+	, entityPathToUrl: function (entityPath) {
+		return this.apiRoot + '/' + entityPath;
 	}
 
 
 	/**
+	 * Resolves entities from the siren api
 	 *
-	 * @param {String|Array} entityNames
+	 * @param {String|Array} entityPaths
+	 * @returns {Promise}
 	 */
-	, resolve: function (entityNames, options) {
+	, resolve: function (entityPaths, options) {
 		options = options || {};
 		options.store = this.store;
 
 		var self = this
 		, urls = [];
 
-		if (typeof entityNames == 'string') {
-			urls = this.entityNameToUrl(entityNames);
+		if (typeof entityPaths == 'string') {
+			urls = this.entityPathToUrl(entityPaths);
 		} else {
-			urls = _.map(entityNames, function(entityName) {
-				return self.entityNameToUrl(entityName);
+			urls = _.map(entityPaths, function(entityPath) {
+				return self.entityPathToUrl(entityPath);
 			});
 		}
 

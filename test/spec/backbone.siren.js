@@ -119,22 +119,23 @@ describe('Backbone.Siren: ', function () {
 
     describe('.parse', function () {
 
-        it('parses an entity from a plain Siren object to a Backbone.Siren object and returns the result', function () {
-            var bbSiren = Backbone.Siren.parse(settingsModelSiren);
-            expect(bbSiren instanceof Backbone.Siren.Model).toBeTrue();
-        });
+	    it('parses a raw Collection', function () {
+		    var bbSiren = Backbone.Siren.parse(settingsModelSiren);
+		    expect(bbSiren instanceof Backbone.Siren.Model).toBeTrue();
+	    });
 
 
-	    // @todo - we no longer add them to the model on Backbone.Model.parse, instead its done on Backbone.Model.prototype.parse
-        it('adds Backbone.Siren object to the store IF its a model', function () {
-	        var store = new Backbone.Siren.Store();
-            var urlKey = settingsModelSiren.links[0].href;
+	    it('parses a raw Model', function () {
+		    var bbSiren = Backbone.Siren.parse(sirenCollection);
+		    expect(bbSiren instanceof Backbone.Siren.Collection).toBeTrue();
+	    });
 
-            expect(store.exists(urlKey)).toBeFalse();
 
-            Backbone.Siren.parse(settingsModelSiren, store);
-            expect(store.exists(urlKey)).toBeTrue();
-        });
+	    it('parses a raw Error', function () {
+		    var rawError = {'class': ['error']};
+		    var bbSiren = Backbone.Siren.parse(rawError);
+		    expect(bbSiren instanceof Backbone.Siren.Model).toBeTrue();
+	    });
     });
 
 
@@ -283,6 +284,53 @@ describe('Backbone.Siren: ', function () {
 			});
 
 			return promise;
+		});
+	});
+
+
+	//
+	// Prototype methods
+	//
+
+	describe('.init', function () {
+		var sirenApi = new Backbone.Siren('http://blah.io', {'ba': 'boom'});
+		sirenApi.init('http://new.io', {'ba': 'bing'});
+		expect(sirenApi.apiRoot).toBe('http://new.io');
+		expect(sirenApi.options).toEqual({'ba': 'bing'});
+	});
+
+
+	describe('.entityPathToUrl', function () {
+		it('turns an entity path into a full url', function () {
+			var sirenApi = new Backbone.Siren('http://blah.io');
+			expect(sirenApi.entityPathToUrl('some/path')).toBe('http://blah.io/some/path');
+		});
+	});
+
+
+	describe('.resolve', function () {
+		beforeEach(function () {
+			this.stub(Backbone.Siren, 'resolve');
+		});
+
+
+		it('resolves an entity from the Siren Api', function () {
+			var sirenApi = new Backbone.Siren('http://blah.io');
+			var options = {'bon': 'bon'};
+
+			sirenApi.resolve('some/path', options);
+			expect(Backbone.Siren.resolve).toHaveBeenCalledWith('http://blah.io/some/path', options);
+		});
+
+
+		it('resolves an array of entities from the Siren Api', function () {
+			var sirenApi = new Backbone.Siren('http://blah.io');
+			var options = {'bon': 'bon'};
+
+			sirenApi.resolve(['some/path', 'some/other/path'], options);
+
+			options.store = sirenApi.store;
+			expect(Backbone.Siren.resolve).toHaveBeenCalledWith(['http://blah.io/some/path', 'http://blah.io/some/other/path'], options);
 		});
 	});
 });
