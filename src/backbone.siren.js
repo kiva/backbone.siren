@@ -107,16 +107,6 @@ function rawEntityHasClass(rawEntity, className) {
 
 
 /**
- * Access to the representation's "self" url, or its "href" if there is one.
- *
- * @returns {String}
- */
-function url() {
-    return getRawEntityUrl(this._data);
-}
-
-
-/**
  *
  * @param classname
  * @returns {Boolean}
@@ -137,17 +127,28 @@ function hasRel(rel) {
 
 
 /**
- * Accesses to the raw entity's "class"
+ * Access the entity's url.
+ * In some cases this would be the "self" link, in other cases it's the "href".
  *
- * @returns {Array}
+ * @returns {String}
  */
-function classes() {
-    return this._data['class'];
+function url() {
+	return getRawEntityUrl(this._data);
 }
 
 
 /**
- * Access to the raw entity's "title"
+ * Accesses to the entity's "class"
+ *
+ * @returns {Array}
+ */
+function classes() {
+    return this._data['class'] || [];
+}
+
+
+/**
+ * Access to the entity's "title"
  *
  * @returns {String}
  */
@@ -157,62 +158,32 @@ function title() {
 
 
 /**
- * Access to the raw entity's "rel"
+ * Access to the entity's "rel"
+ *
+ * @returns {Array|undefined}
  */
 function rel() {
-	return this._data.rel;
+	return this._data.rel || [];
 }
 
 
 /**
- * Filters an array of links down to those that match the given "rel"
+ * Access to the entity's "links"
  *
- * @param {Array} links
- * @param {String} rel
+ * @returns {Array|undefined}
+ */
+function links() {
+    return this._data.links || [];
+}
+
+
+/**
+ * Access to the entity's "actions"
+ *
  * @returns {Array}
  */
-function filterLinksByRel(links, rel) {
-	return _.filter(links, function (link) {
-		return _.indexOf(link.rel, rel) > -1;
-	});
-}
-
-
-/**
- * Access to the raw entity's "links"
- *
- * @todo Haven't had many use-cases yet for links.
- * As the use-cases arise, this method should be re-thought
- *
- * @param {String} rel
- * @returns {Array}
- */
-function links(rel) {
-    var _links = this._data.links;
-
-    if (rel) {
-	    _links = filterLinksByRel(_links, rel);
-    }
-
-    return _links || [];
-}
-
-
-/**
- *
- * @param filters
- * @returns {*|Array}
- */
-function actions(filters) {
-	var _actions = this._actions;
-
-	if (filters) {
-		_actions = _.filter(_actions, function (action) {
-			return action.match(filters);
-		});
-	}
-
-	return _actions;
+function actions() {
+	return this._actions || [];
 }
 
 

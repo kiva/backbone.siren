@@ -55,9 +55,10 @@ describe('Siren Collection: ', function () {
         });
 
 
-        it('returns undefined if there are no classes', function () {
+        it('returns an empty array if there are no classes', function () {
             var mySirenCollection = new Backbone.Siren.Collection({});
-            expect(mySirenCollection.classes()).not.toBeDefined();
+	        expect(mySirenCollection.classes()).toBeArray();
+	        expect(mySirenCollection.classes().length).toBe(0);
         });
     });
 
@@ -70,8 +71,9 @@ describe('Siren Collection: ', function () {
 		});
 
 
-		it('returns undefined if rel is not defined', function () {
-			expect(sirenCollection.rel()).not.toBeDefined();
+		it('returns an empty array if rel is not defined', function () {
+			expect(sirenCollection.rel()).toBeArray();
+			expect(sirenCollection.rel().length).toBe(0);
 		});
 	});
 
@@ -175,6 +177,19 @@ describe('Siren Collection: ', function () {
             expect(action).not.toBeDefined();
         });
     });
+
+
+	describe('.match()', function () {
+		it('Checks if a model matches by class.', function () {
+			expect(sirenCollection.match({'class': 'wtf'})).toBeFalse();
+			expect(sirenCollection.match({'class': 'collection'})).toBeTrue();
+		});
+
+		it('Checks if a model matches by rel.', function () {
+			expect(sirenCollection.at(0).match({'rel': 'wtf'})).toBeFalse();
+			expect(sirenCollection.at(0).match({'rel': 'api.kiva.org/rels/loans'})).toBeTrue();
+		});
+	});
 
 
 	describe('.parse()', function () {

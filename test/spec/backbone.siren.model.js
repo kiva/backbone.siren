@@ -62,7 +62,8 @@ describe('Siren Model: ', function () {
 
         it('returns an empty array if there are no classes', function () {
             var mySirenModel = new Backbone.Siren.Model({});
-            expect(mySirenModel.classes()).not.toBeDefined();
+	        expect(mySirenModel.classes()).toBeArray();
+	        expect(mySirenModel.classes().length).toBe(0);
         });
     });
 
@@ -75,8 +76,9 @@ describe('Siren Model: ', function () {
 		});
 
 
-		it('returns undefined if rel is not defined', function () {
-			expect(sirenModel.rel()).not.toBeDefined();
+		it('returns an empty array if rel is not defined', function () {
+			expect(sirenModel.rel()).toBeArray();
+			expect(sirenModel.rel().length).toBe(0);
 		});
 	});
 
@@ -188,6 +190,19 @@ describe('Siren Model: ', function () {
             expect(action).not.toBeDefined();
         });
     });
+
+
+	describe('.match()', function () {
+		it('Checks if a model matches by class.', function () {
+			expect(sirenModel.match({'class': 'wtf'})).toBeFalse();
+			expect(sirenModel.match({'class': 'order'})).toBeTrue();
+		});
+
+		it('Checks if a model matches by rel.', function () {
+			expect(sirenModel.get('order-items').match({'rel': 'wtf'})).toBeFalse();
+			expect(sirenModel.get('order-items').match({'rel': 'http://x.io/rels/order-items'})).toBeTrue();
+		});
+	});
 
 
 	describe('.parse()', function () {
