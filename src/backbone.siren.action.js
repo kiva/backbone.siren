@@ -47,6 +47,10 @@ Action.prototype = {
 	, match: function (filters) {
 		var matched = true;
 
+		if (!filters) {
+			return matched;
+		}
+
 		if (filters['class']) {
 			matched = this.hasClass(filters['class']);
 		}

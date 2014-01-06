@@ -7,7 +7,7 @@ describe('Siren Action: ', function () {
 	// @todo quick fix for upgrade to buster 0.7
 	var expect = buster.expect;
 
-    var sirenAction = {name: 'add-item', title: 'Add Item', method: 'FANCY', href: 'http://api.x.io/orders/42/items', type: 'application/x-fancy-stuff', fields: [{name: 'orderNumber', type: 'hidden', value: '42'}, {name: 'productCode', type: 'text'}, {name: 'quantity', type: 'number' }]}
+    var sirenAction = {name: 'add-item', 'class': ['fuzzy', 'fluffy'], title: 'Add Item', method: 'FANCY', href: 'http://api.x.io/orders/42/items', type: 'application/x-fancy-stuff', fields: [{name: 'orderNumber', type: 'hidden', value: '42'}, {name: 'productCode', type: 'text'}, {name: 'quantity', type: 'number' }]}
     , bbSirenAction;
 
 
@@ -34,6 +34,32 @@ describe('Siren Action: ', function () {
 
 			bbSirenAction['class'] = ['test'];
 			expect(bbSirenAction.hasClass('test')).toBeTrue();
+		});
+	});
+
+
+	describe('.match', function () {
+		it('Checks if the Siren Action matches the given class', function () {
+			expect(bbSirenAction.match({'class': 'chunky'})).toBeFalse();
+			expect(bbSirenAction.match({'class': 'fluffy'})).toBeTrue();
+		});
+
+
+		it('Checks if the Siren Action matches the given name', function () {
+			expect(bbSirenAction.match({name: 'do-stuff'})).toBeFalse();
+			expect(bbSirenAction.match({name: 'add-item'})).toBeTrue();
+		});
+
+
+		it('Checks if the Siren Action matches name and class', function () {
+			expect(bbSirenAction.match({name: 'do-stuff', 'class': 'fluffy'})).toBeFalse();
+			expect(bbSirenAction.match({name: 'add-item', 'class': 'fluffy'})).toBeTrue();
+		});
+
+
+		it('returns true if a filter is not provided', function () {
+			expect(bbSirenAction.match()).toBeTrue();
+			expect(bbSirenAction.match({blah: 'shmah'})).toBeTrue();
 		});
 	});
 
