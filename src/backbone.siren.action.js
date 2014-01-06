@@ -99,17 +99,6 @@ Action.prototype = {
 	/**
 	 *
 	 * @param {String} name
-	 * @param {String} value
-	 */
-	, setSecureKey: function (name, value) {
-		var secureKeys = this.getSecureKeys();
-		secureKeys.set(name, value);
-	}
-
-
-	/**
-	 *
-	 * @param {String}
 	 * @returns {*}
 	 */
 	, getSecureKey: function (name) {
@@ -122,12 +111,13 @@ Action.prototype = {
 
 
 	/**
-	 * Clears all secure keys.
-	 * We don't want "secure keys" floating around they should be cleared as soon as they are no longer needed
 	 *
+	 * @param {String} name
+	 * @param {String} value
+	 * @returns {Backbone.Model}
 	 */
-	, clearSecureKey: function (name) {
-		return this.getSecureKeys().unset(name);
+	, setSecureKey: function (name, value) {
+		return this.getSecureKeys().set(name, value);
 	}
 
 
@@ -135,9 +125,21 @@ Action.prototype = {
 	 * Clears all secure keys.
 	 * We don't want "secure keys" floating around they should be cleared as soon as they are no longer needed
 	 *
+	 * @returns {Backbone.Model}
 	 */
 	, clearSecureKeys: function () {
 		return this.getSecureKeys().clear();
+	}
+
+
+	/**
+	 * Clear a secure key.
+	 *
+	 * @param name
+	 * @returns {Backbone.Model}
+	 */
+	, clearSecureKey: function (name) {
+		return this.getSecureKeys().unset(name);
 	}
 
 

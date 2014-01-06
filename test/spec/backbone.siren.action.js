@@ -112,5 +112,64 @@ describe('Siren Action: ', function () {
 		    expect(myBbSirenModel.validationError).toMatch('There was an error');
 	    });
     });
+
+
+	describe('.getSecureKeys()', function () {
+		it('gets the secureKeys model', function () {
+			bbSirenAction.secureKeys = new Backbone.Model({'uno': 1, 'dos': 2, 'tres': 3});
+			expect(bbSirenAction.getSecureKeys()).toEqual(bbSirenAction.secureKeys);
+		});
+
+
+		it('creates and returns a new model if a secureKeys model does not yet exist', function () {
+			expect(bbSirenAction.secureKeys).not.toBeDefined();
+			bbSirenAction.getSecureKeys();
+			expect(bbSirenAction.secureKeys).toBeDefined();
+			expect(bbSirenAction.secureKeys.attributes).toEqual({});
+		});
+	});
+
+
+	describe('.getSecureKey()', function () {
+		it('gets a secure key - wrapper for Backbone.Model.prototype.get()', function () {
+			bbSirenAction.setSecureKey('uno', 1);
+			expect(bbSirenAction.getSecureKey('uno')).toBe(1);
+		});
+	});
+
+
+	describe('.setSecureKey()', function () {
+		it('sets a secure key - wrapper for Backbone.Model.prototype.set()', function () {
+			var result = bbSirenAction.setSecureKey('uno', 1);
+			expect(result.attributes).toEqual({uno: 1});
+		});
+
+
+		it('sets secure keys - wrapper for Backbone.Model.prototype.set()', function () {
+			var result = bbSirenAction.setSecureKey({uno: 1, dos: 3, tres: 3});
+			expect(result.attributes).toEqual({uno: 1, dos: 3, tres: 3});
+		});
+	});
+
+
+	describe('.clearSecureKeys()', function () {
+		it('clears all secure keys', function () {
+			bbSirenAction.setSecureKey({uno: 1, dos: 3, tres: 3});
+
+			var result = bbSirenAction.clearSecureKeys();
+			expect(result.attributes).toEqual({});
+		});
+	});
+
+
+	describe('.clearSecureKey()', function () {
+		it('clears a secure key', function () {
+			bbSirenAction.setSecureKey({uno: 1, dos: 3, tres: 3});
+
+			var result = bbSirenAction.clearSecureKey('dos');
+			expect(result.attributes).toEqual({uno: 1, tres: 3});
+		});
+	});
+
 });
 
