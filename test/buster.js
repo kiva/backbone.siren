@@ -1,10 +1,13 @@
+'use strict';
+
 var config = module.exports;
 
 config.development = {
     env: 'browser'
     , rootPath: '../'
     , deps: [
-        'bower_components/jquery/jquery.js'
+		'test/assertions.js'
+        , 'bower_components/jquery/jquery.js'
         , 'bower_components/underscore/underscore.js'
         , 'bower_components/backbone/backbone.js'
         , 'src/patternLibrary.js'
@@ -26,7 +29,8 @@ config.dist_amd = {
     env: 'browser'
     , rootPath: '../'
     , deps: [
-        'bower_components/jquery/jquery.js'
+		'test/assertions.js'
+        , 'bower_components/jquery/jquery.js'
         , 'bower_components/underscore/underscore.js'
         , 'bower_components/backbone/backbone.js'
     ]
@@ -39,7 +43,8 @@ config.dist_iife = {
 	env: 'browser'
 	, rootPath: '../'
 	, deps: [
-		'bower_components/jquery/jquery.js'
+		'test/assertions.js'
+		, 'bower_components/jquery/jquery.js'
 		, 'bower_components/underscore/underscore.js'
 		, 'bower_components/backbone/backbone.js'
 	]

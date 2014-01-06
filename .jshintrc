@@ -30,6 +30,7 @@
 		, "Backbone"
 		, "_"
 		, "getUrl"
+		, "buster"
 
 		, "afterEach"
 		, "beforeEach"

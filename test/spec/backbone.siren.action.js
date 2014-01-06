@@ -66,7 +66,7 @@ describe('Siren Action: ', function () {
 
     describe('.execute()', function () {
         beforeEach(function () {
-            this.stub($, 'ajax').returns('jqXhr');
+            this.stub($, 'ajax').returns((new $.Deferred()).promise());
         });
 
 
@@ -76,7 +76,7 @@ describe('Siren Action: ', function () {
 
             var jqXhr = myBbSirenModel.getActionByName('add-item').execute();
             expect($.ajax).toHaveBeenCalled();
-            expect(jqXhr).toBe('jqXhr');
+            expect(jqXhr).toBePromise();
         });
 
 
