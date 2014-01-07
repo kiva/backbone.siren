@@ -81,18 +81,17 @@ describe('Siren Action: ', function () {
 
 
         it('sets default ajax settings that can be overriden', function () {
-            var jqXhr
-            , mySirenModel = {href: 'test', actions: [sirenAction]}
+            var mySirenModel = {href: 'test', actions: [sirenAction]}
             , myBbSirenModel = new Backbone.Siren.Model(mySirenModel);
 
             // Defaults
-            jqXhr = myBbSirenModel.getActionByName('add-item').execute();
+            myBbSirenModel.getActionByName('add-item').execute();
             expect($.ajax).toHaveBeenCalledWith(sinon.match({url: 'http://api.x.io/orders/42/items', type: 'FANCY', contentType: 'application/x-fancy-stuff', validate: true}));
 
             $.ajax.reset();
 
             // Override
-            jqXhr = myBbSirenModel.getActionByName('add-item').execute({type: 'FANCIER', contentType: 'application/x-aaah-shite'});
+            myBbSirenModel.getActionByName('add-item').execute({type: 'FANCIER', contentType: 'application/x-aaah-shite'});
             expect($.ajax).toHaveBeenCalledWith(sinon.match({url: 'http://api.x.io/orders/42/items', type: 'FANCIER', contentType: 'application/x-aaah-shite'}));
         });
 
@@ -110,6 +109,85 @@ describe('Siren Action: ', function () {
 
 		    myBbSirenModel.getActionByName('add-item').execute();
 		    expect(myBbSirenModel.validationError).toMatch('There was an error');
+	    });
+
+
+	    it('fires the "request" events on the parent when the request is sent', function () {
+		    var callback = this.spy()
+			, callback2 = this.spy()
+			, mySirenModel = {href: 'test', actions: [sirenAction]}
+			, myBbSirenModel = new Backbone.Siren.Model(mySirenModel);
+
+		    myBbSirenModel.on('request', callback);
+		    myBbSirenModel.on('request:add-item', callback2);
+		    myBbSirenModel.getActionByName('add-item').execute();
+
+		    expect(callback).toHaveBeenCalled();
+	    });
+
+
+	    it('fires a "sync" event when the model is successfully updated from the server', function () {
+		    $.ajax.restore();
+
+		    var callback = this.spy()
+			, server = sinon.fakeServer.create()
+		    , mySirenModel = {href: 'test', actions: [sirenAction]}
+			, myBbSirenModel = new Backbone.Siren.Model(mySirenModel);
+
+		    server.respondWith('{"href": "api.io/test"}');
+
+		    myBbSirenModel.getActionByName('add-item').execute();
+		    myBbSirenModel.on('sync:add-item', callback);
+
+		    server.respond();
+		    expect(callback).toHaveBeenCalled();
+	    });
+
+
+	    it('fires an "error" event when their is an error in updating a model from the server', function () {
+		    $.ajax.restore();
+
+		    var callback = this.spy()
+		    , server = sinon.fakeServer.create()
+		    , mySirenModel = {href: 'test', actions: [sirenAction]}
+		    , myBbSirenModel = new Backbone.Siren.Model(mySirenModel);
+
+		    server.respondWith(
+			    'GET'
+			    , '/some/article/comments.json'
+			    , [400, {"Content-Type": "application/json" }, '{"href": "api.io/test"}']
+		    );
+
+		    myBbSirenModel.getActionByName('add-item').execute();
+		    myBbSirenModel.on('error:add-item', callback);
+
+		    server.respond();
+		    expect(callback).toHaveBeenCalled();
+	    });
+
+
+	    it('is compatible with Backbone.js [v1.1.0+] PATCH', function () {
+		    var mySirenModel = {href: 'test', actions: [sirenAction]}
+		    , myBbSirenModel;
+
+		    sirenAction.method = 'PATCH';
+		    myBbSirenModel = new Backbone.Siren.Model(mySirenModel);
+		    myBbSirenModel.getActionByName('add-item').execute();
+
+		    expect($.ajax).toHaveBeenCalledWith(sinon.match({'type': 'PATCH'}));
+	    });
+
+
+	    it('also works if the parent is a collection ("request" event is fired on the collection)', function () {
+		    var mySirenCollection = {'class': ['collection'], href: 'test', actions: [sirenAction]}
+			, callback = this.spy()
+			, myBbSirenCollection;
+
+		    myBbSirenCollection = new Backbone.Siren.Collection(mySirenCollection);
+		    myBbSirenCollection.on('request:add-item', callback);
+		    myBbSirenCollection.getActionByName('add-item').execute();
+
+		    expect(callback).toHaveBeenCalled();
 	    });
     });
 
@@ -170,6 +248,5 @@ describe('Siren Action: ', function () {
 			expect(result.attributes).toEqual({uno: 1, tres: 3});
 		});
 	});
-
 });
 

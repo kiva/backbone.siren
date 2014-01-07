@@ -152,26 +152,26 @@ Action.prototype = {
 		options = options || {};
 
 		var actionModel, jqXhr
-			, attributes = options.attributes// So you can pass in properties that do not exist in the parent.
-			, actionName = this.name
-			, parent = this.parent
-			, presets = {
-				url: this.href
-				, actionName: actionName
-				, success: function (model, resp, options) {
-					parent.trigger('sync:' + actionName, model, resp, options);
-					if (parent instanceof Backbone.Model) {
-						parent.attributes = {};
-						parent.set(actionModel.attributes);
-					} else {
-						// Parent is assumed to be a collection
-						parent.set(actionModel.models);
-					}
+		, attributes = options.attributes// So you can pass in properties that do not exist in the parent.
+		, actionName = this.name
+		, parent = this.parent
+		, presets = {
+			url: this.href
+			, actionName: actionName
+			, success: function (model, resp, options) {
+				parent.trigger('sync:' + actionName, model, resp, options);
+				if (parent instanceof Backbone.Model) {
+					parent.attributes = {};
+					parent.set(actionModel.attributes);
+				} else {
+					// Parent is assumed to be a collection
+					parent.set(actionModel.models);
 				}
-				, error: function (model, xhr, options) {
-					parent.trigger('error:' + actionName, model, xhr, options);
-				}
-			};
+			}
+			, error: function (model, xhr, options) {
+				parent.trigger('error:' + actionName, model, xhr, options);
+			}
+		};
 
 		delete options.attributes;
 
