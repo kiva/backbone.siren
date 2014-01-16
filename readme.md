@@ -1,6 +1,5 @@
 [![Build Status](https://travis-ci.org/kiva/backbone.siren.png)](https://travis-ci.org/kiva/backbone.siren)
 [![Coverage Status](https://coveralls.io/repos/kiva/backbone.siren/badge.png?branch=master)](https://coveralls.io/r/kiva/backbone.siren?branch=master)
-[![Code Climate](https://codeclimate.com/repos/52c50554e30ba002b60004c4/badges/744f7fa0bb6baaaffc2e/gpa.png)](https://codeclimate.com/repos/52c50554e30ba002b60004c4/feed)
 # Backbone.Siren
 
 A client side adapter that converts resource representations from [Siren JSON](https://github.com/kevinswiber/siren) to [Backbone Models](http://backbonejs.org/#Model) and [Collections](http://backbonejs.org/#Collection).
