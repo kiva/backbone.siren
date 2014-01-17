@@ -7,4 +7,5 @@ npm-debug.log
 
 ## The following are not ignored but are marked as "unchanged"
 ## To view a list of files marked "assume-unchanged": git ls-files -v
+## To recursively mark these files as "changed": git ls-files -z dist/ | xargs -0 git update-index --no-assume-unchanged
 # /dist
