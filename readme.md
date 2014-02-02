@@ -6,20 +6,6 @@ A client side adapter that converts resource representations from [Siren JSON](h
 
 ## Basic Use
 
-To use Backbone.Siren:
-
-```
-bbSirenModel = new Backbone.Siren.Model(sirenObject);
-// or
-bbSirenCollection = new Backbone.Siren.Collection(sirenObject);
-```
-
-Or, you can just point Backbone.Siren to a url that returns a Siren resource and let it do the rest:
-
-```
-Backbone.Siren.resolve('http://my.api.io/user/123');
-```
-
 If you're building an app that uses a Siren API on the backend:
 
 ```
@@ -32,6 +18,20 @@ sirenApi.resolve('basket/111').done(function (basketModel) {});
 // Or
 userModel = sirenApi.resolve(['user/123', 'basket/111']).done(function (userModel, basketModel) {});
 
+```
+
+Or, you can just point Backbone.Siren to a url that returns a Siren resource and let it do the rest:
+
+```
+Backbone.Siren.resolve('http://my.api.io/user/123');
+```
+
+You can also just manually parse a Siren Model or Collection into a Backbone object:
+
+```
+bbSirenModel = new Backbone.Siren.Model(sirenObject);
+// or
+bbSirenCollection = new Backbone.Siren.Collection(sirenObject);
 ```
 
 ## Example
