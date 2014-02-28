@@ -457,6 +457,8 @@ _.extend(BbSiren, {
 
 
     /**
+     * @todo is this even being used?
+     *
      * Wraps the standard Backbone.ajax()
      *
      * @param {String} url
@@ -979,7 +981,7 @@ BbSiren.prototype = {
 	 * @returns {Promise}
 	 */
 	, resolve: function (entityPaths, options) {
-		options = options || {};
+		options = $.extend({}, this.options, options);
 		options.store = this.store;
 
 		var self = this
