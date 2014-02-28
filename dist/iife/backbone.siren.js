@@ -1,5 +1,5 @@
 /*
-* Backbone.Siren v0.3.0
+* Backbone.Siren v0.3.1
 *
 * Copyright (c) 2014 Kiva Microfunds
 * Licensed under the MIT license.
@@ -466,6 +466,8 @@
 	
 	
 	    /**
+	     * @todo is this even being used?
+	     *
 	     * Wraps the standard Backbone.ajax()
 	     *
 	     * @param {String} url
@@ -988,7 +990,7 @@
 		 * @returns {Promise}
 		 */
 		, resolve: function (entityPaths, options) {
-			options = options || {};
+			options = $.extend({}, this.options, options);
 			options.store = this.store;
 	
 			var self = this
@@ -1055,6 +1057,10 @@
 		, match: function (filters) {
 			var matched = true;
 	
+			if (!filters) {
+				return matched;
+			}
+	
 			if (filters['class']) {
 				matched = this.hasClass(filters['class']);
 			}
@@ -1103,17 +1109,6 @@
 		/**
 		 *
 		 * @param {String} name
-		 * @param {String} value
-		 */
-		, setSecureKey: function (name, value) {
-			var secureKeys = this.getSecureKeys();
-			secureKeys.set(name, value);
-		}
-	
-	
-		/**
-		 *
-		 * @param {String}
 		 * @returns {*}
 		 */
 		, getSecureKey: function (name) {
@@ -1126,12 +1121,13 @@
 	
 	
 		/**
-		 * Clears all secure keys.
-		 * We don't want "secure keys" floating around they should be cleared as soon as they are no longer needed
 		 *
+		 * @param {String} name
+		 * @param {String} value
+		 * @returns {Backbone.Model}
 		 */
-		, clearSecureKey: function (name) {
-			return this.getSecureKeys().unset(name);
+		, setSecureKey: function (name, value) {
+			return this.getSecureKeys().set(name, value);
 		}
 	
 	
@@ -1139,9 +1135,21 @@
 		 * Clears all secure keys.
 		 * We don't want "secure keys" floating around they should be cleared as soon as they are no longer needed
 		 *
+		 * @returns {Backbone.Model}
 		 */
 		, clearSecureKeys: function () {
 			return this.getSecureKeys().clear();
+		}
+	
+	
+		/**
+		 * Clear a secure key.
+		 *
+		 * @param name
+		 * @returns {Backbone.Model}
+		 */
+		, clearSecureKey: function (name) {
+			return this.getSecureKeys().unset(name);
 		}
 	
 	
@@ -1154,26 +1162,26 @@
 			options = options || {};
 	
 			var actionModel, jqXhr
-				, attributes = options.attributes// So you can pass in properties that do not exist in the parent.
-				, actionName = this.name
-				, parent = this.parent
-				, presets = {
-					url: this.href
-					, actionName: actionName
-					, success: function (model, resp, options) {
-						parent.trigger('sync:' + actionName, model, resp, options);
-						if (parent instanceof Backbone.Model) {
-							parent.attributes = {};
-							parent.set(actionModel.attributes);
-						} else {
-							// Parent is assumed to be a collection
-							parent.set(actionModel.models);
-						}
+			, attributes = options.attributes// So you can pass in properties that do not exist in the parent.
+			, actionName = this.name
+			, parent = this.parent
+			, presets = {
+				url: this.href
+				, actionName: actionName
+				, success: function (model, resp, options) {
+					parent.trigger('sync:' + actionName, model, resp, options);
+					if (parent instanceof Backbone.Model) {
+						parent.attributes = {};
+						parent.set(actionModel.attributes);
+					} else {
+						// Parent is assumed to be a collection
+						parent.set(actionModel.models);
 					}
-					, error: function (model, xhr, options) {
-						parent.trigger('error:' + actionName, model, xhr, options);
-					}
-				};
+				}
+				, error: function (model, xhr, options) {
+					parent.trigger('error:' + actionName, model, xhr, options);
+				}
+			};
 	
 			delete options.attributes;
 	
