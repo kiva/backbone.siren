@@ -319,6 +319,8 @@ describe('Backbone.Siren: ', function () {
 			var options = {'bon': 'bon'};
 
 			sirenApi.resolve('some/path', options);
+
+			options.store = sirenApi.store;
 			expect(Backbone.Siren.resolve).toHaveBeenCalledWith('http://blah.io/some/path', options);
 		});
 
