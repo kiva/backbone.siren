@@ -257,7 +257,7 @@ function request(rel) {
  * @returns {Promise}
  */
 function resolve(options) {
-	options = options || {};
+	options = $.extend(this.siren.ajaxOptions || {}, options);
 
 	var deferred = new $.Deferred();
 
@@ -271,6 +271,7 @@ function resolve(options) {
 		// Its already been hydrated
 		deferred.resolve(this);
 	} else if (options.url) {
+
 		// This option allows us to defer hydration of our model or collection with the url provided
 		// Very much like .fetch() only it adds support for chaining nested entities
 

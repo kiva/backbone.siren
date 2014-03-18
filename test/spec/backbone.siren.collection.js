@@ -115,6 +115,19 @@ describe('Siren Collection: ', function () {
     });
 
 
+	describe('.resolve()', function () {
+		it('merges siren.ajaxOptions onto each each call', function () {
+			var options = {forceFetch: true, type: 'blah'};
+
+			this.stub(sirenCollection, 'fetch');
+			sirenCollection.siren.ajaxOptions = {dataType: 'json'};
+			sirenCollection.resolve(options);
+
+			expect(sirenCollection.fetch).toHaveBeenCalledWith(sinon.match({forceFetch: true, type: 'blah', dataType: 'json'}));
+		});
+	});
+
+
     describe('.hasClass()', function () {
         it('returns whether a collection has a given class', function () {
             expect(sirenCollection.hasClass('wtf')).toBe(false);

@@ -7,11 +7,11 @@ describe('Siren Action: ', function () {
 	// @todo quick fix for upgrade to buster 0.7
 	var expect = buster.expect;
 
-    var sirenAction = {name: 'add-item', 'class': ['fuzzy', 'fluffy'], title: 'Add Item', method: 'FANCY', href: 'http://api.x.io/orders/42/items', type: 'application/x-fancy-stuff', fields: [{name: 'orderNumber', type: 'hidden', value: '42'}, {name: 'productCode', type: 'text'}, {name: 'quantity', type: 'number' }]}
-    , bbSirenAction;
+    var sirenAction, bbSirenAction;
 
 
     beforeEach(function () {
+	    sirenAction = {name: 'add-item', 'class': ['fuzzy', 'fluffy'], title: 'Add Item', method: 'FANCY', href: 'http://api.x.io/orders/42/items', type: 'application/x-fancy-stuff', fields: [{name: 'orderNumber', type: 'hidden', value: '42'}, {name: 'productCode', type: 'text'}, {name: 'quantity', type: 'number' }]}
         bbSirenAction = new Backbone.Siren.Action(sirenAction);
     });
 
@@ -94,6 +94,21 @@ describe('Siren Action: ', function () {
             myBbSirenModel.getActionByName('add-item').execute({type: 'FANCIER', contentType: 'application/x-aaah-shite'});
             expect($.ajax).toHaveBeenCalledWith(sinon.match({url: 'http://api.x.io/orders/42/items', type: 'FANCIER', contentType: 'application/x-aaah-shite'}));
         });
+
+
+	    it('merges the siren.ajaxOptions onto each call', function () {
+		    var mySirenModel = {href: 'test', actions: [sirenAction]}
+		    , myBbSirenModel = new Backbone.Siren.Model(mySirenModel, {ajaxOptions: {type: 'FANCIER', contentType: 'application/x-aaah-shite'}});
+
+		    myBbSirenModel.getActionByName('add-item').execute();
+		    expect($.ajax).toHaveBeenCalledWith(sinon.match({url: 'http://api.x.io/orders/42/items', type: 'FANCIER', contentType: 'application/x-aaah-shite'}));
+
+		    $.ajax.reset();
+
+		    // Override
+		    myBbSirenModel.getActionByName('add-item').execute({type: 'FANCIEST'});
+		    expect($.ajax).toHaveBeenCalledWith(sinon.match({url: 'http://api.x.io/orders/42/items', type: 'FANCIEST', contentType: 'application/x-aaah-shite'}));
+	    });
 
 
         it('returns undefined if there is no parent to the action', function () {

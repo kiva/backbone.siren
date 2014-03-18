@@ -122,6 +122,19 @@ describe('Siren Model: ', function () {
     });
 
 
+	describe('.resolve()', function () {
+		it('merges siren.ajaxOptions onto each each call', function () {
+			var options = {forceFetch: true, type: 'blah'};
+
+			this.stub(sirenModel, 'fetch');
+			sirenModel.siren.ajaxOptions = {dataType: 'json'};
+			sirenModel.resolve(options);
+
+			expect(sirenModel.fetch).toHaveBeenCalledWith(sinon.match({forceFetch: true, type: 'blah', dataType: 'json'}));
+		});
+	});
+
+
     describe('.hasClass()', function () {
         it('returns whether a model has a given class', function () {
             expect(sirenModel.hasClass('wtf')).toBeFalse();
