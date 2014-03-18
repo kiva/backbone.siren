@@ -530,6 +530,29 @@ describe('Siren Model: ', function () {
 	});
 
 
+	describe('.siren', function () {
+		it('is an object that is set each BbSiren Model upon instantiation', function () {
+			var myModel = new Backbone.Siren.Model();
+			expect(myModel.siren).toBeObject();
+		});
+
+
+		it('has a store if provided via the options', function () {
+			var myModel = new Backbone.Siren.Model({href: 'blah'}, {store: new Backbone.Siren.Store()});
+			expect(myModel.siren.store).toBeObject();
+		});
+
+
+		it('has a store if provided via the options', function () {
+			var ajaxOptions = {data: {blah: true}, type: 'json'}
+			, myModel = new Backbone.Siren.Model({href: 'blah'}, {ajaxOptions: ajaxOptions});
+
+			expect(myModel.siren.ajaxOptions).toBeObject();
+			expect(myModel.siren.ajaxOptions).toEqual(ajaxOptions);
+		});
+	});
+
+
     it('sets a Backbone Model\'s "attributes" hash to the siren "properties"', function () {
         expect(sirenModel.attributes).toMatch(settingsModelSiren.properties);
     });
