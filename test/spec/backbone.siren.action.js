@@ -11,7 +11,7 @@ describe('Siren Action: ', function () {
 
 
     beforeEach(function () {
-	    sirenAction = {name: 'add-item', 'class': ['fuzzy', 'fluffy'], title: 'Add Item', method: 'FANCY', href: 'http://api.x.io/orders/42/items', type: 'application/x-fancy-stuff', fields: [{name: 'orderNumber', type: 'hidden', value: '42'}, {name: 'productCode', type: 'text'}, {name: 'quantity', type: 'number' }]}
+	    sirenAction = {name: 'add-item', 'class': ['fuzzy', 'fluffy'], title: 'Add Item', method: 'FANCY', href: 'http://api.x.io/orders/42/items', type: 'application/x-fancy-stuff', fields: [{name: 'orderNumber', type: 'hidden', value: '42'}, {name: 'productCode', type: 'text'}, {name: 'quantity', type: 'number' }]};
         bbSirenAction = new Backbone.Siren.Action(sirenAction);
     });
 
