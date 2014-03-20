@@ -544,6 +544,7 @@ _.extend(BbSiren, {
 	 * @param {String} url
 	 * @param {Object} options
 	 * @param {Object} options.store - store instance @todo remove the need to have this parameter
+	 * @todo - add an options.ajaxOptions parameter.
 	 */
 	, resolveOne: function (url, options) {
 		options = options || {};
