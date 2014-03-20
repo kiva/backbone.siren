@@ -212,7 +212,7 @@ Action.prototype = {
 			});
 		}
 
-		options = _.extend(presets, options);
+		options = _.extend(presets, parent.siren.ajaxOptions || {}, options);
 		attributes = _.extend(parent.toJSON({actionName: this.name}), attributes);
 
 		// Note that .save() can return false in the case of failed validation.

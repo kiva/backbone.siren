@@ -115,6 +115,19 @@ describe('Siren Collection: ', function () {
     });
 
 
+	describe('.resolve()', function () {
+		it('merges siren.ajaxOptions onto each each call', function () {
+			var options = {forceFetch: true, type: 'blah'};
+
+			this.stub(sirenCollection, 'fetch');
+			sirenCollection.siren.ajaxOptions = {dataType: 'json'};
+			sirenCollection.resolve(options);
+
+			expect(sirenCollection.fetch).toHaveBeenCalledWith(sinon.match({forceFetch: true, type: 'blah', dataType: 'json'}));
+		});
+	});
+
+
     describe('.hasClass()', function () {
         it('returns whether a collection has a given class', function () {
             expect(sirenCollection.hasClass('wtf')).toBe(false);
@@ -439,6 +452,31 @@ describe('Siren Collection: ', function () {
 
 			// @todo poor-man's jqXhr test.
 			expect(result.done).toBeFunction();
+		});
+	});
+
+
+
+
+	describe('.siren', function () {
+		it('is an object that is set on each BbSiren Collection upon instantiation', function () {
+			var myCollection = new Backbone.Siren.Model();
+			expect(myCollection.siren).toBeObject();
+		});
+
+
+		it('has a store if provided via the options', function () {
+			var myCollection = new Backbone.Siren.Collection({href: 'blah'}, {store: new Backbone.Siren.Store()});
+			expect(myCollection.siren.store).toBeObject();
+		});
+
+
+		it('has a ajaxOptions if provided via the options', function () {
+			var ajaxOptions = {data: {blah: true}, type: 'json'}
+			, myCollection = new Backbone.Siren.Collection({href: 'blah'}, {ajaxOptions: ajaxOptions});
+
+			expect(myCollection.siren.ajaxOptions).toBeObject();
+			expect(myCollection.siren.ajaxOptions).toEqual(ajaxOptions);
 		});
 	});
 
