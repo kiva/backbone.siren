@@ -456,6 +456,31 @@ describe('Siren Collection: ', function () {
 	});
 
 
+
+
+	describe('.siren', function () {
+		it('is an object that is set on each BbSiren Collection upon instantiation', function () {
+			var myCollection = new Backbone.Siren.Model();
+			expect(myCollection.siren).toBeObject();
+		});
+
+
+		it('has a store if provided via the options', function () {
+			var myCollection = new Backbone.Siren.Collection({href: 'blah'}, {store: new Backbone.Siren.Store()});
+			expect(myCollection.siren.store).toBeObject();
+		});
+
+
+		it('has a ajaxOptions if provided via the options', function () {
+			var ajaxOptions = {data: {blah: true}, type: 'json'}
+			, myCollection = new Backbone.Siren.Collection({href: 'blah'}, {ajaxOptions: ajaxOptions});
+
+			expect(myCollection.siren.ajaxOptions).toBeObject();
+			expect(myCollection.siren.ajaxOptions).toEqual(ajaxOptions);
+		});
+	});
+
+
     it('Adds siren sub-entities as models to a Backbone Collection\'s models property', function () {
         expect(sirenCollection.models).toBeDefined();
         expect(sirenCollection.models.length).toBe(3);

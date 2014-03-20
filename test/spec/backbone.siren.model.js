@@ -556,7 +556,7 @@ describe('Siren Model: ', function () {
 		});
 
 
-		it('has a store if provided via the options', function () {
+		it('has a ajaxOptions if provided via the options', function () {
 			var ajaxOptions = {data: {blah: true}, type: 'json'}
 			, myModel = new Backbone.Siren.Model({href: 'blah'}, {ajaxOptions: ajaxOptions});
 
