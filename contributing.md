@@ -60,12 +60,15 @@ Run buster tests only:
 > grunt buster
 ```
 
-### Generating [lcov](http://ltp.sourceforge.net/coverage/lcov.php) coverage reports
+### Coverage reports
 
-You can generate your own, updated, visual lcov reports.
+Travis will generate coverage reports and output them to [coveralls.io](https://coveralls.io/r/kiva/backbone.siren).  Test coverage should go up, not down.
 
-[buster-coverage](https://github.com/ebi/buster-coverage) will automatically generate a static coverage report in either xml or lcov format.
-By default, this project is set to generate lcov reports.  There are different ways of generating a visual report from this a lcov file, here is how I've done it:
+### Generating [lcov](http://ltp.sourceforge.net/coverage/lcov.php) coverage reports locally
+
+You can generate your own, updated, visual lcov reports.  [buster-coverage](https://github.com/ebi/buster-coverage) will automatically generate an lcov test coverage report.
+
+To generate a visual report in html:
 
 Install [genhtml](http://linux.die.net/man/1/genhtml)
 ```
@@ -83,4 +86,4 @@ Changes should follow existing patterns and pass jshint.
 
 ## Pull requests
 
-Pull requests should be made to the `pre-release` branch and should _not_ include changes to the `/dist` folder.
+Pull requests should be made to the `pre-release` branch and should _not_ include any changes to the `/dist` folder.
