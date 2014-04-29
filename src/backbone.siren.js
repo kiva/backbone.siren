@@ -238,9 +238,11 @@ function request(rel) {
 	    return _.indexOf(link.rel, rel) > -1;
      });
 
-    if (link) {
-	    return BbSiren.resolveOne(link.href);
+    if (! link) {
+	    return;
     }
+
+    return BbSiren.resolveOne(link.href);
 }
 
 
@@ -831,10 +833,6 @@ _.extend(BbSiren, {
 				this.siren.ajaxOptions = options.ajaxOptions;
 			}
 
-			if (options.apiRoot) {
-				this.siren.apiRoot = options.apiRoot;
-			}
-
 		    this.parseActions();
         }
 
@@ -1009,7 +1007,6 @@ BbSiren.prototype = {
 	, resolve: function (entityPaths, options) {
 		options = $.extend({}, this.options, options);
 		options.store = this.store;
-		options.apiRoot = this.apiRoot;
 
 		var self = this
 		, urls = [];
