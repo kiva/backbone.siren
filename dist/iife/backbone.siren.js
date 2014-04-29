@@ -1,5 +1,5 @@
 /*
-* Backbone.Siren v0.3.1
+* Backbone.Siren v0.3.2
 *
 * Copyright (c) 2014 Kiva Microfunds
 * Licensed under the MIT license.
@@ -35,27 +35,43 @@
 	
 	
 	/**
+	 * Gets a link url by name from a raw siren enity
+	 *
+	 * @param {Object} rawEntity
+	 * @param {String} name
+	 * @returns {String|undefined}
+	 */
+	function getRawEntityUrl(rawEntity, name) {
+		var link, url;
+	
+		link = _.filter(rawEntity.links, function (link) {
+			return !!(link.rel && _.filter(link.rel, function (relType) {
+				return relType == name;
+			}).length);
+		})[0];
+	
+		if (link) {
+			url = link.href;
+		}
+	
+		return url;
+	}
+	
+	
+	/**
 	 * Gets the url from a raw Siren entity
 	 *
 	 * @static
-	 * @param rawEntity
+	 * @param {Object} rawEntity
 	 * @returns {String|undefined}
 	 */
-	function getRawEntityUrl(rawEntity) {
-		var link, url;
+	function getRawEntitySelfUrl(rawEntity) {
+		var url;
 	
 		if (rawEntity.href) {
 			url = rawEntity.href;
 		} else if (rawEntity.links) {
-			link = _.filter(rawEntity.links, function (link) {
-				return !!(link.rel && _.filter(link.rel, function (relType) {
-					return relType == 'self';
-				}).length);
-			})[0];
-	
-			if (link) {
-				url = link.href;
-			}
+			url = getRawEntityUrl(rawEntity, 'self');
 		} else {
 			warn('Missing href or "self" link');
 			url = '';
@@ -72,7 +88,7 @@
 	 * Note: This is probably a temporary solution as Siren does not yet officially support names on entity's.
 	 *
 	 * @static
-	 * @param rawEntity
+	 * @param {Object} rawEntity
 	 * @returns {String}
 	 */
 	function getRawEntityRelAsName(rawEntity) {
@@ -126,27 +142,6 @@
 	
 	
 	/**
-	 *
-	 * @param rel
-	 * @returns {Boolean}
-	 */
-	function hasRel(rel) {
-		return _.indexOf(this.rel(), rel) > -1;
-	}
-	
-	
-	/**
-	 * Access the entity's url.
-	 * In some cases this would be the "self" link, in other cases it's the "href".
-	 *
-	 * @returns {String}
-	 */
-	function url() {
-		return getRawEntityUrl(this._data);
-	}
-	
-	
-	/**
 	 * Accesses to the entity's "class"
 	 *
 	 * @returns {Array}
@@ -177,12 +172,48 @@
 	
 	
 	/**
+	 *
+	 * @param rel
+	 * @returns {Boolean}
+	 */
+	function hasRel(rel) {
+		return _.indexOf(this.rel(), rel) > -1;
+	}
+	
+	
+	/**
+	 * Gets an entity's link by rel
+	 *
+	 * @param {String} rel
+	 * @returns {String|undefined}
+	 */
+	function link(rel) {
+		if (rel == 'self') {
+			return getRawEntitySelfUrl(this._data);
+		}
+	
+		return getRawEntityUrl(this._data, rel);
+	}
+	
+	
+	/**
 	 * Access to the entity's "links"
 	 *
 	 * @returns {Array|undefined}
 	 */
 	function links() {
 	    return this._data.links || [];
+	}
+	
+	
+	/**
+	 * Access the entity's url.
+	 * In some cases this would be the "self" link, in other cases it's the "href".
+	 *
+	 * @returns {String}
+	 */
+	function url() {
+		return this.link('self');
 	}
 	
 	
@@ -236,6 +267,7 @@
 	 * @todo This only works with rel links that are requests to the API.
 	 * There will be times when a rel points to a resource outside of the API and that needs to be thought through
 	 * @todo This method leaves much to be desired and should be refactored.
+	 * @todo might be more useful if it checks if the link is to a sirenEntity? If so, resolves it? (still need to put some thought into this)
 	 *
 	 * @param {String} rel
 	 * @returns {Promise}
@@ -265,7 +297,7 @@
 	 * @returns {Promise}
 	 */
 	function resolve(options) {
-		options = options || {};
+		options = $.extend(this.siren.ajaxOptions || {}, options);
 	
 		var deferred = new $.Deferred();
 	
@@ -279,6 +311,7 @@
 			// Its already been hydrated
 			deferred.resolve(this);
 		} else if (options.url) {
+	
 			// This option allows us to defer hydration of our model or collection with the url provided
 			// Very much like .fetch() only it adds support for chaining nested entities
 	
@@ -351,6 +384,7 @@
 	/**
 	 * Is called in the Model or Collection's constructor.
 	 * It creates a Backbone.Siren.Action instance from a raw action and attaches it to the Model or Collection (aka "parent").
+	 * @todo, This should probably be a public, static method on BbSiren.
 	 *
 	 * @returns {Array|undefined}
 	 */
@@ -447,21 +481,20 @@
 	     * Creates a Backbone.Siren model, collection, or error from a Siren object
 	     *
 	     * @param {Object} rawEntity
+	     * @param {Object} options
 	     * @returns {Backbone.Siren.Model|Backbone.Siren.Collection|Backbone.Siren.Error}
 	     */
-	    , parse: function (rawEntity, store) {
-	        var bbSiren;
+	    , parse: function (rawEntity, options) {
+			options = options || {};
 	
 	        if (BbSiren.isRawCollection(rawEntity)) {
-	            bbSiren = new Backbone.Siren.Collection(rawEntity, {store: store});
+	            return new Backbone.Siren.Collection(rawEntity, options);
 	        } else if (BbSiren.isRawError(rawEntity)) {
 	            // @todo how should we represent errors?  For now, treat them as regular Models...
-	            bbSiren = new Backbone.Siren.Model(rawEntity, {store: store});
+	            return new Backbone.Siren.Model(rawEntity, options);
 	        } else {
-	            bbSiren = new Backbone.Siren.Model(rawEntity, {store: store});
+	            return new Backbone.Siren.Model(rawEntity, options);
 	        }
-	
-	        return bbSiren;
 	    }
 	
 	
@@ -551,6 +584,7 @@
 		 * @param {String} url
 		 * @param {Object} options
 		 * @param {Object} options.store - store instance @todo remove the need to have this parameter
+		 * @todo - add an options.ajaxOptions parameter.
 		 */
 		, resolveOne: function (url, options) {
 			options = options || {};
@@ -614,7 +648,7 @@
 	
 					BbSiren.ajax(rootUrl, options)
 						.done(function (rawEntity) {
-							var bbSiren = BbSiren.parse(rawEntity, store);
+							var bbSiren = BbSiren.parse(rawEntity, options);
 							deferred.resolve(bbSiren);
 	
 							options.deferred = chainedDeferred;
@@ -629,7 +663,7 @@
 								entity = {};
 							}
 	
-							bbSiren = BbSiren.parse(entity, store);
+							bbSiren = BbSiren.parse(entity, options);
 							deferred.reject(bbSiren, jqXhr);
 							chainedDeferred.reject(bbSiren, jqXhr);
 						});
@@ -645,6 +679,7 @@
 	        , classes: classes
 			, rel: rel
 			, actions: actions
+			, link: link
 			, links: links
 			, title: title
 	        , hasClass: hasClass
@@ -690,12 +725,12 @@
 	            , deferred = new $.Deferred();
 	
 	            if ((rawEntity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
-	                BbSiren.resolveOne(getRawEntityUrl(rawEntity), options)
+	                BbSiren.resolveOne(getRawEntitySelfUrl(rawEntity), options)
 	                    .done(function (bbSiren) {
 	                        deferred.resolve(self.setEntity(bbSiren, rawEntity.rel, getRawEntityName(rawEntity)));
 	                    });
 	            } else {
-	                bbSiren = BbSiren.parse(rawEntity, options.store);
+	                bbSiren = BbSiren.parse(rawEntity, options);
 	                bbSirenPromise = deferred.resolve(this.setEntity(bbSiren, rawEntity.rel, getRawEntityName(rawEntity)));
 	            }
 	
@@ -725,9 +760,6 @@
 	
 	            return bbSiren;
 	        }
-	
-	
-	
 	
 	
 	        /**
@@ -829,6 +861,19 @@
 	            options.parse = true; // Force "parse" to be called on instantiation: http://stackoverflow.com/questions/11068989/backbone-js-using-parse-without-calling-fetch/14950519#14950519
 	
 	            Backbone.Model.call(this, sirenObj, options);
+	
+				this.siren = {};
+	
+				// the store
+				if (options.store) {
+					this.siren.store = options.store;
+				}
+	
+				// entity options
+				if (options.ajaxOptions) {
+					this.siren.ajaxOptions = options.ajaxOptions;
+				}
+	
 			    this.parseActions();
 	        }
 	
@@ -840,6 +885,7 @@
 	        , classes: classes
 			, rel: rel
 			, actions: actions
+			, link: link
 			, links: links
 			, title: title
 	        , hasClass: hasClass
@@ -953,6 +999,17 @@
 	            options.parse = true; // Force "parse" to be called on instantiation: http://stackoverflow.com/questions/11068989/backbone-js-using-parse-without-calling-fetch/14950519#14950519
 	
 	            Backbone.Collection.call(this, sirenObj, options);
+	
+				this.siren = {};
+	
+				if (options.store) {
+					this.siren.store = options.store;
+				}
+	
+				if (options.ajaxOptions) {
+					this.siren.ajaxOptions = options.ajaxOptions;
+				}
+	
 			    this.parseActions();
 	        }
 	    })
@@ -1222,7 +1279,7 @@
 				});
 			}
 	
-			options = _.extend(presets, options);
+			options = _.extend(presets, parent.siren.ajaxOptions || {}, options);
 			attributes = _.extend(parent.toJSON({actionName: this.name}), attributes);
 	
 			// Note that .save() can return false in the case of failed validation.
@@ -1256,15 +1313,18 @@
 		 * @return {Backbone.Siren.Model}
 		 */
 		add: function (bbSirenObj) {
-			var self = this;
+			var self = this
+			, index;
 	
 			if (Backbone.Siren.isCollection(bbSirenObj)) {
 				bbSirenObj.each(function (sirenModel) {
 					self.add(sirenModel);
 				});
+	
+				index = bbSirenObj.link('current');
 			}
 	
-			this.data[bbSirenObj.url()] = bbSirenObj;
+			this.data[index || bbSirenObj.url()] = bbSirenObj;
 			return bbSirenObj;
 		}
 	
