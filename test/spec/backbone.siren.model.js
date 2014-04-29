@@ -122,6 +122,19 @@ describe('Siren Model: ', function () {
     });
 
 
+	describe('.resolve()', function () {
+		it('merges siren.ajaxOptions onto each each call', function () {
+			var options = {forceFetch: true, type: 'blah'};
+
+			this.stub(sirenModel, 'fetch');
+			sirenModel.siren.ajaxOptions = {dataType: 'json'};
+			sirenModel.resolve(options);
+
+			expect(sirenModel.fetch).toHaveBeenCalledWith(sinon.match({forceFetch: true, type: 'blah', dataType: 'json'}));
+		});
+	});
+
+
     describe('.hasClass()', function () {
         it('returns whether a model has a given class', function () {
             expect(sirenModel.hasClass('wtf')).toBeFalse();
@@ -526,6 +539,29 @@ describe('Siren Model: ', function () {
 			expect(function () {
 				sirenModel.resolveNextInChain(['non-existent-subentity']);
 			}).toThrow('ReferenceError');
+		});
+	});
+
+
+	describe('.siren', function () {
+		it('is an object that is set each BbSiren Model upon instantiation', function () {
+			var myModel = new Backbone.Siren.Model();
+			expect(myModel.siren).toBeObject();
+		});
+
+
+		it('has a store if provided via the options', function () {
+			var myModel = new Backbone.Siren.Model({href: 'blah'}, {store: new Backbone.Siren.Store()});
+			expect(myModel.siren.store).toBeObject();
+		});
+
+
+		it('has a ajaxOptions if provided via the options', function () {
+			var ajaxOptions = {data: {blah: true}, type: 'json'}
+			, myModel = new Backbone.Siren.Model({href: 'blah'}, {ajaxOptions: ajaxOptions});
+
+			expect(myModel.siren.ajaxOptions).toBeObject();
+			expect(myModel.siren.ajaxOptions).toEqual(ajaxOptions);
 		});
 	});
 
