@@ -26,27 +26,43 @@ function toCamelCase(name) {
 
 
 /**
+ * Gets a link url by name from a raw siren enity
+ *
+ * @param {Object} rawEntity
+ * @param {String} name
+ * @returns {String|undefined}
+ */
+function getRawEntityUrl(rawEntity, name) {
+	var link, url;
+
+	link = _.filter(rawEntity.links, function (link) {
+		return !!(link.rel && _.filter(link.rel, function (relType) {
+			return relType == name;
+		}).length);
+	})[0];
+
+	if (link) {
+		url = link.href;
+	}
+
+	return url;
+}
+
+
+/**
  * Gets the url from a raw Siren entity
  *
  * @static
- * @param rawEntity
+ * @param {Object} rawEntity
  * @returns {String|undefined}
  */
-function getRawEntityUrl(rawEntity) {
-	var link, url;
+function getRawEntitySelfUrl(rawEntity) {
+	var url;
 
 	if (rawEntity.href) {
 		url = rawEntity.href;
 	} else if (rawEntity.links) {
-		link = _.filter(rawEntity.links, function (link) {
-			return !!(link.rel && _.filter(link.rel, function (relType) {
-				return relType == 'self';
-			}).length);
-		})[0];
-
-		if (link) {
-			url = link.href;
-		}
+		url = getRawEntityUrl(rawEntity, 'self');
 	} else {
 		warn('Missing href or "self" link');
 		url = '';
@@ -63,7 +79,7 @@ function getRawEntityUrl(rawEntity) {
  * Note: This is probably a temporary solution as Siren does not yet officially support names on entity's.
  *
  * @static
- * @param rawEntity
+ * @param {Object} rawEntity
  * @returns {String}
  */
 function getRawEntityRelAsName(rawEntity) {
@@ -117,27 +133,6 @@ function hasClass(classname) {
 
 
 /**
- *
- * @param rel
- * @returns {Boolean}
- */
-function hasRel(rel) {
-	return _.indexOf(this.rel(), rel) > -1;
-}
-
-
-/**
- * Access the entity's url.
- * In some cases this would be the "self" link, in other cases it's the "href".
- *
- * @returns {String}
- */
-function url() {
-	return getRawEntityUrl(this._data);
-}
-
-
-/**
  * Accesses to the entity's "class"
  *
  * @returns {Array}
@@ -168,12 +163,48 @@ function rel() {
 
 
 /**
+ *
+ * @param rel
+ * @returns {Boolean}
+ */
+function hasRel(rel) {
+	return _.indexOf(this.rel(), rel) > -1;
+}
+
+
+/**
+ * Gets an entity's link by rel
+ *
+ * @param {String} rel
+ * @returns {String|undefined}
+ */
+function link(rel) {
+	if (rel == 'self') {
+		return getRawEntitySelfUrl(this._data);
+	}
+
+	return getRawEntityUrl(this._data, rel);
+}
+
+
+/**
  * Access to the entity's "links"
  *
  * @returns {Array|undefined}
  */
 function links() {
     return this._data.links || [];
+}
+
+
+/**
+ * Access the entity's url.
+ * In some cases this would be the "self" link, in other cases it's the "href".
+ *
+ * @returns {String}
+ */
+function url() {
+	return this.link('self');
 }
 
 
@@ -636,6 +667,7 @@ _.extend(BbSiren, {
         , classes: classes
 		, rel: rel
 		, actions: actions
+		, link: link
 		, links: links
 		, title: title
         , hasClass: hasClass
@@ -681,7 +713,7 @@ _.extend(BbSiren, {
             , deferred = new $.Deferred();
 
             if ((rawEntity.href && options.autoFetch == 'linked') || options.autoFetch == 'all') {
-                BbSiren.resolveOne(getRawEntityUrl(rawEntity), options)
+                BbSiren.resolveOne(getRawEntitySelfUrl(rawEntity), options)
                     .done(function (bbSiren) {
                         deferred.resolve(self.setEntity(bbSiren, rawEntity.rel, getRawEntityName(rawEntity)));
                     });
@@ -831,6 +863,7 @@ _.extend(BbSiren, {
         , classes: classes
 		, rel: rel
 		, actions: actions
+		, link: link
 		, links: links
 		, title: title
         , hasClass: hasClass

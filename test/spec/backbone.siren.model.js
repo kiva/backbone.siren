@@ -19,9 +19,9 @@ describe('Siren Model: ', function () {
 			, {"name": "update-customer","method": "POST", "href": "http://api.x.io/customers", fields: [{name: "customer"}]}
         ]
         ,"links":[
-            {"rel":["self"],"href":"http://api.x.io/orders/42"}
-		    ,{"rel":["previous"],"href":"http://api.x.io/orders/41"}
-		    ,{"rel":["next"],"href":"http://api.x.io/orders/43"}
+            {"rel":["self"],"href": "http://api.x.io/orders/42"}
+		    , {"rel":["previous"],"href": "http://api.x.io/orders/41"}
+		    , {"rel":["next"],"href": "http://api.x.io/orders/43"}
         ]
     }
     , sirenModel, store;
@@ -34,6 +34,13 @@ describe('Siren Model: ', function () {
 
 
     describe('.url()', function () {
+	    it('is a proxy to this.link(\'self\')', function () {
+		    this.stub(sirenModel, 'link');
+			sirenModel.url();
+		    expect(sirenModel.link).toHaveBeenCalled();
+	    });
+
+
         it('returns a model\'s url, getting it from the href', function () {
             var mySirenModel = new Backbone.Siren.Model({href: 'http://api.x.io/blah'});
             expect(mySirenModel.url()).toEqual('http://api.x.io/blah');
@@ -80,6 +87,18 @@ describe('Siren Model: ', function () {
 		it('returns an empty array if rel is not defined', function () {
 			expect(sirenModel.rel()).toBeArray();
 			expect(sirenModel.rel().length).toBe(0);
+		});
+	});
+
+
+	describe('.link()', function () {
+		it('returns a model\'s link, finding the first that matches the given rel', function () {
+			expect(sirenModel.link('previous')).toBe('http://api.x.io/orders/41');
+		});
+
+
+		it('returns undefined if there is no link with that rel', function () {
+			expect(sirenModel.link('non-existent')).not.toBeDefined();
 		});
 	});
 
