@@ -28,6 +28,13 @@ describe('Siren Collection: ', function () {
 
 
     describe('.url()', function () {
+	    it('is a proxy to this.link(\'self\')', function () {
+		    this.stub(sirenCollection, 'link');
+		    sirenCollection.url();
+		    expect(sirenCollection.link).toHaveBeenCalled();
+	    });
+
+
         it('returns a collection\'s url, getting it from the href', function () {
             var mySirenCollection = new Backbone.Siren.Collection({href: 'http://api.x.io/blah'});
             expect(mySirenCollection.url()).toEqual('http://api.x.io/blah');
@@ -74,6 +81,18 @@ describe('Siren Collection: ', function () {
 		it('returns an empty array if rel is not defined', function () {
 			expect(sirenCollection.rel()).toBeArray();
 			expect(sirenCollection.rel().length).toBe(0);
+		});
+	});
+
+
+	describe('.link()', function () {
+		it('returns a collection\'s link, finding the first that matches the given rel', function () {
+			expect(sirenCollection.link('previous')).toBe('api.kiva.org/lenders/6282/loans?page=3');
+		});
+
+
+		it('returns undefined if there is no link with that rel', function () {
+			expect(sirenCollection.link('non-existent')).not.toBeDefined();
 		});
 	});
 

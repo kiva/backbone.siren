@@ -19,15 +19,18 @@ Store.prototype = {
 	 * @return {Backbone.Siren.Model}
 	 */
 	add: function (bbSirenObj) {
-		var self = this;
+		var self = this
+		, index;
 
 		if (Backbone.Siren.isCollection(bbSirenObj)) {
 			bbSirenObj.each(function (sirenModel) {
 				self.add(sirenModel);
 			});
+
+			index = bbSirenObj.link('current');
 		}
 
-		this.data[bbSirenObj.url()] = bbSirenObj;
+		this.data[index || bbSirenObj.url()] = bbSirenObj;
 		return bbSirenObj;
 	}
 

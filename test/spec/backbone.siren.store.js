@@ -43,6 +43,32 @@ describe('Backbone.Siren.Store: ', function () {
 			expect(store.data['http://two']).toBeDefined();
 			expect(store.data['http://three']).toBeDefined();
 		});
+
+
+		it('adds a collection to the store, indexing by "current" if available', function () {
+			var store = new Backbone.Siren.Store()
+				, bbSirenCollection = new Backbone.Siren.Collection({
+					'class': ['collection']
+					, entities: [
+						{properties: {}, links: [{rel: ['self'], href: 'http://one'}]}
+						, {properties: {}, links: [{rel: ['self'], href: 'http://two'}]}
+						, {properties: {}, links: [{rel: ['self'], href: 'http://three'}]}
+					]
+					, links: [
+						{
+							rel: ['self']
+							, href: 'http://collect'
+						}
+						, {
+							rel: ['current']
+							, href: 'http://collect?page=30'
+						}
+					]
+				});
+
+			store.add(bbSirenCollection);
+			expect(store.data['http://collect?page=30']).toBeDefined();
+		});
 	});
 
 
