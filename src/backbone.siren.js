@@ -227,6 +227,7 @@ function match(filters) {
  * @todo This only works with rel links that are requests to the API.
  * There will be times when a rel points to a resource outside of the API and that needs to be thought through
  * @todo This method leaves much to be desired and should be refactored.
+ * @todo might be more useful if it checks if the link is to a sirenEntity? If so, resolves it? (still need to put some thought into this)
  *
  * @param {String} rel
  * @returns {Promise}
@@ -237,11 +238,9 @@ function request(rel) {
 	    return _.indexOf(link.rel, rel) > -1;
      });
 
-    if (! link) {
-	    return;
+    if (link) {
+	    return BbSiren.resolveOne(link.href);
     }
-
-    return BbSiren.resolveOne(link.href);
 }
 
 
@@ -256,7 +255,7 @@ function request(rel) {
  * @returns {Promise}
  */
 function resolve(options) {
-	options = options || {};
+	options = $.extend(this.siren.ajaxOptions || {}, options);
 
 	var deferred = new $.Deferred();
 
@@ -270,6 +269,7 @@ function resolve(options) {
 		// Its already been hydrated
 		deferred.resolve(this);
 	} else if (options.url) {
+
 		// This option allows us to defer hydration of our model or collection with the url provided
 		// Very much like .fetch() only it adds support for chaining nested entities
 
@@ -342,6 +342,7 @@ function resolveNextInChain(chain, options) {
 /**
  * Is called in the Model or Collection's constructor.
  * It creates a Backbone.Siren.Action instance from a raw action and attaches it to the Model or Collection (aka "parent").
+ * @todo, This should probably be a public, static method on BbSiren.
  *
  * @returns {Array|undefined}
  */
@@ -438,21 +439,20 @@ _.extend(BbSiren, {
      * Creates a Backbone.Siren model, collection, or error from a Siren object
      *
      * @param {Object} rawEntity
+     * @param {Object} options
      * @returns {Backbone.Siren.Model|Backbone.Siren.Collection|Backbone.Siren.Error}
      */
-    , parse: function (rawEntity, store) {
-        var bbSiren;
+    , parse: function (rawEntity, options) {
+		options = options || {};
 
         if (BbSiren.isRawCollection(rawEntity)) {
-            bbSiren = new Backbone.Siren.Collection(rawEntity, {store: store});
+            return new Backbone.Siren.Collection(rawEntity, options);
         } else if (BbSiren.isRawError(rawEntity)) {
             // @todo how should we represent errors?  For now, treat them as regular Models...
-            bbSiren = new Backbone.Siren.Model(rawEntity, {store: store});
+            return new Backbone.Siren.Model(rawEntity, options);
         } else {
-            bbSiren = new Backbone.Siren.Model(rawEntity, {store: store});
+            return new Backbone.Siren.Model(rawEntity, options);
         }
-
-        return bbSiren;
     }
 
 
@@ -542,6 +542,7 @@ _.extend(BbSiren, {
 	 * @param {String} url
 	 * @param {Object} options
 	 * @param {Object} options.store - store instance @todo remove the need to have this parameter
+	 * @todo - add an options.ajaxOptions parameter.
 	 */
 	, resolveOne: function (url, options) {
 		options = options || {};
@@ -605,7 +606,7 @@ _.extend(BbSiren, {
 
 				BbSiren.ajax(rootUrl, options)
 					.done(function (rawEntity) {
-						var bbSiren = BbSiren.parse(rawEntity, store);
+						var bbSiren = BbSiren.parse(rawEntity, options);
 						deferred.resolve(bbSiren);
 
 						options.deferred = chainedDeferred;
@@ -620,7 +621,7 @@ _.extend(BbSiren, {
 							entity = {};
 						}
 
-						bbSiren = BbSiren.parse(entity, store);
+						bbSiren = BbSiren.parse(entity, options);
 						deferred.reject(bbSiren, jqXhr);
 						chainedDeferred.reject(bbSiren, jqXhr);
 					});
@@ -686,7 +687,7 @@ _.extend(BbSiren, {
                         deferred.resolve(self.setEntity(bbSiren, rawEntity.rel, getRawEntityName(rawEntity)));
                     });
             } else {
-                bbSiren = BbSiren.parse(rawEntity, options.store);
+                bbSiren = BbSiren.parse(rawEntity, options);
                 bbSirenPromise = deferred.resolve(this.setEntity(bbSiren, rawEntity.rel, getRawEntityName(rawEntity)));
             }
 
@@ -716,9 +717,6 @@ _.extend(BbSiren, {
 
             return bbSiren;
         }
-
-
-
 
 
         /**
@@ -820,6 +818,23 @@ _.extend(BbSiren, {
             options.parse = true; // Force "parse" to be called on instantiation: http://stackoverflow.com/questions/11068989/backbone-js-using-parse-without-calling-fetch/14950519#14950519
 
             Backbone.Model.call(this, sirenObj, options);
+
+			this.siren = {};
+
+			// the store
+			if (options.store) {
+				this.siren.store = options.store;
+			}
+
+			// entity options
+			if (options.ajaxOptions) {
+				this.siren.ajaxOptions = options.ajaxOptions;
+			}
+
+			if (options.apiRoot) {
+				this.siren.apiRoot = options.apiRoot;
+			}
+
 		    this.parseActions();
         }
 
@@ -944,6 +959,17 @@ _.extend(BbSiren, {
             options.parse = true; // Force "parse" to be called on instantiation: http://stackoverflow.com/questions/11068989/backbone-js-using-parse-without-calling-fetch/14950519#14950519
 
             Backbone.Collection.call(this, sirenObj, options);
+
+			this.siren = {};
+
+			if (options.store) {
+				this.siren.store = options.store;
+			}
+
+			if (options.ajaxOptions) {
+				this.siren.ajaxOptions = options.ajaxOptions;
+			}
+
 		    this.parseActions();
         }
     })
@@ -983,6 +1009,7 @@ BbSiren.prototype = {
 	, resolve: function (entityPaths, options) {
 		options = $.extend({}, this.options, options);
 		options.store = this.store;
+		options.apiRoot = this.apiRoot;
 
 		var self = this
 		, urls = [];

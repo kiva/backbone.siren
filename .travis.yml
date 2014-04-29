@@ -2,6 +2,7 @@ language: node_js
 node_js:
   - 0.10.18
 before_install:
+  - npm install -g buster@0.7.8
   - npm install -g grunt-cli
   - npm install -g bower
 after_script:
