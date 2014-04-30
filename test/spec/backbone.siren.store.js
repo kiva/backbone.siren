@@ -164,4 +164,34 @@ describe('Backbone.Siren.Store: ', function () {
 	});
 
 
+	describe('.addRequest()', function () {
+		it('adds a jqXhr request to the store', function () {
+			var store = new Backbone.Siren.Store();
+			var fakejqXhr = new $.Deferred();
+
+			store.addRequest('http://someUrl', fakejqXhr);
+			expect(store.requests['http://someUrl']).toBe(fakejqXhr);
+		});
+
+
+		it('removes the request from the store once its been resolved', function () {
+			var store = new Backbone.Siren.Store();
+			var fakejqXhr = new $.Deferred();
+
+			store.addRequest('http://someUrl', fakejqXhr);
+			fakejqXhr.resolve();
+			expect(store.requests['http://someUrl']).toBeNull();
+		});
+	});
+
+
+	describe('.getRequest()', function () {
+		it('gets a jqXhr request from the store', function () {
+			var store = new Backbone.Siren.Store();
+			var fakejqXhr = new $.Deferred();
+
+			store.addRequest('http://someUrl', fakejqXhr);
+			expect(store.getRequest('http://someUrl')).toBe(fakejqXhr);
+		});
+	});
 });

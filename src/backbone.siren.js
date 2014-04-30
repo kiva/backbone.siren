@@ -634,7 +634,7 @@ _.extend(BbSiren, {
 				deferred = new $.Deferred();
 
 				if (store) {
-					store.addRequest(rootUrl, deferred.promise());
+					store.addRequest(options.data ? rootUrl + '?' + $.param(options.data) : rootUrl, deferred.promise());
 				}
 
 				BbSiren.ajax(rootUrl, options)
