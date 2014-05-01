@@ -49,10 +49,11 @@ Store.prototype = {
 	/**
 	 * Filters Siren objects by their index value (aka their self-url)
 	 *
-	 * @param {Regex} regex
+	 * @param {String} regexString
 	 * @returns {Array}
 	 */
-	, filter: function (regex) {
+	, filter: function (regexString) {
+		var regex = new RegExp(regexString);
 		return _.filter(this.data, function (val, key) {
 			return regex.test(key);
 		});

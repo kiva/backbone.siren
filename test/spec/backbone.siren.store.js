@@ -137,7 +137,6 @@ describe('Backbone.Siren.Store: ', function () {
 
 
 	describe('.filter', function () {
-
 		it('filters down stored models by doing a regex match on all stored models', function () {
 			var store = new Backbone.Siren.Store();
 
@@ -148,6 +147,7 @@ describe('Backbone.Siren.Store: ', function () {
 
 			var result;
 
+			// Accepts a regular expression
 			result = store.filter(/notFound/);
 			expect(result).toBeArray();
 			expect(result.length).toBe(0);
@@ -155,10 +155,11 @@ describe('Backbone.Siren.Store: ', function () {
 			result = store.filter(/one/);
 			expect(result.length).toBe(3);
 
-			result = store.filter(/one\/two\/three/);
+			// Accepts a string
+			result = store.filter('/one/two/three');
 			expect(result.length).toBe(1);
 
-			result = store.filter(/four/);
+			result = store.filter('four');
 			expect(result.length).toBe(1);
 		});
 	});

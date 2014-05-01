@@ -743,6 +743,7 @@ _.extend(BbSiren, {
                 , entity: bbSiren
             };
 
+			// "name" is not officially supported by the siren spec. See https://github.com/kevinswiber/siren/pull/33
             if (name) {
                 this.set(name, bbSiren);
                 entityItem.name = name;
