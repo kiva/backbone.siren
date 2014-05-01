@@ -8,37 +8,48 @@ describe('Backbone.Siren.Store: ', function () {
 	var expect = buster.expect;
 
 
-	describe('.add - Model', function () {
+	describe('.addModel', function () {
 
 		it('adds a model to the store', function () {
 			var store = new Backbone.Siren.Store()
 			, bbSirenModel = new Backbone.Siren.Model({properties: {}, links: [{rel: ['self'], href: 'http://one'}]});
 
-			store.add(bbSirenModel);
+			store.addModel(bbSirenModel);
 
 			expect(store.data['http://one']).toBeDefined();
 		});
 	});
 
 
-	describe('.add - Collection', function () {
+	describe('.addCollection', function () {
+		var store, rawSirenCollection;
 
-		it('adds a collection to the store, which includes adding all sub-entities', function () {
-			var store = new Backbone.Siren.Store()
-			, bbSirenCollection = new Backbone.Siren.Collection({
+
+		beforeEach(function () {
+			store = new Backbone.Siren.Store();
+			rawSirenCollection = {
 				'class': ['collection']
 				, entities: [
 					{properties: {}, links: [{rel: ['self'], href: 'http://one'}]}
 					, {properties: {}, links: [{rel: ['self'], href: 'http://two'}]}
 					, {properties: {}, links: [{rel: ['self'], href: 'http://three'}]}
 				]
-				, rel: ['self']
-				, href: 'http://collect'
-			});
+				, links: [
+					{
+						rel: ['self']
+						, href: 'http://collect'
+					}
+				]
+			};
+		});
 
-			store.add(bbSirenCollection);
 
-			expect(store.data['http://collect']).toBeDefined();
+		it('adds a collection to the store, which includes adding all sub-entities', function () {
+			var bbSirenCollection = new Backbone.Siren.Collection(rawSirenCollection);
+
+			store.addCollection(bbSirenCollection);
+
+			expect(store.data['http://collect']).toEqual(bbSirenCollection);
 			expect(store.data['http://one']).toBeDefined();
 			expect(store.data['http://two']).toBeDefined();
 			expect(store.data['http://three']).toBeDefined();
@@ -46,8 +57,18 @@ describe('Backbone.Siren.Store: ', function () {
 
 
 		it('adds a collection to the store, indexing by "current" if available', function () {
+			rawSirenCollection.links.push({rel: ['current'], href: 'http://collect?page=30'});
+
+			var bbSirenCollection = new Backbone.Siren.Collection(rawSirenCollection);
+
+			store.addCollection(bbSirenCollection);
+			expect(store.data['http://collect?page=30']).toBeDefined();
+		});
+
+
+		it('adds models from a "current" collection to a "self" collection', function () {
 			var store = new Backbone.Siren.Store()
-				, bbSirenCollection = new Backbone.Siren.Collection({
+			, bbSirenCollection = new Backbone.Siren.Collection({
 					'class': ['collection']
 					, entities: [
 						{properties: {}, links: [{rel: ['self'], href: 'http://one'}]}
@@ -64,10 +85,38 @@ describe('Backbone.Siren.Store: ', function () {
 							, href: 'http://collect?page=30'
 						}
 					]
-				});
+			});
 
-			store.add(bbSirenCollection);
-			expect(store.data['http://collect?page=30']).toBeDefined();
+			store.addCollection(bbSirenCollection);
+
+			var selfCollection = store.data['http://collect'];
+
+			expect(selfCollection).toBeDefined();
+			expect(selfCollection.size()).toBe(bbSirenCollection.size());
+			expect(selfCollection.models).toEqual(bbSirenCollection.models);
+
+			// Re-uses the same "self" collection on subsequent adds
+			var bbSirenCollection2 = new Backbone.Siren.Collection({
+				'class': ['collection']
+				, entities: [
+					{properties: {}, links: [{rel: ['self'], href: 'http://four'}]}
+				]
+				, links: [
+					{
+						rel: ['self']
+						, href: 'http://collect'
+					}
+					, {
+						rel: ['current']
+						, href: 'http://collect?page=31'
+					}
+				]
+			});
+
+			store.addCollection(bbSirenCollection2);
+
+			expect(selfCollection.size()).toBe(bbSirenCollection.size() + bbSirenCollection2.size());
+			expect(selfCollection.contains(bbSirenCollection2.models[0])).toBeTrue();
 		});
 	});
 
@@ -84,7 +133,7 @@ describe('Backbone.Siren.Store: ', function () {
 			var model = new Backbone.Siren.Model({links: [{rel: ['self'], href: "api.io/one"}]});
 
 			expect(store.get(model.url())).not.toBeDefined();
-			store.add(model);
+			store.addModel(model);
 			expect(store.exists(model.url())).toBeDefined();
 		});
 
@@ -93,7 +142,7 @@ describe('Backbone.Siren.Store: ', function () {
 			var model = new Backbone.Siren.Model({links: [{rel: ['self'], href: "api.io/one"}]});
 
 			expect(store.get(model._data)).not.toBeDefined();
-			store.add(model);
+			store.addModel(model);
 			expect(store.exists(model._data)).toBeDefined();
 		});
 
@@ -112,7 +161,7 @@ describe('Backbone.Siren.Store: ', function () {
 			var model = new Backbone.Siren.Model({links: [{rel: ['self'], href: "api.io/one"}]});
 
 			expect(store.exists(model.url())).toBeFalse();
-			store.add(model);
+			store.addModel(model);
 			expect(store.exists(model.url())).toBeTrue();
 		});
 
@@ -121,7 +170,7 @@ describe('Backbone.Siren.Store: ', function () {
 			var model = new Backbone.Siren.Model({links: [{rel: ['self'], href: "api.io/one"}]});
 
 			expect(store.exists(model)).toBeFalse();
-			store.add(model);
+			store.addModel(model);
 			expect(store.exists(model)).toBeTrue();
 		});
 
@@ -130,7 +179,7 @@ describe('Backbone.Siren.Store: ', function () {
 			var collection = new Backbone.Siren.Collection({'class': ['collection'], links: [{rel: ['self'], href: "api.io/my-collection"}]});
 
 			expect(store.exists(collection)).toBeFalse();
-			store.add(collection);
+			store.addCollection(collection);
 			expect(store.exists(collection)).toBeTrue();
 		});
 	});

@@ -228,8 +228,13 @@ describe('Siren Collection: ', function () {
 		var obj = {};
 
 		beforeEach(function () {
-			obj.resolveEntities = this.spy();
-			obj.url = this.stub().returns('http://fake.url');
+			obj = {
+				resolveEntities: this.spy()
+				, url: this.stub().returns('http//self.url')
+				, link: this.stub().returns('http://current.url')
+				, classes: this.stub().returns('someClass')
+				, each: function () {}
+			};
 
 			this.stub(Backbone.Siren.Model.prototype, 'resolveEntities');
 		});
@@ -264,7 +269,7 @@ describe('Siren Collection: ', function () {
 
 			Backbone.Siren.Collection.prototype.parse.call(obj, loansCollectionSiren, options);
 
-			expect(options.store.get('http://fake.url')).toBeDefined();
+			expect(options.store.get('http://current.url')).toBeDefined();
 		});
 	});
 

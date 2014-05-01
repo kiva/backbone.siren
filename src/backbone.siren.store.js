@@ -1,5 +1,17 @@
 'use strict';
 
+function newEmptySirenCollection(sirenClass, url) {
+	return new Backbone.Siren.Collection({
+		'class': sirenClass
+		, links: [
+			{
+				rel: ['self'], href: url
+			}
+		]
+	});
+}
+
+
 /**
  * Stores Siren objects in memory
  *
@@ -13,32 +25,56 @@ var Store = Backbone.Siren.Store = function () {
 
 Store.prototype = {
 
+
 	/**
+	 * Adds a model to the store
 	 *
-	 * @param {Backbone.Siren.Model|Backbone.Siren.Collection} bbSirenObj
-	 * @return {Backbone.Siren.Model}
+	 * @param {Backbone.Siren.Model} model
+	 * @returns {Backbone.Siren.Store}
 	 */
-	add: function (bbSirenObj) {
-		var self = this
-		, index;
+	addModel: function (model) {
+		this.data[model.url()] = model;
+		return this;
+	}
 
-		if (Backbone.Siren.isCollection(bbSirenObj)) {
-			bbSirenObj.each(function (sirenModel) {
-				self.add(sirenModel);
-			});
 
-			index = bbSirenObj.link('current');
+	/**
+	 * Adds a collection to the store.
+	 *
+	 * @param {Backbone.Siren.Collection} collection
+	 * @returns {Backbone.Siren.Store}
+	 */
+	, addCollection: function (collection) {
+		var selfCollection
+		, self = this
+		, currentUrl = collection.link('current')
+		, selfUrl = collection.url();
+
+		if (currentUrl) {
+			// Make sure there is a "self" collection, models should also be added there.
+			selfCollection = this.get(selfUrl);
+			if (! selfCollection) {
+				selfCollection = newEmptySirenCollection(collection.classes(), selfUrl);
+				this.data[selfUrl] = selfCollection;
+			}
+
+			selfCollection.add(collection.models);
 		}
 
-		this.data[index || bbSirenObj.url()] = bbSirenObj;
-		return bbSirenObj;
+		// Add each model to the store
+		collection.each(function (model) {
+			self.addModel(model);
+		});
+
+		this.data[currentUrl || selfUrl] = collection;
+		return this;
 	}
 
 
 	/**
 	 *
 	 * @param {Object|String} rawEntityOrUrl
-	 * @return {Backbone.Siren.Model}
+	 * @returns {Backbone.Siren.Model}
 	 */
 	, get: function (rawEntityOrUrl) {
 		/*global getRawEntityUrl*/
@@ -62,7 +98,7 @@ Store.prototype = {
 	/**
 	 *
 	 * @param {Backbone.Siren.Model|Backbone.Siren.Collection|String} ModelOrSirenObjOrUrl
-	 * @return {Boolean}
+	 * @returns {Boolean}
 	 */
 	, exists: function (ModelOrSirenObjOrUrl) {
 		return !!this.get(Backbone.Siren.isHydratedObject(ModelOrSirenObjOrUrl) ? ModelOrSirenObjOrUrl.url() : ModelOrSirenObjOrUrl);
@@ -73,7 +109,7 @@ Store.prototype = {
 	 *
 	 * @param url
 	 * @param request
-	 * @returns {Promise}
+	 * @returns {Backbone.Siren.Store}
 	 */
 	, addRequest: function (url, request) {
 		var self = this;
@@ -84,7 +120,7 @@ Store.prototype = {
 		});
 
 		this.requests[url] = request;
-		return request;
+		return this;
 	}
 
 
