@@ -271,9 +271,9 @@ describe('Backbone.Siren: ', function () {
 			, modelTwo = new Backbone.Siren.Model({links: [{rel: ['self'], href: 'http://api.io/entityTwo'}]})
 			, modelThree = new Backbone.Siren.Model({links: [{rel: ['self'], href: 'http://api.io/entityThree'}]});
 
-			store.add(modelOne);
-			store.add(modelTwo);
-			store.add(modelThree);
+			store.addModel(modelOne);
+			store.addModel(modelTwo);
+			store.addModel(modelThree);
 
 			promise = Backbone.Siren.resolveMany(['http://api.io/entityOne', 'http://api.io/entityTwo', 'http://api.io/entityThree'], {store: store});
 

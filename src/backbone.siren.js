@@ -767,7 +767,7 @@ _.extend(BbSiren, {
 			this.resolveEntities(options);
 
 			if (options.store) {
-				options.store.add(this);
+				options.store.addModel(this);
 			}
 
             return rawEntity.properties;
@@ -908,7 +908,7 @@ _.extend(BbSiren, {
             });
 
 			if (options.store) {
-				options.store.add(this);
+				options.store.addCollection(this);
 			}
 
             return models;
