@@ -256,11 +256,27 @@ describe('Siren Collection: ', function () {
 		});
 
 
-		it('returns all of the collection\'s models', function () {
+		it('creates and returns all of the collection\'s models', function () {
 			var result = Backbone.Siren.Collection.prototype.parse.call(obj, loansCollectionSiren, {});
 
-			expect(result).toBeArray();
 			expect(result.length).toBe(3);
+			_.each(result, function(model) {
+				expect(model instanceof Backbone.Siren.Model).toBeTrue();
+			});
+		});
+
+
+		it('parses each of the collection\'s models with the same options', function () {
+			var arr = [];
+
+			this.stub(Backbone.Siren.Model.prototype, 'parse', function (obj, options) {
+				arr.push(options);
+				expect(options.blah).toBe('shmah');
+			});
+
+			Backbone.Siren.Collection.prototype.parse.call(obj, loansCollectionSiren, {blah: 'shmah'});
+			expect(arr.length).toBe(3);
+
 		});
 
 

@@ -74,11 +74,29 @@ Store.prototype = {
 	/**
 	 *
 	 * @param {Object|String} rawEntityOrUrl
-	 * @returns {Backbone.Siren.Model}
+	 * @returns {Backbone.Siren.Model|Backbone.Siren.Collection}
 	 */
 	, get: function (rawEntityOrUrl) {
 		/*global getRawEntityUrl*/
-		return this.data[typeof rawEntityOrUrl == 'object'? getRawEntityUrl(rawEntityOrUrl, 'self'): rawEntityOrUrl];
+		return this.data[typeof rawEntityOrUrl == 'object'? getRawEntitySelfUrl(rawEntityOrUrl): rawEntityOrUrl];
+	}
+
+
+	/**
+	 * Get the matching "current" collection for the given rawCollection
+	 *
+	 * @param {Object} rawCollection
+	 * @returns {Backbone.Siren.Collection}
+	 */
+	, getCurrentCollection: function (rawCollection) {
+		/*global BbSiren, getRawEntityUrl, getRawEntitySelfUrl */
+
+		if (BbSiren.isLoaded(rawCollection)) {
+			return this.data[getRawEntityUrl(rawCollection, 'current')];
+		} else {
+			// The entity is not loaded, so we don't know if it references a "current" collection or a "self" collection
+			return this.data[getRawEntitySelfUrl(rawCollection)];
+		}
 	}
 
 

@@ -138,7 +138,7 @@ describe('Backbone.Siren.Store: ', function () {
 		});
 
 
-		it('gets a bbSiren object matching the given raw entity from the store', function () {
+		it('gets a bbSiren object from the store that matches the given raw entity', function () {
 			var model = new Backbone.Siren.Model({links: [{rel: ['self'], href: "api.io/one"}]});
 
 			expect(store.get(model._data)).not.toBeDefined();
@@ -146,6 +146,55 @@ describe('Backbone.Siren.Store: ', function () {
 			expect(store.get(model._data)).toBeDefined();
 		});
 
+
+		it('gets a bbSiren object from the store that matches the given linked raw entity', function () {
+			var rawModel = {href: "api.io/one"};
+			var model = new Backbone.Siren.Model(rawModel);
+
+			expect(store.get(rawModel)).not.toBeDefined();
+			store.addModel(model);
+			expect(store.get(rawModel)).toBeDefined();
+		});
+
+	});
+
+
+	describe('.getCurrentCollection()', function () {
+		var store, rawCurrentCollection, currentCollection;
+
+
+		beforeEach(function () {
+			store = new Backbone.Siren.Store();
+			rawCurrentCollection = {'class': 'collection', links: [{rel: ['self'], href: 'http://x.io'}, {rel: ['current'], href: 'http://x.io?page=30'}]};
+			currentCollection = new Backbone.Siren.Collection(rawCurrentCollection, {store: store});
+		});
+
+
+		it('returns any matching, stored "current" collection for the given raw "loaded" collection', function () {
+			var collection = store.getCurrentCollection(rawCurrentCollection);
+			expect(collection).toBeDefined();
+		});
+
+
+		it('returns any matching, stored collection when given a raw "linked" collection', function () {
+			var collection = store.getCurrentCollection({'class': 'collection', href: 'http://x.io'});
+			expect(collection).toBeDefined();
+
+			collection = store.getCurrentCollection({'class': 'collection', href: 'http://x.io?page=30'});
+			expect(collection).toBeDefined();
+		});
+
+
+		it('returns undefined when given a raw "self" collection', function () {
+			var collection = store.getCurrentCollection({'class': 'collection', links: [{rel: ['self'], href: 'http://x.io'}]});
+			expect(collection).not.toBeDefined();
+		});
+
+
+		it('returns undefined if the "current" collection is not found', function () {
+			var collection = store.getCurrentCollection({'class': 'collection', links: [{rel: ['self'], href: 'http://x.io'}, {rel: ['current'], href: 'http://x.io?page=45'}]});
+			expect(collection).not.toBeDefined();
+		});
 	});
 
 

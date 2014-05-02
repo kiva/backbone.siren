@@ -26,7 +26,7 @@ function toCamelCase(name) {
 
 
 /**
- * Gets a link url by name from a raw siren enity
+ * Gets a link url by name from a raw siren entity
  *
  * @param {Object} rawEntity
  * @param {String} name
@@ -468,6 +468,92 @@ _.extend(BbSiren, {
 	}
 
 
+	/**
+	 * Parses a raw siren model into a Backbone.Siren.Model and maintains its representation in the store.
+	 *
+	 * @param {Object} rawModel
+	 * @param {Object} options
+	 * @returns {Backbone.Model}
+	 */
+	, parseModel: function (rawModel, options) {
+		options = options || {};
+
+		var model
+		, store = options.store;
+
+		if (store) {
+			model = store.get(rawModel);
+		}
+
+		if (model) {
+			// Only override the old model if the new one is fully loaded
+			if (BbSiren.isLoaded(rawModel)) {
+				model.constructor(rawModel);
+			}
+		} else {
+			model = new Backbone.Siren.Model(rawModel, options);
+		}
+
+		return model;
+	}
+
+
+	/**
+	 * Parses a raw siren collection into a Backbone.Siren.Collection and maintains its representation in the store.
+	 *
+	 * @param rawCollection
+	 * @param options
+	 * @returns {*}
+	 */
+	, parseCollection: function (rawCollection, options) {
+		options = options || {};
+
+		var newModels, collection
+		, cachedCollections = []
+		, store = options.store;
+
+		if (store) {
+			// Check the store to see if we have cached version of the "self" collection.  If so, do we also have a "current" collection?
+			collection = store.get(rawCollection);
+
+			if (collection) {
+				cachedCollections.push(collection);
+
+				var currentUrl = getRawEntityUrl(rawCollection, 'current');
+				if (currentUrl) {
+					collection = store.getCurrentCollection(rawCollection);
+					if (collection) {
+						cachedCollections.push(collection);
+					} else {
+						collection = new Backbone.Siren.Collection(rawCollection, options);
+					}
+				}
+			}
+		}
+
+		if (cachedCollections.length) {
+			// The last collection will be the "current" collection, if not, fallback to the "self" collection.
+			collection = _.last(cachedCollections);
+
+			// Only override the old collection if the new one is fully loaded
+			if (BbSiren.isLoaded(rawCollection)) {
+				// Update our collection and save references to the models
+				newModels = collection.parse(rawCollection);
+				collection.parseActions();
+
+				// Since a collection can have a "current" as well as a "self" representation, we need to make sure to update both.
+				_.each(cachedCollections, function (collection) {
+					collection.add(newModels);
+				});
+			}
+		} else {
+			collection = new Backbone.Siren.Collection(rawCollection, options);
+		}
+
+		return collection;
+	}
+
+
     /**
      * Creates a Backbone.Siren model, collection, or error from a Siren object
      *
@@ -478,13 +564,14 @@ _.extend(BbSiren, {
     , parse: function (rawEntity, options) {
 		options = options || {};
 
-        if (BbSiren.isRawCollection(rawEntity)) {
-            return new Backbone.Siren.Collection(rawEntity, options);
+		if (BbSiren.isRawCollection(rawEntity)) {
+			return this.parseCollection(rawEntity, options);
         } else if (BbSiren.isRawError(rawEntity)) {
             // @todo how should we represent errors?  For now, treat them as regular Models...
+			// @todo are we storing errors in the store?  If so, don't...
             return new Backbone.Siren.Model(rawEntity, options);
         } else {
-            return new Backbone.Siren.Model(rawEntity, options);
+			return this.parseModel(rawEntity, options);
         }
     }
 
@@ -904,7 +991,7 @@ _.extend(BbSiren, {
 
             var models = [];
             _.each(rawEntity.entities, function (entity) {
-                models.push(new Backbone.Siren.Model(entity, options));
+                models.push(BbSiren.parse(entity, options));
             });
 
 			if (options.store) {
