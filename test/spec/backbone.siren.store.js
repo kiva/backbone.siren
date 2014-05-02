@@ -134,7 +134,7 @@ describe('Backbone.Siren.Store: ', function () {
 
 			expect(store.get(model.url())).not.toBeDefined();
 			store.addModel(model);
-			expect(store.exists(model.url())).toBeDefined();
+			expect(store.get(model.url())).toBeDefined();
 		});
 
 
@@ -143,7 +143,7 @@ describe('Backbone.Siren.Store: ', function () {
 
 			expect(store.get(model._data)).not.toBeDefined();
 			store.addModel(model);
-			expect(store.exists(model._data)).toBeDefined();
+			expect(store.get(model._data)).toBeDefined();
 		});
 
 	});

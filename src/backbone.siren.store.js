@@ -78,7 +78,7 @@ Store.prototype = {
 	 */
 	, get: function (rawEntityOrUrl) {
 		/*global getRawEntityUrl*/
-		return this.data[typeof rawEntityOrUrl == 'object'? getRawEntityUrl(rawEntityOrUrl): rawEntityOrUrl];
+		return this.data[typeof rawEntityOrUrl == 'object'? getRawEntityUrl(rawEntityOrUrl, 'self'): rawEntityOrUrl];
 	}
 
 
