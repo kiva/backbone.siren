@@ -563,6 +563,44 @@ describe('Siren Model: ', function () {
 	});
 
 
+	describe('.update()', function () {
+		var myRawModel = {
+			'class': ['updated']
+			, properties: {
+					blah: 'shmah'
+			}
+			, links: [
+				{rel: ['self'], href: 'http://x.io'}
+			]
+		};
+
+
+		it('updates all properties on the model', function () {
+			sirenModel.update(myRawModel);
+			expect(sirenModel.get('blah')).toBe('shmah');
+		});
+
+
+		it('updates all top level properties on the model', function () {
+			sirenModel.update(myRawModel);
+			expect(sirenModel.url()).toBe(myRawModel.links[0].href);
+			expect(sirenModel.actions().length).toBe(0);
+			expect(sirenModel.classes()).toEqual(myRawModel['class']);
+		});
+
+
+		it('does not alter the model if updating with a "linked" entity', function () {
+			sirenModel.update({href: 'http://x.io/updated'});
+			expect(sirenModel.url()).toBe('http://api.x.io/orders/42');
+		});
+
+
+		it('returns the model', function () {
+			expect(sirenModel.update(myRawModel)).toBe(sirenModel);
+		});
+	});
+
+
 	describe('.siren', function () {
 		it('is an object that is set each BbSiren Model upon instantiation', function () {
 			var myModel = new Backbone.Siren.Model();

@@ -551,8 +551,18 @@ describe('Siren Collection: ', function () {
 			expect(sirenCollection.actions().length).toBe(0);
 			expect(sirenCollection.classes()).toEqual(myRawCollection['class']);
 		});
-	});
 
+
+		it('does not alter the collection if updating with a "linked" entity', function () {
+			sirenCollection.update({href: 'http://x.io'});
+			expect(sirenCollection.size()).toBe(3);
+		});
+
+
+		it('returns the collection', function () {
+			expect(sirenCollection.update(myRawCollection)).toBe(sirenCollection);
+		});
+	});
 
 
 

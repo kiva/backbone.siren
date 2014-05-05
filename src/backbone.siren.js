@@ -942,9 +942,11 @@ _.extend(BbSiren, {
 
 		, update: function (rawModel) {
 			if (BbSiren.isLoaded(rawModel)) {
-				this.parse(rawModel);
+				this.set(this.parse(rawModel));
 				this.parseActions();
 			}
+
+			return this;
 		}
 
 
@@ -1087,10 +1089,12 @@ _.extend(BbSiren, {
 		 * @param {Array} [models] When parsing, use these models instead of the raw models from the collection
 		 */
 		, update: function (rawCollection, models) {
-			if (BbSiren.isLoaded(rawModel)) {
+			if (BbSiren.isLoaded(rawCollection)) {
 				this.add(this.parse(rawCollection, {preParsedModels: models}));
 				this.parseActions();
 			}
+
+			return this;
 		}
 
 
