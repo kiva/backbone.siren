@@ -9,7 +9,6 @@ describe('Backbone.Siren.Store: ', function () {
 
 
 	describe('.addModel', function () {
-
 		it('adds a model to the store', function () {
 			var store = new Backbone.Siren.Store()
 			, bbSirenModel = new Backbone.Siren.Model({properties: {}, links: [{rel: ['self'], href: 'http://one'}]});
@@ -18,10 +17,18 @@ describe('Backbone.Siren.Store: ', function () {
 
 			expect(store.data['http://one']).toBeDefined();
 		});
+
+
+		it('returns the store object', function () {
+			var store = new Backbone.Siren.Store()
+			, bbSirenModel = new Backbone.Siren.Model({properties: {}, links: [{rel: ['self'], href: 'http://one'}]});
+
+			expect(store.addModel(bbSirenModel)).toBe(store);
+		});
 	});
 
 
-	describe('.addCollection', function () {
+	describe('.addCollection()', function () {
 		var store, rawSirenCollection;
 
 
@@ -44,79 +51,33 @@ describe('Backbone.Siren.Store: ', function () {
 		});
 
 
-		it('adds a collection to the store, which includes adding all sub-entities', function () {
-			var bbSirenCollection = new Backbone.Siren.Collection(rawSirenCollection);
-
-			store.addCollection(bbSirenCollection);
-
-			expect(store.data['http://collect']).toEqual(bbSirenCollection);
-			expect(store.data['http://one']).toBeDefined();
-			expect(store.data['http://two']).toBeDefined();
-			expect(store.data['http://three']).toBeDefined();
-		});
-
-
-		it('adds a collection to the store, indexing by "current" if available', function () {
+		it('adds a collection to the store, indexing by the rel provided', function () {
 			rawSirenCollection.links.push({rel: ['current'], href: 'http://collect?page=30'});
 
 			var bbSirenCollection = new Backbone.Siren.Collection(rawSirenCollection);
 
-			store.addCollection(bbSirenCollection);
+			expect(store.data['http://collect']).not.toBeDefined();
+			expect(store.data['http://collect?page=30']).not.toBeDefined();
+
+			store.addCollection(bbSirenCollection, 'self');
+			store.addCollection(bbSirenCollection, 'current');
+
+			expect(store.data['http://collect']).toBeDefined();
 			expect(store.data['http://collect?page=30']).toBeDefined();
 		});
 
 
-		it('adds models from a "current" collection to a "self" collection', function () {
-			var store = new Backbone.Siren.Store()
-			, bbSirenCollection = new Backbone.Siren.Collection({
-					'class': ['collection']
-					, entities: [
-						{properties: {}, links: [{rel: ['self'], href: 'http://one'}]}
-						, {properties: {}, links: [{rel: ['self'], href: 'http://two'}]}
-						, {properties: {}, links: [{rel: ['self'], href: 'http://three'}]}
-					]
-					, links: [
-						{
-							rel: ['self']
-							, href: 'http://collect'
-						}
-						, {
-							rel: ['current']
-							, href: 'http://collect?page=30'
-						}
-					]
-			});
+		it('default rel is "self"', function () {
+			var bbSirenCollection = new Backbone.Siren.Collection(rawSirenCollection);
 
 			store.addCollection(bbSirenCollection);
+			expect(store.data['http://collect']).toBeDefined();
+		});
 
-			var selfCollection = store.data['http://collect'];
 
-			expect(selfCollection).toBeDefined();
-			expect(selfCollection.size()).toBe(bbSirenCollection.size());
-			expect(selfCollection.models).toEqual(bbSirenCollection.models);
-
-			// Re-uses the same "self" collection on subsequent adds
-			var bbSirenCollection2 = new Backbone.Siren.Collection({
-				'class': ['collection']
-				, entities: [
-					{properties: {}, links: [{rel: ['self'], href: 'http://four'}]}
-				]
-				, links: [
-					{
-						rel: ['self']
-						, href: 'http://collect'
-					}
-					, {
-						rel: ['current']
-						, href: 'http://collect?page=31'
-					}
-				]
-			});
-
-			store.addCollection(bbSirenCollection2);
-
-			expect(selfCollection.size()).toBe(bbSirenCollection.size() + bbSirenCollection2.size());
-			expect(selfCollection.contains(bbSirenCollection2.models[0])).toBeTrue();
+		it('returns the store object', function () {
+			var bbSirenCollection = new Backbone.Siren.Collection(rawSirenCollection);
+			expect(store.addCollection(bbSirenCollection)).toBe(store);
 		});
 	});
 
@@ -166,7 +127,9 @@ describe('Backbone.Siren.Store: ', function () {
 		beforeEach(function () {
 			store = new Backbone.Siren.Store();
 			rawCurrentCollection = {'class': 'collection', links: [{rel: ['self'], href: 'http://x.io'}, {rel: ['current'], href: 'http://x.io?page=30'}]};
-			currentCollection = new Backbone.Siren.Collection(rawCurrentCollection, {store: store});
+			currentCollection = new Backbone.Siren.Collection(rawCurrentCollection);
+			store.addCollection(currentCollection, 'self');
+			store.addCollection(currentCollection, 'current');
 		});
 
 

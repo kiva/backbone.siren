@@ -27,6 +27,41 @@ describe('Siren Collection: ', function () {
     });
 
 
+	describe('.constructor()', function () {
+		it('constructs a Backbone.Siren.Collection instance', function () {
+			var collection = new Backbone.Siren.Collection();
+			expect(collection instanceof Backbone.Siren.Collection).toBeTrue();
+		});
+
+
+		it('calls .parse()', function () {
+			this.spy(Backbone.Siren.Collection.prototype, 'parse');
+
+			var collection = new Backbone.Siren.Collection({href: 'http://x.io'});
+			expect(collection.parse).toHaveBeenCalled();
+		});
+
+
+		it('adds the collection to the optional store', function () {
+			var store = new Backbone.Siren.Store();
+			var collection = new Backbone.Siren.Collection({href: 'http://x.io'}, {store: store});
+			var cachedCollection = store.data['http://x.io'];
+
+			expect(collection.siren.store).toBeDefined();
+			expect(cachedCollection).toBeDefined();
+
+		});
+
+
+		it('adds ajaxOptions onto the collection', function () {
+			var collection = new Backbone.Siren.Collection({href: 'http://x.io'}, {ajaxOptions: {foo: 'shnickens'}});
+
+			expect(collection.siren.ajaxOptions).toBeObject();
+			expect(collection.siren.ajaxOptions.foo).toBe('shnickens');
+		});
+	});
+
+
     describe('.url()', function () {
 	    it('is a proxy to this.link(\'self\')', function () {
 		    this.stub(sirenCollection, 'link');
@@ -276,16 +311,6 @@ describe('Siren Collection: ', function () {
 
 			Backbone.Siren.Collection.prototype.parse.call(obj, loansCollectionSiren, {blah: 'shmah'});
 			expect(arr.length).toBe(3);
-
-		});
-
-
-		it('adds the collection to the store, if there is one', function () {
-			var options = {store: new Backbone.Siren.Store()};
-
-			Backbone.Siren.Collection.prototype.parse.call(obj, loansCollectionSiren, options);
-
-			expect(options.store.get('http://current.url')).toBeDefined();
 		});
 	});
 
@@ -492,6 +517,39 @@ describe('Siren Collection: ', function () {
 
 			// @todo poor-man's jqXhr test.
 			expect(result.done).toBeFunction();
+		});
+	});
+
+
+	describe('.update()', function () {
+		var myRawCollection = {
+			'class': ['collection', 'updated']
+			, entities: [
+				{
+					links: [
+						{rel: ['self'], href: 'http://x.io/12'}
+					]
+				}
+			]
+			, links: [
+				{rel: ['self'], href: 'http://x.io'}
+			]
+		};
+
+
+		it('adds models from a raw collection entity to an existing collection', function () {
+			var originalSize = sirenCollection.size();
+
+			sirenCollection.update(myRawCollection);
+			expect(sirenCollection.size()).toBe(originalSize + myRawCollection.entities.length);
+		});
+
+
+		it('updates all properties on the collection', function () {
+			sirenCollection.update(myRawCollection);
+			expect(sirenCollection.url()).toBe(myRawCollection.links[0].href);
+			expect(sirenCollection.actions().length).toBe(0);
+			expect(sirenCollection.classes()).toEqual(myRawCollection['class']);
 		});
 	});
 

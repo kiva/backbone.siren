@@ -43,6 +43,46 @@ describe('Backbone.Siren: ', function () {
 	};
 
 
+	var rawCurrentCollection = {
+		entities: [
+			{
+				"links": [
+					{"rel": ["self"], "href":"http://api.x.io/orders/43"}
+				]
+			}
+			, {
+				"links": [
+					{"rel": ["self"],  "href":"http://api.x.io/orders/44"}
+				]
+			}
+		]
+		, links: [
+			{rel: ['self'], href: 'http://api.x.io/orders'}
+			, {rel: ['current'], href: 'http://api.x.io/orders?page=30'}
+		]
+	};
+
+
+	var rawCurrentCollection2 = {
+		entities: [
+			{
+				"links": [
+					{"rel": ["self"], "href":"http://api.x.io/orders/45"}
+				]
+			}
+			, {
+				"links": [
+					{"rel": ["self"],  "href":"http://api.x.io/orders/46"}
+				]
+			}
+		]
+		, links: [
+			{rel: ['self'], href: 'http://api.x.io/orders'}
+			, {rel: ['current'], href: 'http://api.x.io/orders?page=31'}
+		]
+	};
+
+
 	describe('.isHydratedObject', function () {
 
 		it('checks if an object is an instantiated Backbone.Siren object', function () {
@@ -107,7 +147,7 @@ describe('Backbone.Siren: ', function () {
 	});
 
 
-	describe('.isRawError', function () {
+	describe('.isRawError()', function () {
 		it('checks if a raw siren object is an error', function () {
 			var bbSirenModel = new Backbone.Siren.Model(rawSettingsModel);
 
@@ -118,39 +158,56 @@ describe('Backbone.Siren: ', function () {
 	});
 
 
-	describe('.parseModel', function () {
+	describe('.addModelToStore()', function () {
+		it('adds a model to the store', function () {
+			var model = new Backbone.Siren.Collection(rawSettingsModel);
+			var store = new Backbone.Siren.Store();
 
+			Backbone.Siren.addModelToStore(store, model);
+			expect(store.get(model.url())).toBeDefined();
+		});
 	});
 
 
-	describe('.parseCollection', function () {
-		var rawCurrentCollection = {
-			entities: [
-				{
-					"links": [
-						{"rel": ["self"], "href":"http://api.x.io/orders/43"}
-					]
-				}
-				, {
-					"links": [
-						{"rel": ["self"],  "href":"http://api.x.io/orders/44"}
-					]
-				}
-			]
-			, links: [
-				{rel: ['self'], href: 'http://api.x.io/orders'}
-				, {rel: ['current'], href: 'http://api.x.io/orders?page=30'}
-			]
-		};
+	describe('.addCollectionToStore()', function () {
+		it('adds a collection to the store', function () {
+			var collection = new Backbone.Siren.Collection(rawCollection);
+			var store = new Backbone.Siren.Store();
+
+			Backbone.Siren.addCollectionToStore(store, collection);
+			expect(store.get(collection.url())).toBeDefined();
+		});
 
 
+		it('adds current collections to the store, as well as the self collection', function () {
+			var currentCollection = new Backbone.Siren.Collection(rawCurrentCollection);
+			var store = new Backbone.Siren.Store();
+
+			Backbone.Siren.addCollectionToStore(store, currentCollection);
+			expect(store.get(currentCollection.link('self'))).toBeDefined();
+			expect(store.get(currentCollection.link('current'))).toBeDefined();
+		});
+
+
+		it('does not add the "self" collection to the store if `storeCurrentOnly` is set to `true`', function () {
+			var currentCollection = new Backbone.Siren.Collection(rawCurrentCollection);
+			var store = new Backbone.Siren.Store();
+
+			Backbone.Siren.addCollectionToStore(store, currentCollection, true);
+			expect(store.get(currentCollection.link('self'))).not.toBeDefined();
+			expect(store.get(currentCollection.link('current'))).toBeDefined();
+		});
+	});
+
+
+	describe('.parseCollection()', function () {
 		it('creates a new collection from a raw collection', function () {
 			var collection = Backbone.Siren.parseCollection(rawCurrentCollection);
 			expect(collection instanceof Backbone.Siren.Collection).toBeTrue();
 		});
 
 
-		it('re-hydrates an existing collection if it is already cached', function () {
+		it('updates an existing collection if it is already cached', function () {
 			var store = new Backbone.Siren.Store();
 			var collection = new Backbone.Siren.Collection(rawCollection, {store: store});
 
@@ -158,44 +215,70 @@ describe('Backbone.Siren: ', function () {
 			collection.tagged = true;
 
 			collection = Backbone.Siren.parseCollection(rawCollection, {store: store});
+
+			// Check the store
+			expect(store.get(getRawEntityUrl(rawCollection, 'self')).tagged).toBeTrue();
+
+			// Check the returned collection
 			expect(collection.tagged).toBeTrue();
 		});
 
 
-		it('adds to an existing "self" and/or "current" collection if parsing a "current" collection', function () {
+		it('updates the "self" and "current" collections if they are both in the cache', function () {
 			var store = new Backbone.Siren.Store();
+			var collection = new Backbone.Siren.Collection(rawCurrentCollection, {store: store});
+			var collection2 = new Backbone.Siren.Collection(rawCurrentCollection2, {store: store});
 
-			var selfCollection = new Backbone.Siren.Collection(rawCollection, {store: store});
-			var currentCollection = Backbone.Siren.parseCollection(rawCurrentCollection, {store: store});
+			// We tag the collection so that we know it's the same one
+			collection.tagged = true;
+			collection2.tagged = true;
 
-			// Check what we have in the store
-			selfCollection = store.get('http://api.x.io/orders');
-			currentCollection = store.get('http://api.x.io/orders?page=30');
+			// Update collection2
+			collection2 = Backbone.Siren.parseCollection(rawCurrentCollection2, {store: store});
 
-			expect(selfCollection.size()).toBe(4);
-			expect(currentCollection.size()).toBe(2);
+			// Check the store
+			expect(store.get(getRawEntityUrl(rawCurrentCollection2, 'self')).tagged).toBeTrue();
+			expect(store.get(getRawEntityUrl(rawCurrentCollection2, 'current')).tagged).toBeTrue();
 
-			// Add more to the current collection
-			var anotherRawCurrentCollection =  {
-				entities: [
-					{"links": [{"rel": ["self"], "href":"http://api.x.io/orders/45"}]}
-				]
-				, links: [
-					{rel: ['self'], href: 'http://api.x.io/orders'}
-					, {rel: ['current'], href: 'http://api.x.io/orders?page=30'}
-				]
-			};
-
-			currentCollection = Backbone.Siren.parseCollection(anotherRawCurrentCollection, {store: store});
-
-			// The currentCollection gets
-			expect(selfCollection.size()).toBe(5);
-			expect(currentCollection.size()).toBe(3);
-
+			// Check the returned collection
+			expect(collection.tagged).toBeTrue();
+			expect(collection2.tagged).toBeTrue();
 		});
 
 
-		it('returns the cached collection if parsing a "linked" collection, leaving the stored collection untouched', function () {
+		it('adds the "current" collection and the "self" collection to the store', function () {
+			var store = new Backbone.Siren.Store();
+
+			Backbone.Siren.parseCollection(rawCurrentCollection, {store: store});
+
+			var cachedCurrentCollection = store.data['http://api.x.io/orders?page=30'];
+			expect(cachedCurrentCollection).toBeDefined();
+
+			var cachedSelfCollection = store.data['http://api.x.io/orders'];
+			expect(cachedSelfCollection).toBeDefined();
+		});
+
+
+		it('adds the "current" collection to the store and updates the cached "self" collection', function () {
+			var store = new Backbone.Siren.Store();
+
+			// Add first collection to the store
+			Backbone.Siren.parseCollection(rawCurrentCollection, {store: store});
+
+			// Add a new collection
+			Backbone.Siren.parseCollection(rawCurrentCollection2, {store: store});
+
+			// It should have been cached
+			var cachedCurrentCollection = store.data['http://api.x.io/orders?page=31'];
+			expect(cachedCurrentCollection).toBeDefined();
+
+			// The "self" collection should have been added to
+			var cachedSelfCollection = store.data['http://api.x.io/orders'];
+			expect(cachedSelfCollection.size()).toBe(4);
+		});
+
+
+		it('leaves the matching, cached, "loaded" collection un-changed if parsing a "linked" collection', function () {
 			var store = new Backbone.Siren.Store();
 			var collection = new Backbone.Siren.Collection(rawCollection, {store: store});
 
@@ -205,23 +288,6 @@ describe('Backbone.Siren: ', function () {
 			// Now check what we have in the store
 			collection = store.get(collection.url());
 			expect(collection.size()).toBe(2);
-		});
-
-
-		it('re-hydrates both, any matching, stored, "self" and "current" collections if parsing a "current" collection', function () {
-			var store = new Backbone.Siren.Store();
-			var collection = new Backbone.Siren.Collection(rawCurrentCollection, {store: store});
-
-			// We tag the collection so that we know it's the same one
-			collection.tagged = true;
-
-			expect(collection.link('current')).toBeDefined();
-			expect(store.get(collection.link('self'))).toBeDefined();
-			expect(store.get(collection.link('current'))).toBeDefined();
-
-
-
-			expect(collection.tagged).toBeTrue();
 		});
 	});
 

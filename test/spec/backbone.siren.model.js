@@ -6,7 +6,7 @@ describe('Siren Model: ', function () {
 	// @todo quick fix for upgrade to buster 0.7
 	var expect = buster.expect;
 
-    var settingsModelSiren = {
+    var rawSettingsModel = {
         "class":["order", "special"]
         ,"properties":{"orderNumber":42,"itemCount":3,"status":"pending"}
         ,"entities":[
@@ -29,8 +29,18 @@ describe('Siren Model: ', function () {
 
     beforeEach(function () {
 	    store = new Backbone.Siren.Store();
-        sirenModel = new Backbone.Siren.Model(settingsModelSiren, {store: store});
+        sirenModel = new Backbone.Siren.Model(rawSettingsModel, {store: store});
     });
+
+
+	describe('.constructor()', function () {
+		it('adds the model to the store, if a store is provided', function () {
+			var store = new Backbone.Siren.Store()
+			, model = new Backbone.Siren.Model(rawSettingsModel, {store: store});
+
+			expect(store.exists(model)).toBeTrue();
+		});
+	});
 
 
     describe('.url()', function () {
@@ -105,7 +115,7 @@ describe('Siren Model: ', function () {
 
     describe('.links()', function () {
         it('returns an array of the model\'s links', function () {
-            var expectedLinks = settingsModelSiren.links;
+            var expectedLinks = rawSettingsModel.links;
 
             expect(sirenModel.links()).toMatch(expectedLinks);
         });
@@ -172,7 +182,7 @@ describe('Siren Model: ', function () {
 
     describe('.entities', function () {
         it('returns an array of the model\'s sub-entities', function () {
-            expect(sirenModel.entities().length).toBe(settingsModelSiren.entities.length);
+            expect(sirenModel.entities().length).toBe(rawSettingsModel.entities.length);
         });
 
 
@@ -258,9 +268,9 @@ describe('Siren Model: ', function () {
 
 
 		it('parses the raw entity and initializes some settings on the model', function () {
-			Backbone.Siren.Model.prototype.parse.call(obj, settingsModelSiren, {});
+			Backbone.Siren.Model.prototype.parse.call(obj, rawSettingsModel, {});
 
-			expect(obj._data).toEqual(settingsModelSiren);
+			expect(obj._data).toEqual(rawSettingsModel);
 			expect(obj._entities).toBeArray();
 		});
 
@@ -268,7 +278,7 @@ describe('Siren Model: ', function () {
 		it('resolves all sub-entities', function () {
 			var options = {someSetting: 'blah'};
 
-			Backbone.Siren.Model.prototype.parse.call(obj, settingsModelSiren, options);
+			Backbone.Siren.Model.prototype.parse.call(obj, rawSettingsModel, options);
 			expect(obj.resolveEntities).toHaveBeenCalledWith(options);
 		});
 
@@ -276,24 +286,15 @@ describe('Siren Model: ', function () {
 		it('sets the isLoaded flag', function () {
 			this.stub(Backbone.Siren, 'isLoaded').returns('maybeitismaybeitisnt');
 
-			Backbone.Siren.Model.prototype.parse.call(obj, settingsModelSiren, {});
+			Backbone.Siren.Model.prototype.parse.call(obj, rawSettingsModel, {});
 			expect(obj.isLoaded).toEqual('maybeitismaybeitisnt');
 		});
 
 
 		it('returns all of the entity\'s properties', function () {
-			var result = Backbone.Siren.Model.prototype.parse.call(obj, settingsModelSiren, {});
+			var result = Backbone.Siren.Model.prototype.parse.call(obj, rawSettingsModel, {});
 
-			expect(result).toEqual(settingsModelSiren.properties);
-		});
-
-
-		it('adds the model to the store, if there is one', function () {
-			var options = {store: new Backbone.Siren.Store()};
-
-			Backbone.Siren.Model.prototype.parse.call(obj, settingsModelSiren, options);
-
-			expect(options.store.get('http://fake.url')).toBeDefined();
+			expect(result).toEqual(rawSettingsModel.properties);
 		});
 	});
 
@@ -310,7 +311,7 @@ describe('Siren Model: ', function () {
 	    it('returns an object with all the model\'s attributes as well as the attributes in any nested models', function () {
 
 		    var expected = _.extend(
-			    _.clone(settingsModelSiren.properties)
+			    _.clone(rawSettingsModel.properties)
 			    , {customer: sirenModel.get('customer').attributes}
 			    , {'order-items': []} // Empty, nested entities are represented as an empty array
 		    );
@@ -586,6 +587,6 @@ describe('Siren Model: ', function () {
 
 
     it('sets a Backbone Model\'s "attributes" hash to the siren "properties"', function () {
-        expect(sirenModel.attributes).toMatch(settingsModelSiren.properties);
+        expect(sirenModel.attributes).toMatch(rawSettingsModel.properties);
     });
 });

@@ -469,6 +469,38 @@ _.extend(BbSiren, {
 
 
 	/**
+	 *
+	 * @param {Backbone.Siren.Store} store
+	 * @param {Backbone.Siren.Model} model
+	 */
+	, addModelToStore: function (store, model) {
+		store.addModel(model);
+	}
+
+
+	/**
+	 * Adds a Collection to the store.
+	 * If it's a "current" collection, it also adds the "self" collection to the store.
+	 *
+	 * @param {Backbone.Siren.Store} store
+	 * @param {Backbone.Siren.Collection} collection
+	 */
+	, addCollectionToStore: function (store, collection, storeCurrentOnly) {
+		var currentUrl = collection.link('current');
+		if (currentUrl) {
+			store.addCollection(collection, 'current');
+		}
+
+		// @todo, by having objects automatically added to the store on instantiation we end up having to pass
+		// around store option.  It feels a bit messy doing things this way.  Consider re-visiting so that
+		// objects no longer add themselves to the store on instantiation.
+		if (! storeCurrentOnly) {
+			store.addCollection(collection, 'self');
+		}
+	}
+
+
+	/**
 	 * Parses a raw siren model into a Backbone.Siren.Model and maintains its representation in the store.
 	 *
 	 * @param {Object} rawModel
@@ -486,10 +518,7 @@ _.extend(BbSiren, {
 		}
 
 		if (model) {
-			// Only override the old model if the new one is fully loaded
-			if (BbSiren.isLoaded(rawModel)) {
-				model.constructor(rawModel);
-			}
+			model.update(rawModel);
 		} else {
 			model = new Backbone.Siren.Model(rawModel, options);
 		}
@@ -508,45 +537,31 @@ _.extend(BbSiren, {
 	, parseCollection: function (rawCollection, options) {
 		options = options || {};
 
-		var newModels, collection
-		, cachedCollections = []
+		var collection, currentUrl
+		, createNewCollectionFlag = true
 		, store = options.store;
 
 		if (store) {
-			// Check the store to see if we have cached version of the "self" collection.  If so, do we also have a "current" collection?
 			collection = store.get(rawCollection);
-
 			if (collection) {
-				cachedCollections.push(collection);
+				collection.update(rawCollection);
+				createNewCollectionFlag = false;
+				options.storeCurrentOnly = true;
+			}
 
-				var currentUrl = getRawEntityUrl(rawCollection, 'current');
-				if (currentUrl) {
-					collection = store.getCurrentCollection(rawCollection);
-					if (collection) {
-						cachedCollections.push(collection);
-					} else {
-						collection = new Backbone.Siren.Collection(rawCollection, options);
-					}
+			// Is it a "current" collection?
+			currentUrl = getRawEntityUrl(rawCollection, 'current');
+			if (currentUrl) {
+				collection = store.get(currentUrl);
+				if (collection) {
+					collection.update(rawCollection);
+				} else {
+					createNewCollectionFlag = true;
 				}
 			}
 		}
 
-		if (cachedCollections.length) {
-			// The last collection will be the "current" collection, if not, fallback to the "self" collection.
-			collection = _.last(cachedCollections);
-
-			// Only override the old collection if the new one is fully loaded
-			if (BbSiren.isLoaded(rawCollection)) {
-				// Update our collection and save references to the models
-				newModels = collection.parse(rawCollection);
-				collection.parseActions();
-
-				// Since a collection can have a "current" as well as a "self" representation, we need to make sure to update both.
-				_.each(cachedCollections, function (collection) {
-					collection.add(newModels);
-				});
-			}
-		} else {
+		if (createNewCollectionFlag) {
 			collection = new Backbone.Siren.Collection(rawCollection, options);
 		}
 
@@ -853,10 +868,6 @@ _.extend(BbSiren, {
 
 			this.resolveEntities(options);
 
-			if (options.store) {
-				options.store.addModel(this);
-			}
-
             return rawEntity.properties;
         }
 
@@ -929,6 +940,14 @@ _.extend(BbSiren, {
 	    }
 
 
+		, update: function (rawModel) {
+			if (BbSiren.isLoaded(rawModel)) {
+				this.parse(rawModel);
+				this.parseActions();
+			}
+		}
+
+
         /**
          * http://backbonejs.org/#Model-constructor
          *
@@ -943,12 +962,11 @@ _.extend(BbSiren, {
 
 			this.siren = {};
 
-			// the store
 			if (options.store) {
 				this.siren.store = options.store;
+				BbSiren.addModelToStore(options.store, this);
 			}
 
-			// entity options
 			if (options.ajaxOptions) {
 				this.siren.ajaxOptions = options.ajaxOptions;
 			}
@@ -989,14 +1007,10 @@ _.extend(BbSiren, {
             this._meta = rawEntity.properties || {};
 			this.isLoaded = BbSiren.isLoaded(rawEntity);
 
-            var models = [];
-            _.each(rawEntity.entities, function (entity) {
-                models.push(BbSiren.parse(entity, options));
+			// As an optimization step, we can use the preParsedModels, otherwise, parse all the sub-entities
+			var models = options.preParsedModels || _.map(rawEntity.entities, function (entity) {
+                return BbSiren.parse(entity, options);
             });
-
-			if (options.store) {
-				options.store.addCollection(this);
-			}
 
             return models;
         }
@@ -1067,6 +1081,19 @@ _.extend(BbSiren, {
 	    }
 
 
+		/**
+		 *
+		 * @param {Object} rawCollection
+		 * @param {Array} [models] When parsing, use these models instead of the raw models from the collection
+		 */
+		, update: function (rawCollection, models) {
+			if (BbSiren.isLoaded(rawModel)) {
+				this.add(this.parse(rawCollection, {preParsedModels: models}));
+				this.parseActions();
+			}
+		}
+
+
         /**
          * http://backbonejs.org/#Collection-constructor
          *
@@ -1083,6 +1110,7 @@ _.extend(BbSiren, {
 
 			if (options.store) {
 				this.siren.store = options.store;
+				BbSiren.addCollectionToStore(options.store, this, !!options.storeCurrentOnly);
 			}
 
 			if (options.ajaxOptions) {
