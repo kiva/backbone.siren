@@ -501,6 +501,26 @@ _.extend(BbSiren, {
 
 
 	/**
+	 * Wrapper for .toJSON()
+	 *
+	 * @param {*} val
+	 * @param {Object} options
+	 * @returns {*} A serialized version of the given val.
+	 */
+	, serializeData: function (val, options) {
+		options = options || {};
+
+		if (BbSiren.isHydratedObject(val)) {
+			if (_.indexOf(options.renderedEntities, val.url()) < 0 ) {
+				return val.toJSON(options);
+			}
+		} else {
+			return val;
+		}
+	}
+
+
+	/**
 	 * Parses a raw siren model into a Backbone.Siren.Model and maintains its representation in the store.
 	 *
 	 * @param {Object} rawModel
@@ -875,10 +895,15 @@ _.extend(BbSiren, {
         /**
          * http://backbonejs.org/#Model-toJSON
          *
+         * If passed an actionName, .toJSON() will only serialize the properties from the action's field's
+         *
          * @param {Object} options
          * @returns {Object}
          */
         , toJSON: function (options) {
+			options = options || {};
+			options.renderedEntities = options.renderedEntities || [];
+
             var action
             , json = {}
             , self = this;
@@ -887,19 +912,16 @@ _.extend(BbSiren, {
                 action = this.getActionByName(options.actionName);
             }
 
+			options.renderedEntities.push(this.url());
+
 		    if (action) {
                 _.each(action.fields, function (field) {
-                    var val = self.get(field.name);
-
-                    json[field.name] = BbSiren.isHydratedObject(val)
-                        ? val.toJSON({actionName: field.action})
-                        : val;
+	                options.actionName = field.action;
+	                json[field.name] = BbSiren.serializeData(self.get(field.name), options);
                 });
             } else {
                 _.each(this.attributes, function (val, name) {
-                    json[name] = (val instanceof Backbone.Siren.Model) || (val instanceof Backbone.Siren.Collection)
-                        ? val.toJSON(options)
-                        : val;
+	                json[name] = BbSiren.serializeData(val, options);
                 });
             }
 
@@ -1038,7 +1060,10 @@ _.extend(BbSiren, {
 	     * @returns {Object}
 	     */
 	    , toJSON: function (options) {
-		    options  = options || {};
+			options = options || {};
+			options.renderedEntities = options.renderedEntities || [];
+
+			options.renderedEntities.push(this.url());
 
 //			    if (! options.isNestedBatch) { // @todo WIP
 //				    delete options.actionName;

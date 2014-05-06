@@ -200,6 +200,33 @@ describe('Backbone.Siren: ', function () {
 	});
 
 
+	describe('.serializeData()', function () {
+		it('returns a serialized version of the model or collection', function () {
+			this.spy(Backbone.Siren.Model.prototype, 'toJSON');
+			this.spy(Backbone.Siren.Collection.prototype, 'toJSON');
+
+			var settingsModel = new Backbone.Siren.Model(rawSettingsModel);
+			Backbone.Siren.serializeData(settingsModel);
+			expect(settingsModel.toJSON).toHaveBeenCalled();
+
+			var collection = new Backbone.Siren.Collection(rawCollection);
+			Backbone.Siren.serializeData(collection);
+			expect(collection.toJSON).toHaveBeenCalled();
+		});
+
+
+		it('returns the value if it\'s not a Model or Collection', function () {
+			expect(Backbone.Siren.serializeData('two')).toBe('two');
+		});
+
+
+		it('returns `undefined` if val\'s already been rendered', function () {
+			var settingsModel = new Backbone.Siren.Model(rawSettingsModel);
+			expect(Backbone.Siren.serializeData(settingsModel, {renderedEntities: [settingsModel.url()]})).not.toBeDefined();
+		});
+	});
+
+
 	describe('.parseCollection()', function () {
 		it('creates a new collection from a raw collection', function () {
 			var collection = Backbone.Siren.parseCollection(rawCurrentCollection);

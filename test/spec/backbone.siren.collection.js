@@ -328,7 +328,14 @@ describe('Siren Collection: ', function () {
 
 
         it('returns an empty array if the collection does not have any matching attributes for the given action', function () {
-            var mySirenCollection = new Backbone.Siren.Collection({actions: [{name: 'do-test'}]});
+            var mySirenCollection = new Backbone.Siren.Collection({
+	            actions: [{
+	                name: 'do-test'
+                }]
+	            , links: [
+		            {rel: ['test'], href:'x.io'}
+	            ]
+            });
 
             expect(mySirenCollection.toJSON({actionName: 'do-test'})).toEqual([]);
         });
