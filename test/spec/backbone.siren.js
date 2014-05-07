@@ -7,7 +7,7 @@ describe('Backbone.Siren: ', function () {
 	// @todo quick fix for upgrade to buster 0.7
 	var expect = buster.expect;
 
-    var settingsModelSiren = {
+    var rawSettingsModel = {
 	    "class":["order", "special"]
 	    ,"properties":{"orderNumber":42,"itemCount":3,"status":"pending"}
 	    ,"entities":[
@@ -23,19 +23,62 @@ describe('Backbone.Siren: ', function () {
 	    ]
     };
 
-	var sirenCollection = {
+	var rawCollection = {
 		"class": ["collection"]
 		, "entities": [
 			{
 				"links": [
-					{"rel":["self"],"href":"http://api.x.io/orders/41"}
+					{"rel": ["self"], "href":"http://api.x.io/orders/41"}
 				]
 			}
 			, {
 				"links": [
-					{"rel":["self"],"href":"http://api.x.io/orders/42"}
+					{"rel": ["self"],  "href":"http://api.x.io/orders/42"}
 				]
 			}
+		]
+		, links: [
+			{"rel": ["self"], "href":"http://api.x.io/orders"}
+		]
+	};
+
+
+	var rawCurrentCollection = {
+		entities: [
+			{
+				"links": [
+					{"rel": ["self"], "href":"http://api.x.io/orders/43"}
+				]
+			}
+			, {
+				"links": [
+					{"rel": ["self"],  "href":"http://api.x.io/orders/44"}
+				]
+			}
+		]
+		, links: [
+			{rel: ['self'], href: 'http://api.x.io/orders'}
+			, {rel: ['current'], href: 'http://api.x.io/orders?page=30'}
+		]
+	};
+
+
+	var rawCurrentCollection2 = {
+		entities: [
+			{
+				"links": [
+					{"rel": ["self"], "href":"http://api.x.io/orders/45"}
+				]
+			}
+			, {
+				"links": [
+					{"rel": ["self"],  "href":"http://api.x.io/orders/46"}
+				]
+			}
+		]
+		, links: [
+			{rel: ['self'], href: 'http://api.x.io/orders'}
+			, {rel: ['current'], href: 'http://api.x.io/orders?page=31'}
 		]
 	};
 
@@ -43,14 +86,14 @@ describe('Backbone.Siren: ', function () {
 	describe('.isHydratedObject', function () {
 
 		it('checks if an object is an instantiated Backbone.Siren object', function () {
-			var bbSirenModel = new Backbone.Siren.Model(settingsModelSiren);
+			var bbSirenModel = new Backbone.Siren.Model(rawSettingsModel);
 
-			expect(Backbone.Siren.isHydratedObject(settingsModelSiren)).toBeFalse();
+			expect(Backbone.Siren.isHydratedObject(rawSettingsModel)).toBeFalse();
 			expect(Backbone.Siren.isHydratedObject(bbSirenModel)).toBeTrue();
 
-			var bbSirenCollection = new Backbone.Siren.Collection(sirenCollection);
+			var bbSirenCollection = new Backbone.Siren.Collection(rawCollection);
 
-			expect(Backbone.Siren.isHydratedObject(sirenCollection)).toBeFalse();
+			expect(Backbone.Siren.isHydratedObject(rawCollection)).toBeFalse();
 			expect(Backbone.Siren.isHydratedObject(bbSirenCollection)).toBeTrue();
 		});
 
@@ -80,11 +123,11 @@ describe('Backbone.Siren: ', function () {
 	describe('.isCollection', function () {
 
 		it('checks if a backbone.siren object is a collection', function () {
-			var bbSirenModel = new Backbone.Siren.Model(settingsModelSiren);
-			var bbSirenCollection = new Backbone.Siren.Collection(sirenCollection);
+			var bbSirenModel = new Backbone.Siren.Model(rawSettingsModel);
+			var bbSirenCollection = new Backbone.Siren.Collection(rawCollection);
 
-			expect(Backbone.Siren.isCollection(settingsModelSiren)).toBeFalse();
-			expect(Backbone.Siren.isCollection(sirenCollection)).toBeFalse();
+			expect(Backbone.Siren.isCollection(rawSettingsModel)).toBeFalse();
+			expect(Backbone.Siren.isCollection(rawCollection)).toBeFalse();
 			expect(Backbone.Siren.isCollection(bbSirenModel)).toBeFalse();
 			expect(Backbone.Siren.isCollection(bbSirenCollection)).toBeTrue();
 		});
@@ -92,41 +135,172 @@ describe('Backbone.Siren: ', function () {
 
 
 	describe('.isRawCollection', function () {
-
 		it('checks if a siren json object is a collection', function () {
-			var bbSirenModel = new Backbone.Siren.Model(settingsModelSiren);
-			var bbSirenCollection = new Backbone.Siren.Collection(sirenCollection);
+			var bbSirenModel = new Backbone.Siren.Model(rawSettingsModel);
+			var bbSirenCollection = new Backbone.Siren.Collection(rawCollection);
 
-			expect(Backbone.Siren.isRawCollection(settingsModelSiren)).toBeFalse();
+			expect(Backbone.Siren.isRawCollection(rawSettingsModel)).toBeFalse();
 			expect(Backbone.Siren.isRawCollection(bbSirenModel)).toBeFalse();
 			expect(Backbone.Siren.isRawCollection(bbSirenCollection)).toBeFalse();
-			expect(Backbone.Siren.isRawCollection(sirenCollection)).toBeTrue();
+			expect(Backbone.Siren.isRawCollection(rawCollection)).toBeTrue();
 		});
 	});
 
 
-	describe('.isRawError', function () {
-
+	describe('.isRawError()', function () {
 		it('checks if a raw siren object is an error', function () {
-			var bbSirenModel = new Backbone.Siren.Model(settingsModelSiren);
+			var bbSirenModel = new Backbone.Siren.Model(rawSettingsModel);
 
-			expect(Backbone.Siren.isRawError(settingsModelSiren)).toBeFalse();
+			expect(Backbone.Siren.isRawError(rawSettingsModel)).toBeFalse();
 			expect(Backbone.Siren.isRawError(bbSirenModel)).toBeFalse();
 			expect(Backbone.Siren.isRawError({'class': ['error']})).toBeTrue();
 		});
 	});
 
 
-    describe('.parse', function () {
+	describe('.addModelToStore()', function () {
+		it('adds a model to the store', function () {
+			var model = new Backbone.Siren.Collection(rawSettingsModel);
+			var store = new Backbone.Siren.Store();
 
+			Backbone.Siren.addModelToStore(store, model);
+			expect(store.get(model.url())).toBeDefined();
+		});
+	});
+
+
+	describe('.addCollectionToStore()', function () {
+		it('adds a collection to the store', function () {
+			var collection = new Backbone.Siren.Collection(rawCollection);
+			var store = new Backbone.Siren.Store();
+
+			Backbone.Siren.addCollectionToStore(store, collection);
+			expect(store.get(collection.url())).toBeDefined();
+		});
+
+
+		it('adds current collections to the store, as well as the self collection', function () {
+			var currentCollection = new Backbone.Siren.Collection(rawCurrentCollection);
+			var store = new Backbone.Siren.Store();
+
+			Backbone.Siren.addCollectionToStore(store, currentCollection);
+			expect(store.get(currentCollection.link('self'))).toBeDefined();
+			expect(store.get(currentCollection.link('current'))).toBeDefined();
+		});
+
+
+		it('does not add the "self" collection to the store if `storeCurrentOnly` is set to `true`', function () {
+			var currentCollection = new Backbone.Siren.Collection(rawCurrentCollection);
+			var store = new Backbone.Siren.Store();
+
+			Backbone.Siren.addCollectionToStore(store, currentCollection, true);
+			expect(store.get(currentCollection.link('self'))).not.toBeDefined();
+			expect(store.get(currentCollection.link('current'))).toBeDefined();
+		});
+	});
+
+
+	describe('.parseCollection()', function () {
+		it('creates a new collection from a raw collection', function () {
+			var collection = Backbone.Siren.parseCollection(rawCurrentCollection);
+			expect(collection instanceof Backbone.Siren.Collection).toBeTrue();
+		});
+
+
+		it('updates an existing collection if it is already cached', function () {
+			var store = new Backbone.Siren.Store();
+			var collection = new Backbone.Siren.Collection(rawCollection, {store: store});
+
+			// We tag the collection so that we know it's the same one
+			collection.tagged = true;
+
+			collection = Backbone.Siren.parseCollection(rawCollection, {store: store});
+
+			// Check the store
+			expect(store.get(getRawEntityUrl(rawCollection, 'self')).tagged).toBeTrue();
+
+			// Check the returned collection
+			expect(collection.tagged).toBeTrue();
+		});
+
+
+		it('updates the "self" and "current" collections if they are both in the cache', function () {
+			var store = new Backbone.Siren.Store();
+			var collection = new Backbone.Siren.Collection(rawCurrentCollection, {store: store});
+			var collection2 = new Backbone.Siren.Collection(rawCurrentCollection2, {store: store});
+
+			// We tag the collection so that we know it's the same one
+			collection.tagged = true;
+			collection2.tagged = true;
+
+			// Update collection2
+			collection2 = Backbone.Siren.parseCollection(rawCurrentCollection2, {store: store});
+
+			// Check the store
+			expect(store.get(getRawEntityUrl(rawCurrentCollection2, 'self')).tagged).toBeTrue();
+			expect(store.get(getRawEntityUrl(rawCurrentCollection2, 'current')).tagged).toBeTrue();
+
+			// Check the returned collection
+			expect(collection.tagged).toBeTrue();
+			expect(collection2.tagged).toBeTrue();
+		});
+
+
+		it('adds the "current" collection and the "self" collection to the store', function () {
+			var store = new Backbone.Siren.Store();
+
+			Backbone.Siren.parseCollection(rawCurrentCollection, {store: store});
+
+			var cachedCurrentCollection = store.data['http://api.x.io/orders?page=30'];
+			expect(cachedCurrentCollection).toBeDefined();
+
+			var cachedSelfCollection = store.data['http://api.x.io/orders'];
+			expect(cachedSelfCollection).toBeDefined();
+		});
+
+
+		it('adds the "current" collection to the store and updates the cached "self" collection', function () {
+			var store = new Backbone.Siren.Store();
+
+			// Add first collection to the store
+			Backbone.Siren.parseCollection(rawCurrentCollection, {store: store});
+
+			// Add a new collection
+			Backbone.Siren.parseCollection(rawCurrentCollection2, {store: store});
+
+			// It should have been cached
+			var cachedCurrentCollection = store.data['http://api.x.io/orders?page=31'];
+			expect(cachedCurrentCollection).toBeDefined();
+
+			// The "self" collection should have been added to
+			var cachedSelfCollection = store.data['http://api.x.io/orders'];
+			expect(cachedSelfCollection.size()).toBe(4);
+		});
+
+
+		it('leaves the matching, cached, "loaded" collection un-changed if parsing a "linked" collection', function () {
+			var store = new Backbone.Siren.Store();
+			var collection = new Backbone.Siren.Collection(rawCollection, {store: store});
+
+			collection = Backbone.Siren.parseCollection({'class': ['collection'], href: 'http://api.x.io/orders'}, {store: store});
+			expect(collection.size()).toBe(2);
+
+			// Now check what we have in the store
+			collection = store.get(collection.url());
+			expect(collection.size()).toBe(2);
+		});
+	});
+
+
+    describe('.parse', function () {
 	    it('parses a raw Collection', function () {
-		    var bbSiren = Backbone.Siren.parse(settingsModelSiren);
+		    var bbSiren = Backbone.Siren.parse(rawSettingsModel);
 		    expect(bbSiren instanceof Backbone.Siren.Model).toBeTrue();
 	    });
 
 
 	    it('parses a raw Model', function () {
-		    var bbSiren = Backbone.Siren.parse(sirenCollection);
+		    var bbSiren = Backbone.Siren.parse(rawCollection);
 		    expect(bbSiren instanceof Backbone.Siren.Collection).toBeTrue();
 	    });
 
@@ -140,7 +314,6 @@ describe('Backbone.Siren: ', function () {
 
 
     describe('.ajax', function () {
-
         it('wraps Backbone.ajax', function () {
             this.stub(Backbone, 'ajax');
 
@@ -151,7 +324,6 @@ describe('Backbone.Siren: ', function () {
 
 
 	describe('.parseChain()', function () {
-
 		it('parses a url chain string into an array', function () {
 			var chain = Backbone.Siren.parseChain('http://api.io/resource');
 			expect(chain).toEqual(['http://api.io/resource']);
@@ -178,7 +350,6 @@ describe('Backbone.Siren: ', function () {
 
 
 	describe('.stringifyChain()', function () {
-
 		it('converts a chain array into a url string', function () {
 			var chain = Backbone.Siren.stringifyChain(['http://api.io/resource']);
 			expect(chain).toEqual('http://api.io/resource');
@@ -205,7 +376,6 @@ describe('Backbone.Siren: ', function () {
 
 
 	describe('.resolve', function () {
-
 		it('calls .resolveOne if passed a string', function () {
 			this.stub(Backbone.Siren, 'resolveOne');
 			this.stub(Backbone.Siren, 'resolveMany');
@@ -234,7 +404,7 @@ describe('Backbone.Siren: ', function () {
 
 		beforeEach(function () {
 			server = sinon.fakeServer.create();
-			server.respondWith(JSON.stringify(settingsModelSiren));
+			server.respondWith(JSON.stringify(rawSettingsModel));
 		});
 
 

@@ -27,6 +27,41 @@ describe('Siren Collection: ', function () {
     });
 
 
+	describe('.constructor()', function () {
+		it('constructs a Backbone.Siren.Collection instance', function () {
+			var collection = new Backbone.Siren.Collection();
+			expect(collection instanceof Backbone.Siren.Collection).toBeTrue();
+		});
+
+
+		it('calls .parse()', function () {
+			this.spy(Backbone.Siren.Collection.prototype, 'parse');
+
+			var collection = new Backbone.Siren.Collection({href: 'http://x.io'});
+			expect(collection.parse).toHaveBeenCalled();
+		});
+
+
+		it('adds the collection to the optional store', function () {
+			var store = new Backbone.Siren.Store();
+			var collection = new Backbone.Siren.Collection({href: 'http://x.io'}, {store: store});
+			var cachedCollection = store.data['http://x.io'];
+
+			expect(collection.siren.store).toBeDefined();
+			expect(cachedCollection).toBeDefined();
+
+		});
+
+
+		it('adds ajaxOptions onto the collection', function () {
+			var collection = new Backbone.Siren.Collection({href: 'http://x.io'}, {ajaxOptions: {foo: 'shnickens'}});
+
+			expect(collection.siren.ajaxOptions).toBeObject();
+			expect(collection.siren.ajaxOptions.foo).toBe('shnickens');
+		});
+	});
+
+
     describe('.url()', function () {
 	    it('is a proxy to this.link(\'self\')', function () {
 		    this.stub(sirenCollection, 'link');
@@ -256,20 +291,26 @@ describe('Siren Collection: ', function () {
 		});
 
 
-		it('returns all of the collection\'s models', function () {
+		it('creates and returns all of the collection\'s models', function () {
 			var result = Backbone.Siren.Collection.prototype.parse.call(obj, loansCollectionSiren, {});
 
-			expect(result).toBeArray();
 			expect(result.length).toBe(3);
+			_.each(result, function(model) {
+				expect(model instanceof Backbone.Siren.Model).toBeTrue();
+			});
 		});
 
 
-		it('adds the collection to the store, if there is one', function () {
-			var options = {store: new Backbone.Siren.Store()};
+		it('parses each of the collection\'s models with the same options', function () {
+			var arr = [];
 
-			Backbone.Siren.Collection.prototype.parse.call(obj, loansCollectionSiren, options);
+			this.stub(Backbone.Siren.Model.prototype, 'parse', function (obj, options) {
+				arr.push(options);
+				expect(options.blah).toBe('shmah');
+			});
 
-			expect(options.store.get('http://current.url')).toBeDefined();
+			Backbone.Siren.Collection.prototype.parse.call(obj, loansCollectionSiren, {blah: 'shmah'});
+			expect(arr.length).toBe(3);
 		});
 	});
 
@@ -479,6 +520,49 @@ describe('Siren Collection: ', function () {
 		});
 	});
 
+
+	describe('.update()', function () {
+		var myRawCollection = {
+			'class': ['collection', 'updated']
+			, entities: [
+				{
+					links: [
+						{rel: ['self'], href: 'http://x.io/12'}
+					]
+				}
+			]
+			, links: [
+				{rel: ['self'], href: 'http://x.io'}
+			]
+		};
+
+
+		it('adds models from a raw collection entity to an existing collection', function () {
+			var originalSize = sirenCollection.size();
+
+			sirenCollection.update(myRawCollection);
+			expect(sirenCollection.size()).toBe(originalSize + myRawCollection.entities.length);
+		});
+
+
+		it('updates all properties on the collection', function () {
+			sirenCollection.update(myRawCollection);
+			expect(sirenCollection.url()).toBe(myRawCollection.links[0].href);
+			expect(sirenCollection.actions().length).toBe(0);
+			expect(sirenCollection.classes()).toEqual(myRawCollection['class']);
+		});
+
+
+		it('does not alter the collection if updating with a "linked" entity', function () {
+			sirenCollection.update({href: 'http://x.io'});
+			expect(sirenCollection.size()).toBe(3);
+		});
+
+
+		it('returns the collection', function () {
+			expect(sirenCollection.update(myRawCollection)).toBe(sirenCollection);
+		});
+	});
 
 
 

@@ -1,16 +1,5 @@
 'use strict';
 
-function newEmptySirenCollection(sirenClass, url) {
-	return new Backbone.Siren.Collection({
-		'class': sirenClass
-		, links: [
-			{
-				rel: ['self'], href: url
-			}
-		]
-	});
-}
-
 
 /**
  * Stores Siren objects in memory
@@ -42,31 +31,11 @@ Store.prototype = {
 	 * Adds a collection to the store.
 	 *
 	 * @param {Backbone.Siren.Collection} collection
+	 * @param {String} [rel="self"] - Can be "self" or "current"
 	 * @returns {Backbone.Siren.Store}
 	 */
-	, addCollection: function (collection) {
-		var selfCollection
-		, self = this
-		, currentUrl = collection.link('current')
-		, selfUrl = collection.url();
-
-		if (currentUrl) {
-			// Make sure there is a "self" collection, models should also be added there.
-			selfCollection = this.get(selfUrl);
-			if (! selfCollection) {
-				selfCollection = newEmptySirenCollection(collection.classes(), selfUrl);
-				this.data[selfUrl] = selfCollection;
-			}
-
-			selfCollection.add(collection.models);
-		}
-
-		// Add each model to the store
-		collection.each(function (model) {
-			self.addModel(model);
-		});
-
-		this.data[currentUrl || selfUrl] = collection;
+	, addCollection: function (collection, rel) {
+		this.data[collection.link(rel || 'self')] = collection;
 		return this;
 	}
 
@@ -74,11 +43,29 @@ Store.prototype = {
 	/**
 	 *
 	 * @param {Object|String} rawEntityOrUrl
-	 * @returns {Backbone.Siren.Model}
+	 * @returns {Backbone.Siren.Model|Backbone.Siren.Collection}
 	 */
 	, get: function (rawEntityOrUrl) {
-		/*global getRawEntityUrl*/
-		return this.data[typeof rawEntityOrUrl == 'object'? getRawEntityUrl(rawEntityOrUrl, 'self'): rawEntityOrUrl];
+		/*global getRawEntitySelfUrl*/
+		return this.data[typeof rawEntityOrUrl == 'object'? getRawEntitySelfUrl(rawEntityOrUrl): rawEntityOrUrl];
+	}
+
+
+	/**
+	 * Get the matching "current" collection for the given rawCollection
+	 *
+	 * @param {Object} rawCollection
+	 * @returns {Backbone.Siren.Collection}
+	 */
+	, getCurrentCollection: function (rawCollection) {
+		/*global BbSiren, getRawEntityUrl, getRawEntitySelfUrl */
+
+		if (BbSiren.isLoaded(rawCollection)) {
+			return this.data[getRawEntityUrl(rawCollection, 'current')];
+		} else {
+			// The entity is not loaded, so we don't know if it references a "current" collection or a "self" collection
+			return this.data[getRawEntitySelfUrl(rawCollection)];
+		}
 	}
 
 
