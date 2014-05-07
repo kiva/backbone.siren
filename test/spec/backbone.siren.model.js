@@ -24,7 +24,65 @@ describe('Siren Model: ', function () {
 		    , {"rel":["next"],"href": "http://api.x.io/orders/43"}
         ]
     }
-    , sirenModel, store;
+
+	, rawCircularModel = {
+		// Level one
+		name: 'l1'
+		, properties: {
+			level: 'one'
+		}
+		, entities: [
+			// Level two
+			{
+				name: 'l2'
+				, properties: {
+				level: 'two'
+			}
+				, entities: [
+				// Level three - back to "one"
+				{
+					name: 'l3'
+					, properties: {
+					level: 'one'
+				}
+					, entities: [
+					// Level four - back to "two"
+					{
+						name: 'l4'
+						, properties: {
+						level: 'two'
+					}
+						, entities: []
+						, links: [
+						{rel: ['self'], href: 'x.io/two'}
+					]
+					}
+				]
+					, links: [
+					{rel: ['self'], href: 'x.io/one'}
+				]
+				}
+				, {
+					name: 'random'
+					, properties: {
+						random: 'yes'
+					}
+					, entities: []
+					, links: [
+						{rel: ['self'], href: 'x.io/random'}
+					]
+				}
+			]
+				, links: [
+				{rel: ['self'], href: 'x.io/two'}
+			]
+			}
+		]
+		, links: [
+			{rel: ['self'], href: 'x.io/one'}
+		]
+	}
+	, sirenModel, store;
 
 
     beforeEach(function () {
@@ -342,7 +400,13 @@ describe('Siren Model: ', function () {
         it('returns an empty object if the model does not have any matching attributes for the given action', function () {
 	        // @todo should probably throw instead.
 
-            var mySirenModel = new Backbone.Siren.Model({actions: [{name: 'do-test'}]});
+            var mySirenModel = new Backbone.Siren.Model({actions: [{
+	                name: 'do-test'
+                }]
+	            , links: [
+		            {rel: ['test'], href:'x.io'}
+	            ]
+            });
 
             expect(mySirenModel.toJSON({actionName: 'do-test'})).toEqual({});
         });
@@ -354,6 +418,31 @@ describe('Siren Model: ', function () {
 
 	        expect(model.toJSON()).toEqual(props);
         });
+
+
+	    it('will only parse an entity once', function () {
+		    var mySirenModel = new Backbone.Siren.Model(rawCircularModel);
+		    var serializedData = mySirenModel.toJSON();
+
+		    expect(serializedData.l2.random).toBeDefined();
+		    expect(serializedData.l2.l3).not.toBeDefined();
+
+		    // Nest the circular model one level deeper
+		    mySirenModel = new Backbone.Siren.Model({
+			    properties: {
+				    level: 'top'
+			    }
+			    , entities: [rawCircularModel]
+			    , links: [
+				    {rel: ['self'], href: 'x.io/top'}
+			    ]
+		    });
+
+		    serializedData = mySirenModel.toJSON();
+
+		    expect(serializedData.l1.l2.random).toBeDefined();
+		    expect(serializedData.l1.l2.l3).not.toBeDefined();
+	    });
     });
 
 
