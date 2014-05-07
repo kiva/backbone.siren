@@ -502,6 +502,12 @@ describe('Backbone.Siren: ', function () {
 			var sirenApi = new Backbone.Siren('http://blah.io');
 			expect(sirenApi.entityPathToUrl('some/path')).toBe('http://blah.io/some/path');
 		});
+
+
+		it('returns the url, as-is, if it\'s an absolute url', function () {
+			var sirenApi = new Backbone.Siren('http://blah.io');
+			expect(sirenApi.entityPathToUrl('http://blah.io/some/path')).toBe('http://blah.io/some/path');
+		});
 	});
 
 

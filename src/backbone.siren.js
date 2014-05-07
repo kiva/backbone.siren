@@ -1162,6 +1162,7 @@ BbSiren.prototype = {
 	init: function (apiRoot, options) {
 		this.apiRoot = apiRoot;
 		this.options = options;
+		this.isAbsoluteRegExp = new RegExp('^(?:[a-z]+:)?//', 'i');
 	}
 
 
@@ -1172,6 +1173,10 @@ BbSiren.prototype = {
 	 * @returns {String}
 	 */
 	, entityPathToUrl: function (entityPath) {
+		if (this.isAbsoluteRegExp.test(entityPath)) {
+			return entityPath;
+		}
+
 		return this.apiRoot + '/' + entityPath;
 	}
 
