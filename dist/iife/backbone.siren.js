@@ -1,5 +1,5 @@
 /*
-* Backbone.Siren v0.3.3
+* Backbone.Siren v0.3.4
 *
 * Copyright (c) 2014 Kiva Microfunds
 * Licensed under the MIT license.
@@ -35,7 +35,7 @@
 	
 	
 	/**
-	 * Gets a link url by name from a raw siren enity
+	 * Gets a link url by name from a raw siren entity
 	 *
 	 * @param {Object} rawEntity
 	 * @param {String} name
@@ -477,6 +477,127 @@
 		}
 	
 	
+		/**
+		 *
+		 * @param {Backbone.Siren.Store} store
+		 * @param {Backbone.Siren.Model} model
+		 */
+		, addModelToStore: function (store, model) {
+			store.addModel(model);
+		}
+	
+	
+		/**
+		 * Adds a Collection to the store.
+		 * If it's a "current" collection, it also adds the "self" collection to the store.
+		 *
+		 * @param {Backbone.Siren.Store} store
+		 * @param {Backbone.Siren.Collection} collection
+		 */
+		, addCollectionToStore: function (store, collection, storeCurrentOnly) {
+			var currentUrl = collection.link('current');
+			if (currentUrl) {
+				store.addCollection(collection, 'current');
+			}
+	
+			// @todo, by having objects automatically added to the store on instantiation we end up having to pass
+			// around store option.  It feels a bit messy doing things this way.  Consider re-visiting so that
+			// objects no longer add themselves to the store on instantiation.
+			if (! storeCurrentOnly) {
+				store.addCollection(collection, 'self');
+			}
+		}
+	
+	
+		/**
+		 * Wrapper for .toJSON()
+		 *
+		 * @param {*} val
+		 * @param {Object} options
+		 * @returns {*} A serialized version of the given val.
+		 */
+		, serializeData: function (val, options) {
+			options = options || {};
+	
+			if (BbSiren.isHydratedObject(val)) {
+				if (_.indexOf(options.renderedEntities, val.url()) < 0 ) {
+					return val.toJSON(options);
+				}
+			} else {
+				return val;
+			}
+		}
+	
+	
+		/**
+		 * Parses a raw siren model into a Backbone.Siren.Model and maintains its representation in the store.
+		 *
+		 * @param {Object} rawModel
+		 * @param {Object} options
+		 * @returns {Backbone.Model}
+		 */
+		, parseModel: function (rawModel, options) {
+			options = options || {};
+	
+			var model
+			, store = options.store;
+	
+			if (store) {
+				model = store.get(rawModel);
+			}
+	
+			if (model) {
+				model.update(rawModel);
+			} else {
+				model = new Backbone.Siren.Model(rawModel, options);
+			}
+	
+			return model;
+		}
+	
+	
+		/**
+		 * Parses a raw siren collection into a Backbone.Siren.Collection and maintains its representation in the store.
+		 *
+		 * @param rawCollection
+		 * @param options
+		 * @returns {*}
+		 */
+		, parseCollection: function (rawCollection, options) {
+			options = options || {};
+	
+			var collection, currentUrl
+			, createNewCollectionFlag = true
+			, store = options.store;
+	
+			if (store) {
+				collection = store.get(rawCollection);
+				if (collection) {
+					collection.update(rawCollection);
+					createNewCollectionFlag = false;
+					options.storeCurrentOnly = true;
+				}
+	
+				// Is it a "current" collection?
+				currentUrl = getRawEntityUrl(rawCollection, 'current');
+				if (currentUrl) {
+					collection = store.get(currentUrl);
+					if (collection) {
+						collection.update(rawCollection);
+					} else {
+						createNewCollectionFlag = true;
+					}
+				}
+			}
+	
+			if (createNewCollectionFlag) {
+				collection = new Backbone.Siren.Collection(rawCollection, options);
+			}
+	
+			return collection;
+		}
+	
+	
 	    /**
 	     * Creates a Backbone.Siren model, collection, or error from a Siren object
 	     *
@@ -487,13 +608,14 @@
 	    , parse: function (rawEntity, options) {
 			options = options || {};
 	
-	        if (BbSiren.isRawCollection(rawEntity)) {
-	            return new Backbone.Siren.Collection(rawEntity, options);
+			if (BbSiren.isRawCollection(rawEntity)) {
+				return this.parseCollection(rawEntity, options);
 	        } else if (BbSiren.isRawError(rawEntity)) {
 	            // @todo how should we represent errors?  For now, treat them as regular Models...
+				// @todo are we storing errors in the store?  If so, don't...
 	            return new Backbone.Siren.Model(rawEntity, options);
 	        } else {
-	            return new Backbone.Siren.Model(rawEntity, options);
+				return this.parseModel(rawEntity, options);
 	        }
 	    }
 	
@@ -752,6 +874,7 @@
 	                , entity: bbSiren
 	            };
 	
+				// "name" is not officially supported by the siren spec. See https://github.com/kevinswiber/siren/pull/33
 	            if (name) {
 	                this.set(name, bbSiren);
 	                entityItem.name = name;
@@ -774,10 +897,6 @@
 	
 				this.resolveEntities(options);
 	
-				if (options.store) {
-					options.store.add(this);
-				}
-	
 	            return rawEntity.properties;
 	        }
 	
@@ -785,10 +904,15 @@
 	        /**
 	         * http://backbonejs.org/#Model-toJSON
 	         *
+	         * If passed an actionName, .toJSON() will only serialize the properties from the action's field's
+	         *
 	         * @param {Object} options
 	         * @returns {Object}
 	         */
 	        , toJSON: function (options) {
+				options = options || {};
+				options.renderedEntities = options.renderedEntities || [];
+	
 	            var action
 	            , json = {}
 	            , self = this;
@@ -797,19 +921,16 @@
 	                action = this.getActionByName(options.actionName);
 	            }
 	
+				options.renderedEntities.push(this.url());
+	
 			    if (action) {
 	                _.each(action.fields, function (field) {
-	                    var val = self.get(field.name);
-	
-	                    json[field.name] = BbSiren.isHydratedObject(val)
-	                        ? val.toJSON({actionName: field.action})
-	                        : val;
+		                options.actionName = field.action;
+		                json[field.name] = BbSiren.serializeData(self.get(field.name), options);
 	                });
 	            } else {
 	                _.each(this.attributes, function (val, name) {
-	                    json[name] = (val instanceof Backbone.Siren.Model) || (val instanceof Backbone.Siren.Collection)
-	                        ? val.toJSON(options)
-	                        : val;
+		                json[name] = BbSiren.serializeData(val, options);
 	                });
 	            }
 	
@@ -850,6 +971,16 @@
 		    }
 	
 	
+			, update: function (rawModel) {
+				if (BbSiren.isLoaded(rawModel)) {
+					this.set(this.parse(rawModel));
+					this.parseActions();
+				}
+	
+				return this;
+			}
+	
+	
 	        /**
 	         * http://backbonejs.org/#Model-constructor
 	         *
@@ -864,12 +995,11 @@
 	
 				this.siren = {};
 	
-				// the store
 				if (options.store) {
 					this.siren.store = options.store;
+					BbSiren.addModelToStore(options.store, this);
 				}
 	
-				// entity options
 				if (options.ajaxOptions) {
 					this.siren.ajaxOptions = options.ajaxOptions;
 				}
@@ -910,14 +1040,10 @@
 	            this._meta = rawEntity.properties || {};
 				this.isLoaded = BbSiren.isLoaded(rawEntity);
 	
-	            var models = [];
-	            _.each(rawEntity.entities, function (entity) {
-	                models.push(new Backbone.Siren.Model(entity, options));
+				// As an optimization step, we can use the preParsedModels, otherwise, parse all the sub-entities
+				var models = options.preParsedModels || _.map(rawEntity.entities, function (entity) {
+	                return BbSiren.parse(entity, options);
 	            });
-	
-				if (options.store) {
-					options.store.add(this);
-				}
 	
 	            return models;
 	        }
@@ -943,7 +1069,10 @@
 		     * @returns {Object}
 		     */
 		    , toJSON: function (options) {
-			    options  = options || {};
+				options = options || {};
+				options.renderedEntities = options.renderedEntities || [];
+	
+				options.renderedEntities.push(this.url());
 	
 	//			    if (! options.isNestedBatch) { // @todo WIP
 	//				    delete options.actionName;
@@ -988,6 +1117,21 @@
 		    }
 	
 	
+			/**
+			 *
+			 * @param {Object} rawCollection
+			 * @param {Array} [models] When parsing, use these models instead of the raw models from the collection
+			 */
+			, update: function (rawCollection, models) {
+				if (BbSiren.isLoaded(rawCollection)) {
+					this.add(this.parse(rawCollection, {preParsedModels: models}));
+					this.parseActions();
+				}
+	
+				return this;
+			}
+	
+	
 	        /**
 	         * http://backbonejs.org/#Collection-constructor
 	         *
@@ -1004,6 +1148,7 @@
 	
 				if (options.store) {
 					this.siren.store = options.store;
+					BbSiren.addCollectionToStore(options.store, this, !!options.storeCurrentOnly);
 				}
 	
 				if (options.ajaxOptions) {
@@ -1026,6 +1171,7 @@
 		init: function (apiRoot, options) {
 			this.apiRoot = apiRoot;
 			this.options = options;
+			this.isAbsoluteRegExp = new RegExp('^(?:[a-z]+:)?//', 'i');
 		}
 	
 	
@@ -1036,6 +1182,10 @@
 		 * @returns {String}
 		 */
 		, entityPathToUrl: function (entityPath) {
+			if (this.isAbsoluteRegExp.test(entityPath)) {
+				return entityPath;
+			}
+	
 			return this.apiRoot + '/' + entityPath;
 		}
 	
@@ -1294,6 +1444,7 @@
 	
 	'use strict';
 	
+	
 	/**
 	 * Stores Siren objects in memory
 	 *
@@ -1307,46 +1458,69 @@
 	
 	Store.prototype = {
 	
+	
 		/**
+		 * Adds a model to the store
 		 *
-		 * @param {Backbone.Siren.Model|Backbone.Siren.Collection} bbSirenObj
-		 * @return {Backbone.Siren.Model}
+		 * @param {Backbone.Siren.Model} model
+		 * @returns {Backbone.Siren.Store}
 		 */
-		add: function (bbSirenObj) {
-			var self = this
-			, index;
+		addModel: function (model) {
+			this.data[model.url()] = model;
+			return this;
+		}
 	
-			if (Backbone.Siren.isCollection(bbSirenObj)) {
-				bbSirenObj.each(function (sirenModel) {
-					self.add(sirenModel);
-				});
 	
-				index = bbSirenObj.link('current');
-			}
-	
-			this.data[index || bbSirenObj.url()] = bbSirenObj;
-			return bbSirenObj;
+		/**
+		 * Adds a collection to the store.
+		 *
+		 * @param {Backbone.Siren.Collection} collection
+		 * @param {String} [rel="self"] - Can be "self" or "current"
+		 * @returns {Backbone.Siren.Store}
+		 */
+		, addCollection: function (collection, rel) {
+			this.data[collection.link(rel || 'self')] = collection;
+			return this;
 		}
 	
 	
 		/**
 		 *
 		 * @param {Object|String} rawEntityOrUrl
-		 * @return {Backbone.Siren.Model}
+		 * @returns {Backbone.Siren.Model|Backbone.Siren.Collection}
 		 */
 		, get: function (rawEntityOrUrl) {
-			/*global getRawEntityUrl*/
-			return this.data[typeof rawEntityOrUrl == 'object'? getRawEntityUrl(rawEntityOrUrl): rawEntityOrUrl];
+			/*global getRawEntitySelfUrl*/
+			return this.data[typeof rawEntityOrUrl == 'object'? getRawEntitySelfUrl(rawEntityOrUrl): rawEntityOrUrl];
+		}
+	
+	
+		/**
+		 * Get the matching "current" collection for the given rawCollection
+		 *
+		 * @param {Object} rawCollection
+		 * @returns {Backbone.Siren.Collection}
+		 */
+		, getCurrentCollection: function (rawCollection) {
+			/*global BbSiren, getRawEntityUrl, getRawEntitySelfUrl */
+	
+			if (BbSiren.isLoaded(rawCollection)) {
+				return this.data[getRawEntityUrl(rawCollection, 'current')];
+			} else {
+				// The entity is not loaded, so we don't know if it references a "current" collection or a "self" collection
+				return this.data[getRawEntitySelfUrl(rawCollection)];
+			}
 		}
 	
 	
 		/**
 		 * Filters Siren objects by their index value (aka their self-url)
 		 *
-		 * @param {Regex} regex
+		 * @param {String} regexString
 		 * @returns {Array}
 		 */
-		, filter: function (regex) {
+		, filter: function (regexString) {
+			var regex = new RegExp(regexString);
 			return _.filter(this.data, function (val, key) {
 				return regex.test(key);
 			});
@@ -1356,7 +1530,7 @@
 		/**
 		 *
 		 * @param {Backbone.Siren.Model|Backbone.Siren.Collection|String} ModelOrSirenObjOrUrl
-		 * @return {Boolean}
+		 * @returns {Boolean}
 		 */
 		, exists: function (ModelOrSirenObjOrUrl) {
 			return !!this.get(Backbone.Siren.isHydratedObject(ModelOrSirenObjOrUrl) ? ModelOrSirenObjOrUrl.url() : ModelOrSirenObjOrUrl);
@@ -1367,7 +1541,7 @@
 		 *
 		 * @param url
 		 * @param request
-		 * @returns {Promise}
+		 * @returns {Backbone.Siren.Store}
 		 */
 		, addRequest: function (url, request) {
 			var self = this;
@@ -1378,7 +1552,7 @@
 			});
 	
 			this.requests[url] = request;
-			return request;
+			return this;
 		}
 	
 	
