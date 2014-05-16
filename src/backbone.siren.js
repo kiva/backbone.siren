@@ -538,7 +538,7 @@ _.extend(BbSiren, {
 		}
 
 		if (model) {
-			model.update(rawModel);
+			model.update(rawModel, options);
 		} else {
 			model = new Backbone.Siren.Model(rawModel, options);
 		}
@@ -564,7 +564,7 @@ _.extend(BbSiren, {
 		if (store) {
 			collection = store.get(rawCollection);
 			if (collection) {
-				collection.update(rawCollection);
+				collection.update(rawCollection, options);
 				createNewCollectionFlag = false;
 				options.storeCurrentOnly = true;
 			}
@@ -574,7 +574,7 @@ _.extend(BbSiren, {
 			if (currentUrl) {
 				collection = store.get(currentUrl);
 				if (collection) {
-					collection.update(rawCollection);
+					collection.update(rawCollection, options);
 				} else {
 					createNewCollectionFlag = true;
 				}
@@ -1113,9 +1113,9 @@ _.extend(BbSiren, {
 		 * @param {Object} rawCollection
 		 * @param {Array} [models] When parsing, use these models instead of the raw models from the collection
 		 */
-		, update: function (rawCollection, models) {
+		, update: function (rawCollection, options) {
 			if (BbSiren.isLoaded(rawCollection)) {
-				this.add(this.parse(rawCollection, {preParsedModels: models}));
+				this.add(this.parse(rawCollection, options));
 				this.parseActions();
 			}
 
