@@ -204,6 +204,31 @@ describe('Siren Action: ', function () {
 
 		    expect(callback).toHaveBeenCalled();
 	    });
+
+
+	    it('updates any cached entities from the response', function () {
+		    $.ajax.restore();
+
+		    var rawCollection = {'class': ['collection'], href: 'http://x.io/collection', actions: [sirenAction]};
+		    var sirenCollection = new Backbone.Siren.Collection(rawCollection);
+
+		    // Add a mock store
+		    sirenCollection.siren.store = {
+			    get: function () {
+				    return sirenCollection;
+			    }
+		    };
+
+		    this.stub(sirenCollection, 'update');
+
+		    var server = sinon.fakeServer.create();
+		    server.respondWith(JSON.stringify(rawCollection));
+
+		    sirenCollection.getActionByName('add-item').execute();
+		    server.respond();
+
+		    expect(sirenCollection.update).toHaveBeenCalled();
+	    });
     });
 
 
