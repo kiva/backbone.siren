@@ -81,12 +81,9 @@ describe('Siren Collection: ', function () {
         });
 
 
-        it('returns an empty string and warns if there is no url', function () {
+        it('returns an empty string if there is no url', function () {
             var mySirenCollection = new Backbone.Siren.Collection({});
-            this.stub(console, 'warn');
-
             expect(mySirenCollection.url()).toBe('');
-            expect(console.warn).toHaveBeenCalledOnce();
         });
     });
 
