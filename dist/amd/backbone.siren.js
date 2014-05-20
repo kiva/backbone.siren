@@ -1,5 +1,5 @@
 /*
-* Backbone.Siren v0.3.4
+* Backbone.Siren v0.3.5
 *
 * Copyright (c) 2014 Kiva Microfunds
 * Licensed under the MIT license.
@@ -73,7 +73,6 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
     	} else if (rawEntity.links) {
     		url = getRawEntityUrl(rawEntity, 'self');
     	} else {
-    		warn('Missing href or "self" link');
     		url = '';
     	}
     
@@ -478,6 +477,17 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
     
     
     	/**
+    	 * A js object is assumed to be a Siren object if it has a "self" url or top level "href".
+    	 *
+    	 * @param obj
+    	 * @returns {boolean}
+    	 */
+    	, isRawSiren: function (obj) {
+    		return !!getRawEntitySelfUrl(obj);
+    	}
+    
+    
+    	/**
     	 *
     	 * @param {Backbone.Siren.Store} store
     	 * @param {Backbone.Siren.Model} model
@@ -547,7 +557,7 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
     		}
     
     		if (model) {
-    			model.update(rawModel);
+    			model.update(rawModel, options);
     		} else {
     			model = new Backbone.Siren.Model(rawModel, options);
     		}
@@ -573,7 +583,7 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
     		if (store) {
     			collection = store.get(rawCollection);
     			if (collection) {
-    				collection.update(rawCollection);
+    				collection.update(rawCollection, options);
     				createNewCollectionFlag = false;
     				options.storeCurrentOnly = true;
     			}
@@ -583,7 +593,7 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
     			if (currentUrl) {
     				collection = store.get(currentUrl);
     				if (collection) {
-    					collection.update(rawCollection);
+    					collection.update(rawCollection, options);
     				} else {
     					createNewCollectionFlag = true;
     				}
@@ -603,7 +613,7 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
          *
          * @param {Object} rawEntity
          * @param {Object} options
-         * @returns {Backbone.Siren.Model|Backbone.Siren.Collection|Backbone.Siren.Error}
+         * @returns {Backbone.Siren.Model|Backbone.Siren.Collection|Backbone.Siren.Error|undefined}
          */
         , parse: function (rawEntity, options) {
     		options = options || {};
@@ -614,7 +624,7 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
                 // @todo how should we represent errors?  For now, treat them as regular Models...
     			// @todo are we storing errors in the store?  If so, don't...
                 return new Backbone.Siren.Model(rawEntity, options);
-            } else {
+            } else if (BbSiren.isRawSiren) {
     			return this.parseModel(rawEntity, options);
             }
         }
@@ -971,9 +981,16 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
     	    }
     
     
-    		, update: function (rawModel) {
+    		/**
+    		 * Updates the model with the properties from a "rawModel"
+    		 *
+    		 * @param {Object} rawModel
+    		 * @param {Object} [options]
+    		 * @returns {Backbone.Siren.Model}
+    		 */
+    		, update: function (rawModel, options) {
     			if (BbSiren.isLoaded(rawModel)) {
-    				this.set(this.parse(rawModel));
+    				this.set(this.parse(rawModel), options);
     				this.parseActions();
     			}
     
@@ -1122,9 +1139,9 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
     		 * @param {Object} rawCollection
     		 * @param {Array} [models] When parsing, use these models instead of the raw models from the collection
     		 */
-    		, update: function (rawCollection, models) {
+    		, update: function (rawCollection, options) {
     			if (BbSiren.isLoaded(rawCollection)) {
-    				this.add(this.parse(rawCollection, {preParsedModels: models}));
+    				this.add(this.parse(rawCollection, options));
     				this.parseActions();
     			}
     
@@ -1372,18 +1389,16 @@ define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
     		, attributes = options.attributes// So you can pass in properties that do not exist in the parent.
     		, actionName = this.name
     		, parent = this.parent
+    		, store = parent && parent.siren && parent.siren.store
     		, presets = {
     			url: this.href
     			, actionName: actionName
     			, success: function (model, resp, options) {
     				parent.trigger('sync:' + actionName, model, resp, options);
-    				if (parent instanceof Backbone.Model) {
-    					parent.attributes = {};
-    					parent.set(actionModel.attributes);
-    				} else {
-    					// Parent is assumed to be a collection
-    					parent.set(actionModel.models);
-    				}
+    
+    				// @todo - I think too much logic is going into this.  Much of this stuff is probably already
+    				// done in backbone.  Eventually will need a refactor of .execute() and better integration with backbone.
+    				Backbone.Siren.parse(resp, {store: store, silent: options.silent});
     			}
     			, error: function (model, xhr, options) {
     				parent.trigger('error:' + actionName, model, xhr, options);
