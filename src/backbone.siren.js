@@ -972,9 +972,16 @@ _.extend(BbSiren, {
 	    }
 
 
-		, update: function (rawModel) {
+		/**
+		 * Updates the model with the properties from a "rawModel"
+		 *
+		 * @param {Object} rawModel
+		 * @param {Object} [options]
+		 * @returns {Backbone.Siren.Model}
+		 */
+		, update: function (rawModel, options) {
 			if (BbSiren.isLoaded(rawModel)) {
-				this.set(this.parse(rawModel));
+				this.set(this.parse(rawModel), options);
 				this.parseActions();
 			}
 

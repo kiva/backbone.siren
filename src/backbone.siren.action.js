@@ -161,7 +161,10 @@ Action.prototype = {
 			, actionName: actionName
 			, success: function (model, resp, options) {
 				parent.trigger('sync:' + actionName, model, resp, options);
-				Backbone.Siren.parse(resp, {store: store});
+
+				// @todo - I think too much logic is going into this.  Much of this stuff is probably already
+				// done in backbone.  Eventually will need a refactor of .execute() and better integration with backbone.
+				Backbone.Siren.parse(resp, {store: store, silent: options.silent});
 			}
 			, error: function (model, xhr, options) {
 				parent.trigger('error:' + actionName, model, xhr, options);
