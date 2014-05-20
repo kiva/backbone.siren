@@ -64,7 +64,6 @@ function getRawEntitySelfUrl(rawEntity) {
 	} else if (rawEntity.links) {
 		url = getRawEntityUrl(rawEntity, 'self');
 	} else {
-		warn('Missing href or "self" link');
 		url = '';
 	}
 
@@ -469,6 +468,17 @@ _.extend(BbSiren, {
 
 
 	/**
+	 * A js object is assumed to be a Siren object if it has a "self" url or top level "href".
+	 *
+	 * @param obj
+	 * @returns {boolean}
+	 */
+	, isRawSiren: function (obj) {
+		return !!getRawEntitySelfUrl(obj);
+	}
+
+
+	/**
 	 *
 	 * @param {Backbone.Siren.Store} store
 	 * @param {Backbone.Siren.Model} model
@@ -594,7 +604,7 @@ _.extend(BbSiren, {
      *
      * @param {Object} rawEntity
      * @param {Object} options
-     * @returns {Backbone.Siren.Model|Backbone.Siren.Collection|Backbone.Siren.Error}
+     * @returns {Backbone.Siren.Model|Backbone.Siren.Collection|Backbone.Siren.Error|undefined}
      */
     , parse: function (rawEntity, options) {
 		options = options || {};
@@ -605,7 +615,7 @@ _.extend(BbSiren, {
             // @todo how should we represent errors?  For now, treat them as regular Models...
 			// @todo are we storing errors in the store?  If so, don't...
             return new Backbone.Siren.Model(rawEntity, options);
-        } else {
+        } else if (BbSiren.isRawSiren) {
 			return this.parseModel(rawEntity, options);
         }
     }
