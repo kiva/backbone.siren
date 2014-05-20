@@ -120,12 +120,9 @@ describe('Siren Model: ', function () {
         });
 
 
-        it('returns an empty string and warns if there is no url', function () {
+        it('returns an empty string if there is no url', function () {
             var mySirenModel = new Backbone.Siren.Model({});
-            this.stub(console, 'warn');
-
             expect(mySirenModel.url()).toBe('');
-            expect(console.warn).toHaveBeenCalledOnce();
         });
     });
 

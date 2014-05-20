@@ -7,80 +7,86 @@ describe('Backbone.Siren: ', function () {
 	// @todo quick fix for upgrade to buster 0.7
 	var expect = buster.expect;
 
-    var rawSettingsModel = {
-	    "class":["order", "special"]
-	    ,"properties":{"orderNumber":42,"itemCount":3,"status":"pending"}
-	    ,"entities":[
-		    {"class":["items","collection"],"rel":["http://x.io/rels/order-items", "name:order-items"],"href":"http://api.x.io/orders/42/items"}
-		    ,{"class":["info","customer"],"rel":["http://x.io/rels/customer", "name:customer"],"properties":{"customerId":"pj123","name":"Peter Joseph"},"links":[{"rel":["self"],"href":"http://api.x.io/customers/pj123"}]}
-	    ]
-	    ,"actions":[
-		    {"name":"add-item","title":"Add Item","method":"POST","href":"http://api.x.io/orders/42/items","type":"application/x-www-form-urlencoded","fields":[{name: "addedLater"}, {"name":"orderNumber","type":"hidden","value":"42"},{"name":"productCode","type":"text"},{"name":"quantity","type":"number"}]}]
-	    ,"links":[
-		    {"rel":["self"],"href":"http://api.x.io/orders/42"}
-		    ,{"rel":["previous"],"href":"http://api.x.io/orders/41"}
-		    ,{"rel":["next"],"href":"http://api.x.io/orders/43"}
-	    ]
-    };
 
-	var rawCollection = {
-		"class": ["collection"]
-		, "entities": [
-			{
-				"links": [
-					{"rel": ["self"], "href":"http://api.x.io/orders/41"}
-				]
-			}
-			, {
-				"links": [
-					{"rel": ["self"],  "href":"http://api.x.io/orders/42"}
-				]
-			}
-		]
-		, links: [
-			{"rel": ["self"], "href":"http://api.x.io/orders"}
-		]
-	};
+    var rawSettingsModel, rawCollection, rawCurrentCollection, rawCurrentCollection2;
 
 
-	var rawCurrentCollection = {
-		entities: [
-			{
-				"links": [
-					{"rel": ["self"], "href":"http://api.x.io/orders/43"}
-				]
-			}
-			, {
-				"links": [
-					{"rel": ["self"],  "href":"http://api.x.io/orders/44"}
-				]
-			}
-		]
-		, links: [
-			{rel: ['self'], href: 'http://api.x.io/orders'}
-			, {rel: ['current'], href: 'http://api.x.io/orders?page=30'}
-		]
-	};
+	beforeEach(function () {
+		rawSettingsModel = {
+			"class":["order", "special"]
+			,"properties":{"orderNumber":42,"itemCount":3,"status":"pending"}
+			,"entities":[
+				{"class":["items","collection"],"rel":["http://x.io/rels/order-items", "name:order-items"],"href":"http://api.x.io/orders/42/items"}
+				,{"class":["info","customer"],"rel":["http://x.io/rels/customer", "name:customer"],"properties":{"customerId":"pj123","name":"Peter Joseph"},"links":[{"rel":["self"],"href":"http://api.x.io/customers/pj123"}]}
+			]
+			,"actions":[
+				{"name":"add-item","title":"Add Item","method":"POST","href":"http://api.x.io/orders/42/items","type":"application/x-www-form-urlencoded","fields":[{name: "addedLater"}, {"name":"orderNumber","type":"hidden","value":"42"},{"name":"productCode","type":"text"},{"name":"quantity","type":"number"}]}]
+			,"links":[
+				{"rel":["self"],"href":"http://api.x.io/orders/42"}
+				,{"rel":["previous"],"href":"http://api.x.io/orders/41"}
+				,{"rel":["next"],"href":"http://api.x.io/orders/43"}
+			]
+		};
+
+		rawCollection = {
+			"class": ["collection"]
+			, "entities": [
+				{
+					"links": [
+						{"rel": ["self"], "href":"http://api.x.io/orders/41"}
+					]
+				}
+				, {
+					"links": [
+						{"rel": ["self"],  "href":"http://api.x.io/orders/42"}
+					]
+				}
+			]
+			, links: [
+				{"rel": ["self"], "href":"http://api.x.io/orders"}
+			]
+		};
 
 
-	var rawCurrentCollection2 = {
-		entities: [
-			{
-				"links": [
-					{"rel": ["self"], "href":"http://api.x.io/orders/45"}
-				]
-			}
-			, {
-				"links": [
-					{"rel": ["self"],  "href":"http://api.x.io/orders/46"}
-				]
-			}
-		]
-		, links: [
-			{rel: ['self'], href: 'http://api.x.io/orders'}
-			, {rel: ['current'], href: 'http://api.x.io/orders?page=31'}
-		]
-	};
+		rawCurrentCollection = {
+			entities: [
+				{
+					"links": [
+						{"rel": ["self"], "href":"http://api.x.io/orders/43"}
+					]
+				}
+				, {
+					"links": [
+						{"rel": ["self"],  "href":"http://api.x.io/orders/44"}
+					]
+				}
+			]
+			, links: [
+				{rel: ['self'], href: 'http://api.x.io/orders'}
+				, {rel: ['current'], href: 'http://api.x.io/orders?page=30'}
+			]
+		};
+
+
+		rawCurrentCollection2 = {
+			entities: [
+				{
+					"links": [
+						{"rel": ["self"], "href":"http://api.x.io/orders/45"}
+					]
+				}
+				, {
+					"links": [
+						{"rel": ["self"],  "href":"http://api.x.io/orders/46"}
+					]
+				}
+			]
+			, links: [
+				{rel: ['self'], href: 'http://api.x.io/orders'}
+				, {rel: ['current'], href: 'http://api.x.io/orders?page=31'}
+			]
+		};
+	});
 
 
 	describe('.isHydratedObject', function () {
@@ -227,6 +233,26 @@ describe('Backbone.Siren: ', function () {
 	});
 
 
+	describe('.parseModel()', function () {
+		it('creates a new Backbone.Siren.Model from a raw model', function () {
+			var model = Backbone.Siren.parseModel(rawSettingsModel);
+			expect(model instanceof Backbone.Siren.Model).toBeTrue();
+		});
+
+
+		it('updates an existing model if it is already cached', function () {
+			var store = new Backbone.Siren.Store();
+			var model1 = Backbone.Siren.parseModel(rawSettingsModel, {store: store});
+
+			rawSettingsModel.properties.itemCount = 5;
+			var model2 = Backbone.Siren.parseModel(rawSettingsModel, {store: store});
+
+			expect(model1.get('itemCount')).toBe(5);
+			expect(model1.cid).toBe(model2.cid);
+		});
+	});
+
+
 	describe('.parseCollection()', function () {
 		it('creates a new collection from a raw collection', function () {
 			var collection = Backbone.Siren.parseCollection(rawCurrentCollection);
@@ -238,7 +264,7 @@ describe('Backbone.Siren: ', function () {
 			var store = new Backbone.Siren.Store();
 			var collection = new Backbone.Siren.Collection(rawCollection, {store: store});
 
-			// We tag the collection so that we know it's the same one
+			// We tag the collection so that we know it's the same one (unlike models, collections don't have a "cid")
 			collection.tagged = true;
 
 			collection = Backbone.Siren.parseCollection(rawCollection, {store: store});
@@ -313,6 +339,18 @@ describe('Backbone.Siren: ', function () {
 			expect(collection.size()).toBe(2);
 
 			// Now check what we have in the store
+			collection = store.get(collection.url());
+			expect(collection.size()).toBe(2);
+		});
+
+
+		it('uses existing models from the store instead of creating new ones', function () {
+			var store = new Backbone.Siren.Store();
+			var collection = new Backbone.Siren.Collection(rawCollection, {store: store});
+
+			// Parse the same raw collection again...
+			collection = Backbone.Siren.parseCollection(rawCollection, {store: store});
+
 			collection = store.get(collection.url());
 			expect(collection.size()).toBe(2);
 		});

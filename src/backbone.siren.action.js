@@ -155,18 +155,16 @@ Action.prototype = {
 		, attributes = options.attributes// So you can pass in properties that do not exist in the parent.
 		, actionName = this.name
 		, parent = this.parent
+		, store = parent && parent.siren && parent.siren.store
 		, presets = {
 			url: this.href
 			, actionName: actionName
 			, success: function (model, resp, options) {
 				parent.trigger('sync:' + actionName, model, resp, options);
-				if (parent instanceof Backbone.Model) {
-					parent.attributes = {};
-					parent.set(actionModel.attributes);
-				} else {
-					// Parent is assumed to be a collection
-					parent.set(actionModel.models);
-				}
+
+				// @todo - I think too much logic is going into this.  Much of this stuff is probably already
+				// done in backbone.  Eventually will need a refactor of .execute() and better integration with backbone.
+				Backbone.Siren.parse(resp, {store: store, silent: options.silent});
 			}
 			, error: function (model, xhr, options) {
 				parent.trigger('error:' + actionName, model, xhr, options);

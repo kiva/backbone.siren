@@ -64,7 +64,6 @@ function getRawEntitySelfUrl(rawEntity) {
 	} else if (rawEntity.links) {
 		url = getRawEntityUrl(rawEntity, 'self');
 	} else {
-		warn('Missing href or "self" link');
 		url = '';
 	}
 
@@ -469,6 +468,17 @@ _.extend(BbSiren, {
 
 
 	/**
+	 * A js object is assumed to be a Siren object if it has a "self" url or top level "href".
+	 *
+	 * @param obj
+	 * @returns {boolean}
+	 */
+	, isRawSiren: function (obj) {
+		return !!getRawEntitySelfUrl(obj);
+	}
+
+
+	/**
 	 *
 	 * @param {Backbone.Siren.Store} store
 	 * @param {Backbone.Siren.Model} model
@@ -538,7 +548,7 @@ _.extend(BbSiren, {
 		}
 
 		if (model) {
-			model.update(rawModel);
+			model.update(rawModel, options);
 		} else {
 			model = new Backbone.Siren.Model(rawModel, options);
 		}
@@ -564,7 +574,7 @@ _.extend(BbSiren, {
 		if (store) {
 			collection = store.get(rawCollection);
 			if (collection) {
-				collection.update(rawCollection);
+				collection.update(rawCollection, options);
 				createNewCollectionFlag = false;
 				options.storeCurrentOnly = true;
 			}
@@ -574,7 +584,7 @@ _.extend(BbSiren, {
 			if (currentUrl) {
 				collection = store.get(currentUrl);
 				if (collection) {
-					collection.update(rawCollection);
+					collection.update(rawCollection, options);
 				} else {
 					createNewCollectionFlag = true;
 				}
@@ -594,7 +604,7 @@ _.extend(BbSiren, {
      *
      * @param {Object} rawEntity
      * @param {Object} options
-     * @returns {Backbone.Siren.Model|Backbone.Siren.Collection|Backbone.Siren.Error}
+     * @returns {Backbone.Siren.Model|Backbone.Siren.Collection|Backbone.Siren.Error|undefined}
      */
     , parse: function (rawEntity, options) {
 		options = options || {};
@@ -605,7 +615,7 @@ _.extend(BbSiren, {
             // @todo how should we represent errors?  For now, treat them as regular Models...
 			// @todo are we storing errors in the store?  If so, don't...
             return new Backbone.Siren.Model(rawEntity, options);
-        } else {
+        } else if (BbSiren.isRawSiren) {
 			return this.parseModel(rawEntity, options);
         }
     }
@@ -962,9 +972,16 @@ _.extend(BbSiren, {
 	    }
 
 
-		, update: function (rawModel) {
+		/**
+		 * Updates the model with the properties from a "rawModel"
+		 *
+		 * @param {Object} rawModel
+		 * @param {Object} [options]
+		 * @returns {Backbone.Siren.Model}
+		 */
+		, update: function (rawModel, options) {
 			if (BbSiren.isLoaded(rawModel)) {
-				this.set(this.parse(rawModel));
+				this.set(this.parse(rawModel), options);
 				this.parseActions();
 			}
 
@@ -1113,9 +1130,9 @@ _.extend(BbSiren, {
 		 * @param {Object} rawCollection
 		 * @param {Array} [models] When parsing, use these models instead of the raw models from the collection
 		 */
-		, update: function (rawCollection, models) {
+		, update: function (rawCollection, options) {
 			if (BbSiren.isLoaded(rawCollection)) {
-				this.add(this.parse(rawCollection, {preParsedModels: models}));
+				this.add(this.parse(rawCollection, options));
 				this.parseActions();
 			}
 
