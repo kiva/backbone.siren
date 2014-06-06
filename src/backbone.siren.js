@@ -712,6 +712,10 @@ _.extend(BbSiren, {
 	, resolveOne: function (url, options) {
 		options = options || {};
 
+
+		// @todo - rootUrl should reflect the options.data object if it is set
+		// See: https://github.com/kiva/backbone.siren/issues/70
+
 		var store, state, deferred, storedPromise, bbSiren
 		, chain = BbSiren.parseChain(url)
 		, rootUrl = chain.shift()
