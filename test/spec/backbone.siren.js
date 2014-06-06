@@ -331,6 +331,19 @@ describe('Backbone.Siren: ', function () {
 		});
 
 
+		it('creates a new "self" collection if parsing a "current" collection and one does not already exist', function () {
+			var store = new Backbone.Siren.Store();
+
+			// Add a current collection to the store
+			var collection = Backbone.Siren.parseCollection(rawCurrentCollection, {store: store});
+			var storedCurrentCollection = store.get(collection.link('current'));
+			var storedSelfCollection = store.get(collection.link('self'));
+
+			expect(storedCurrentCollection).toBe(collection);
+			expect(storedCurrentCollection).not.toBe(storedSelfCollection);
+		});
+
+
 		it('leaves the matching, cached, "loaded" collection un-changed if parsing a "linked" collection', function () {
 			var store = new Backbone.Siren.Store();
 			var collection = new Backbone.Siren.Collection(rawCollection, {store: store});
