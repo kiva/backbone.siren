@@ -63,11 +63,11 @@ describe('Siren Collection: ', function () {
 
 
     describe('.url()', function () {
-	    it('is a proxy to this.link(\'self\')', function () {
-		    this.stub(sirenCollection, 'link');
-		    sirenCollection.url();
-		    expect(sirenCollection.link).toHaveBeenCalled();
-	    });
+		it('is a proxy to this.link(\'self\')', function () {
+			this.stub(sirenCollection, 'link');
+			sirenCollection.url();
+			expect(sirenCollection.link).toHaveBeenCalled();
+		});
 
 
         it('returns a collection\'s url, getting it from the href', function () {
@@ -96,8 +96,8 @@ describe('Siren Collection: ', function () {
 
         it('returns an empty array if there are no classes', function () {
             var mySirenCollection = new Backbone.Siren.Collection({});
-	        expect(mySirenCollection.classes()).toBeArray();
-	        expect(mySirenCollection.classes().length).toBe(0);
+			expect(mySirenCollection.classes().length).toBe(0);
+			expect(mySirenCollection.classes()).toBeArray();
         });
     });
 
@@ -148,20 +148,20 @@ describe('Siren Collection: ', function () {
 
     describe('.request()', function () {
         beforeEach(function () {
-	        this.stub(Backbone.Siren, 'resolveOne').returns('jqXhr');
+			this.stub(Backbone.Siren, 'resolveOne').returns('jqXhr');
         });
 
-	    it('makes an http request for a linked resource and returns a deferred object', function () {
+		it('makes an http request for a linked resource and returns a deferred object', function () {
             var requests = sirenCollection.request('next');
 
-	        expect(Backbone.Siren.resolveOne).toHaveBeenCalledWith('api.kiva.org/lenders/6282/loans?page=5');
-	        expect(requests).toBe('jqXhr');
+			expect(Backbone.Siren.resolveOne).toHaveBeenCalledWith('api.kiva.org/lenders/6282/loans?page=5');
+			expect(requests).toBe('jqXhr');
         });
 
 
-	    it('returns undefined if no links match the given rel', function () {
+		it('returns undefined if no links match the given rel', function () {
             var result = sirenCollection.request('fake');
-	        expect(result).not.toBeDefined();
+			expect(result).not.toBeDefined();
         });
     });
 
