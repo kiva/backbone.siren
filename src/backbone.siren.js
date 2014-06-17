@@ -994,7 +994,7 @@ _.extend(BbSiren, {
 		 */
 		, update: function (rawModel, options) {
 			if (BbSiren.isLoaded(rawModel)) {
-				this.set(this.parse(rawModel), options);
+				this.set(this.parse(rawModel, options), options);
 				this.parseActions();
 			}
 
