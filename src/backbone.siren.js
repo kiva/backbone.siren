@@ -494,19 +494,26 @@ _.extend(BbSiren, {
 	 *
 	 * @param {Backbone.Siren.Store} store
 	 * @param {Backbone.Siren.Collection} collection
+	 * @param {String} [representationToStore] limit which representation of the collection we want to store.
+	 *      Can be "current" or "self".
 	 */
-	, addCollectionToStore: function (store, collection, storeCurrentOnly) {
-		var currentUrl = collection.link('current');
-		if (currentUrl) {
-			store.addCollection(collection, 'current');
-		}
+	, addCollectionToStore: function (store, collection, representationToStore) {
+		var currentUrl;
 
 		// @todo, by having objects automatically added to the store on instantiation we end up having to pass
 		// around store option.  It feels a bit messy doing things this way.  Consider re-visiting so that
 		// objects no longer add themselves to the store on instantiation.
-		if (! storeCurrentOnly) {
-			store.addCollection(collection, 'self');
+		if (representationToStore) {
+			store.addCollection(collection, representationToStore);
+			return;
 		}
+
+		currentUrl = collection.link('current');
+		if (currentUrl) {
+			store.addCollection(collection, 'current');
+		}
+
+		store.addCollection(collection, 'self');
 	}
 
 
@@ -567,31 +574,33 @@ _.extend(BbSiren, {
 	, parseCollection: function (rawCollection, options) {
 		options = options || {};
 
-		var collection, currentUrl
-		, createNewCollectionFlag = true
+		var selfCollection, currentCollection, collection, currentUrl
 		, store = options.store;
 
 		if (store) {
-			collection = store.get(rawCollection);
-			if (collection) {
-				collection.update(rawCollection, options);
-				createNewCollectionFlag = false;
-				options.storeCurrentOnly = true;
+			selfCollection = store.get(rawCollection);
+			if (selfCollection) {
+				selfCollection.update(rawCollection, options);
+			} else {
+				options.representationToStore = 'self';
+				selfCollection = new Backbone.Siren.Collection(rawCollection, options);
 			}
 
 			// Is it a "current" collection?
 			currentUrl = getRawEntityUrl(rawCollection, 'current');
 			if (currentUrl) {
-				collection = store.get(currentUrl);
-				if (collection) {
-					collection.update(rawCollection, options);
+				currentCollection = store.get(currentUrl);
+
+				if (currentCollection) {
+					currentCollection.update(rawCollection, options);
 				} else {
-					createNewCollectionFlag = true;
+					options.representationToStore = 'current';
+					currentCollection = new Backbone.Siren.Collection(rawCollection, options);
 				}
 			}
-		}
 
-		if (createNewCollectionFlag) {
+			collection = currentCollection || selfCollection;
+		} else {
 			collection = new Backbone.Siren.Collection(rawCollection, options);
 		}
 
@@ -1160,7 +1169,7 @@ _.extend(BbSiren, {
 
 			if (options.store) {
 				this.siren.store = options.store;
-				BbSiren.addCollectionToStore(options.store, this, !!options.storeCurrentOnly);
+				BbSiren.addCollectionToStore(options.store, this, options.representationToStore);
 			}
 
 			if (options.ajaxOptions) {
