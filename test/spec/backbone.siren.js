@@ -195,13 +195,23 @@ describe('Backbone.Siren: ', function () {
 		});
 
 
-		it('does not add the "self" collection to the store if `storeCurrentOnly` is set to `true`', function () {
+		it('only adds the self collection to the store if `representationToStore` is set to `self`', function () {
 			var currentCollection = new Backbone.Siren.Collection(rawCurrentCollection);
 			var store = new Backbone.Siren.Store();
 
-			Backbone.Siren.addCollectionToStore(store, currentCollection, true);
-			expect(store.get(currentCollection.link('self'))).not.toBeDefined();
+			Backbone.Siren.addCollectionToStore(store, currentCollection, 'self');
+			expect(store.get(currentCollection.link('self'))).toBeDefined();
+			expect(store.get(currentCollection.link('current'))).not.toBeDefined();
+		});
+
+
+		it('only adds the current collection to the store if `representationToStore` is set to `collection`', function () {
+			var currentCollection = new Backbone.Siren.Collection(rawCurrentCollection);
+			var store = new Backbone.Siren.Store();
+
+			Backbone.Siren.addCollectionToStore(store, currentCollection, 'current');
 			expect(store.get(currentCollection.link('current'))).toBeDefined();
+			expect(store.get(currentCollection.link('self'))).not.toBeDefined();
 		});
 	});
 
@@ -262,40 +272,39 @@ describe('Backbone.Siren: ', function () {
 
 		it('updates an existing collection if it is already cached', function () {
 			var store = new Backbone.Siren.Store();
-			var collection = new Backbone.Siren.Collection(rawCollection, {store: store});
+			var initialCollection = new Backbone.Siren.Collection(rawCollection, {store: store});
+			var initialStoredCollection = store.get(initialCollection.url());
 
-			// We tag the collection so that we know it's the same one (unlike models, collections don't have a "cid")
-			collection.tagged = true;
+			var updatedCollection = Backbone.Siren.parseCollection(rawCollection, {store: store});
+			var updatedStoredCollection = store.get(updatedCollection.url());
 
-			collection = Backbone.Siren.parseCollection(rawCollection, {store: store});
-
-			// Check the store
-			expect(store.get(getRawEntityUrl(rawCollection, 'self')).tagged).toBeTrue();
+			// Check what's in the store
+			expect(updatedStoredCollection).toBe(initialStoredCollection);
 
 			// Check the returned collection
-			expect(collection.tagged).toBeTrue();
+			expect(updatedCollection).toBe(initialCollection);
 		});
 
 
 		it('updates the "self" and "current" collections if they are both in the cache', function () {
-			var store = new Backbone.Siren.Store();
-			var collection = new Backbone.Siren.Collection(rawCurrentCollection, {store: store});
-			var collection2 = new Backbone.Siren.Collection(rawCurrentCollection2, {store: store});
+			var store, collection, initialStoredSelfCollection, updatedStoredSelfCollection
+			, initialStoredCurrentCollection, updatedStoredCurrentCollection;
 
-			// We tag the collection so that we know it's the same one
-			collection.tagged = true;
-			collection2.tagged = true;
+			store = new Backbone.Siren.Store();
 
-			// Update collection2
-			collection2 = Backbone.Siren.parseCollection(rawCurrentCollection2, {store: store});
+			// Create a current collection and a self collection
+			collection = new Backbone.Siren.Collection(rawCurrentCollection, {store: store});
 
-			// Check the store
-			expect(store.get(getRawEntityUrl(rawCurrentCollection2, 'self')).tagged).toBeTrue();
-			expect(store.get(getRawEntityUrl(rawCurrentCollection2, 'current')).tagged).toBeTrue();
+			initialStoredSelfCollection = store.get(getRawEntityUrl(rawCurrentCollection, 'self'));
+			initialStoredCurrentCollection = store.get(getRawEntityUrl(rawCurrentCollection, 'current'));
 
-			// Check the returned collection
-			expect(collection.tagged).toBeTrue();
-			expect(collection2.tagged).toBeTrue();
+			Backbone.Siren.parseCollection(rawCurrentCollection);
+
+			updatedStoredSelfCollection = store.get(getRawEntityUrl(rawCurrentCollection, 'self'));
+			updatedStoredCurrentCollection = store.get(getRawEntityUrl(rawCurrentCollection, 'current'));
+
+			expect(updatedStoredSelfCollection).toBe(initialStoredSelfCollection);
+			expect(updatedStoredCurrentCollection).toBe(initialStoredCurrentCollection);
 		});
 
 
@@ -328,6 +337,19 @@ describe('Backbone.Siren: ', function () {
 			// The "self" collection should have been added to
 			var cachedSelfCollection = store.data['http://api.x.io/orders'];
 			expect(cachedSelfCollection.size()).toBe(4);
+		});
+
+
+		it('creates a new "self" collection if parsing a "current" collection and one does not already exist', function () {
+			var store = new Backbone.Siren.Store();
+
+			// Add a current collection to the store
+			var collection = Backbone.Siren.parseCollection(rawCurrentCollection, {store: store});
+			var storedCurrentCollection = store.get(collection.link('current'));
+			var storedSelfCollection = store.get(collection.link('self'));
+
+			expect(storedCurrentCollection).toBe(collection);
+			expect(storedCurrentCollection).not.toBe(storedSelfCollection);
 		});
 
 
