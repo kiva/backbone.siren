@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/kiva/backbone.siren.png?label=ready&title=Ready)](https://waffle.io/kiva/backbone.siren)
 [![Build Status](https://travis-ci.org/kiva/backbone.siren.png)](https://travis-ci.org/kiva/backbone.siren)
 [![Coverage Status](https://coveralls.io/repos/kiva/backbone.siren/badge.png?branch=master)](https://coveralls.io/r/kiva/backbone.siren?branch=master)
 # Backbone.Siren
