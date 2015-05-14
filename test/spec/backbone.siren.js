@@ -549,7 +549,7 @@ describe('Backbone.Siren: ', function () {
 	// Prototype methods
 	//
 
-	describe('.init', function () {
+	describe('.init()', function () {
 		var sirenApi = new Backbone.Siren('http://blah.io', {'ba': 'boom'});
 		sirenApi.init('http://new.io', {'ba': 'bing'});
 		expect(sirenApi.apiRoot).toBe('http://new.io');
@@ -557,7 +557,7 @@ describe('Backbone.Siren: ', function () {
 	});
 
 
-	describe('.entityPathToUrl', function () {
+	describe('.entityPathToUrl()', function () {
 		it('turns an entity path into a full url', function () {
 			var sirenApi = new Backbone.Siren('http://blah.io');
 			expect(sirenApi.entityPathToUrl('some/path')).toBe('http://blah.io/some/path');
@@ -571,7 +571,44 @@ describe('Backbone.Siren: ', function () {
 	});
 
 
-	describe('.resolve', function () {
+	describe('.getRootForPath()', function() {
+		it('strips the parameters from the path when checking for root path', function() {
+			var sirenApi = new Backbone.Siren('/api');
+			sirenApi.alternateRoots = {
+				'/my/route': '/right'
+				,'/my/route?params': '/wrong'
+				,'/my/route#anchor': '/also-wrong'
+				,'/my/route?params#anchor': '/you-are-never-going-to-pass-this-test'
+			};
+
+			expect(sirenApi.getRootForPath('/my/route?params')).toBe('/right');
+			expect(sirenApi.getRootForPath('/my/route#anchor')).toBe('/right');
+			expect(sirenApi.getRootForPath('/my/route?params#anchor')).toBe('/right');
+		});
+
+
+		it('returns the default root when no alternate root is found for the path', function() {
+			var sirenApi = new Backbone.Siren('/right');
+			sirenApi.alternateRoots = {
+				'/my/other-route': '/wrong'
+			};
+
+			expect(sirenApi.getRootForPath('/my/route')).toBe('/right');
+		});
+
+
+		it('returns the alternate root for the path', function() {
+			var sirenApi = new Backbone.Siren('/wrong');
+			sirenApi.alternateRoots = {
+				'/my/route': '/right'
+			};
+
+			expect(sirenApi.getRootForPath('/my/route')).toBe('/right');
+		});
+	});
+
+
+	describe('.resolve()', function () {
 		beforeEach(function () {
 			this.stub(Backbone.Siren, 'resolve');
 		});
