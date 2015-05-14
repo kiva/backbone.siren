@@ -1,6 +1,6 @@
 {
   "name": "backbone.siren",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Converts Siren JSON representations into Backbone Models and Collections",
   "main": "index.js",
   "scripts": {

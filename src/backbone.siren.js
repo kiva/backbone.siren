@@ -208,6 +208,23 @@ function url() {
 
 
 /**
+ * Given a mapping of roots to arrays of paths, swap them.
+ *
+ * @param {Object} roots
+ * @returns {Object}
+ */
+function mapRoots(roots) {
+	var mapped = {};
+	_.each(roots, function(paths, key) {
+		_.each(paths, function(path) {
+			mapped[path] = key;
+		});
+	});
+	return mapped;
+}
+
+
+/**
  * Access to the entity's "actions"
  *
  * @returns {Array}
@@ -1190,9 +1207,12 @@ BbSiren.prototype = {
 	 * @param {Object} options
 	 */
 	init: function (apiRoot, options) {
+		options = options || {};
+
 		this.apiRoot = apiRoot;
 		this.options = options;
 		this.isAbsoluteRegExp = new RegExp('^(?:[a-z]+:)?//', 'i');
+		this.alternateRoots = mapRoots(options.alternateRoots);
 	}
 
 
@@ -1207,7 +1227,20 @@ BbSiren.prototype = {
 			return entityPath;
 		}
 
-		return this.apiRoot + '/' + entityPath;
+		return this.getRootForPath(entityPath) + '/' + entityPath;
+	}
+
+
+	/**
+	 * Get the api root for the given path. If a root is not specified, returns the default root.
+	 *
+	 * @param {String} path
+	 * @returns {String}
+	 */
+	, getRootForPath: function (path) {
+		// remove parameters an anchor tags from path
+		var strippedPath = path.split(/[\?#]/)[0];
+		return this.alternateRoots[strippedPath] ? this.alternateRoots[strippedPath] : this.apiRoot;
 	}
 
 
