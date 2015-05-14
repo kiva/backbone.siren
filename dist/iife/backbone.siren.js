@@ -1,7 +1,7 @@
 /*
-* Backbone.Siren v0.3.6
+* Backbone.Siren v0.3.7
 *
-* Copyright (c) 2014 Kiva Microfunds
+* Copyright (c) 2015 Kiva Microfunds
 * Licensed under the MIT license.
 * https://github.com/kiva/backbone.siren/blob/master/license.txt
 */
@@ -213,6 +213,23 @@
 	 */
 	function url() {
 		return this.link('self');
+	}
+	
+	
+	/**
+	 * Given a mapping of roots to arrays of paths, swap them.
+	 *
+	 * @param {Object} roots
+	 * @returns {Object}
+	 */
+	function mapRoots(roots) {
+		var mapped = {};
+		_.each(roots, function(paths, key) {
+			_.each(paths, function(path) {
+				mapped[path] = key;
+			});
+		});
+		return mapped;
 	}
 	
 	
@@ -1199,9 +1216,12 @@
 		 * @param {Object} options
 		 */
 		init: function (apiRoot, options) {
+			options = options || {};
+	
 			this.apiRoot = apiRoot;
 			this.options = options;
 			this.isAbsoluteRegExp = new RegExp('^(?:[a-z]+:)?//', 'i');
+			this.alternateRoots = mapRoots(options.alternateRoots);
 		}
 	
 	
@@ -1216,7 +1236,20 @@
 				return entityPath;
 			}
 	
-			return this.apiRoot + '/' + entityPath;
+			return this.getRootForPath(entityPath) + '/' + entityPath;
+		}
+	
+	
+		/**
+		 * Get the api root for the given path. If a root is not specified, returns the default root.
+		 *
+		 * @param {String} path
+		 * @returns {String}
+		 */
+		, getRootForPath: function (path) {
+			// remove parameters an anchor tags from path
+			var strippedPath = path.split(/[\?#]/)[0];
+			return this.alternateRoots[strippedPath] ? this.alternateRoots[strippedPath] : this.apiRoot;
 		}
 	
 	
