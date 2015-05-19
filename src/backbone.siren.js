@@ -407,12 +407,6 @@ function parseActions() {
         var bbSirenAction = new BbSiren.Action(action, self);
 
         _actions.push(bbSirenAction);
-
-        if (action.name) {
-            self[toCamelCase(action.name)] = _.bind(bbSirenAction.execute, bbSirenAction);
-        } else {
-            warn('Action is missing a name, unable to add top level method', action);
-        }
     });
 
     self._actions = _actions;
