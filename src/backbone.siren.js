@@ -14,18 +14,6 @@ var BbSiren
 
 
 /**
- * Converts a hyphenated name to camelCase.
- *
- * @static
- * @param name
- * @returns {String}
- */
-function toCamelCase(name) {
-    return name.replace(/(\-[a-z])/g, function(match){return match.toUpperCase().replace('-','');});
-}
-
-
-/**
  * Gets a link url by name from a raw siren entity
  *
  * @param {Object} rawEntity
