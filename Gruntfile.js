@@ -74,14 +74,13 @@ module.exports = function(grunt) {
 	    }
 
 
-        , release: {
+        , 'release-it': {
             options: {
-                additionalFiles: ['bower.json']
-                , tagName: 'v<%= version %>'
-                , npm: false
-                , afterBump: [
-                    'build'
-                ]
+                pkgFiles: ['package.json', 'bower.json'],
+                commitMessage: 'Release %s',
+                tagName: 'v%s',
+                tagAnnotation: 'Version %s',
+                buildCommand: 'grunt build'
             }
         }
 
@@ -103,7 +102,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-coveralls');
-    grunt.loadNpmTasks('grunt-release');
+    grunt.loadNpmTasks('grunt-release-it');
     grunt.loadNpmTasks('grunt-rigger');
 
     grunt.registerTask('test', ['jshint', 'buster:dev']);
