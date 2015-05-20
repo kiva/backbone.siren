@@ -42,6 +42,14 @@ module.exports = function(grunt) {
 		    }
         }
 
+        
+        , coveralls: {
+            options: {
+                src: 'test/coverage/lcov.info'
+                , force: true
+            }
+        }
+
 
         , jshint: {
             options: {
@@ -80,6 +88,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-buster');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-coveralls');
     grunt.loadNpmTasks('grunt-rigger');
 
     grunt.registerTask('test', ['jshint', 'buster:dev']);

@@ -14,18 +14,6 @@ var BbSiren
 
 
 /**
- * Converts a hyphenated name to camelCase.
- *
- * @static
- * @param name
- * @returns {String}
- */
-function toCamelCase(name) {
-    return name.replace(/(\-[a-z])/g, function(match){return match.toUpperCase().replace('-','');});
-}
-
-
-/**
  * Gets a link url by name from a raw siren entity
  *
  * @param {Object} rawEntity
@@ -407,12 +395,6 @@ function parseActions() {
         var bbSirenAction = new BbSiren.Action(action, self);
 
         _actions.push(bbSirenAction);
-
-        if (action.name) {
-            self[toCamelCase(action.name)] = _.bind(bbSirenAction.execute, bbSirenAction);
-        } else {
-            warn('Action is missing a name, unable to add top level method', action);
-        }
     });
 
     self._actions = _actions;

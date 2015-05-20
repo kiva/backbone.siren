@@ -14,11 +14,10 @@ config.development = {
     ]
     , sources: ['src/backbone.siren.js', 'src/backbone.siren.action.js', 'src/backbone.siren.store.js', 'src/backbone.siren.formView.js', 'src/backbone.siren.validate.js']
     , specs: ['test/spec/**/*.js']
-    , extensions: [ require('buster-coverage') ]
-    , 'buster-coverage': {
-        outputDirectory: 'test/coverage'
-        , format: 'lcov'
-        , combinedResultsOnly: true
+    , extensions: [require('buster-istanbul')]
+    , 'buster-istanbul': {
+        outputDirectory: 'test/coverage',
+        format: 'lcov'
     }
 };
 
