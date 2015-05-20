@@ -25,7 +25,7 @@
   "readmeFilename": "readme.md",
   "devDependencies": {
     "buster": "0.7.8",
-    "buster-coverage": "0.1.0",
+    "buster-istanbul": "^0.1.15",
     "coveralls": "2.6.1",
     "grunt": "0.4.1",
     "grunt-buster": "0.3.1",
