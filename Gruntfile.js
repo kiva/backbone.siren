@@ -74,6 +74,18 @@ module.exports = function(grunt) {
 	    }
 
 
+        , release: {
+            options: {
+                additionalFiles: ['bower.json']
+                , tagName: 'v<%= version %>'
+                , npm: false
+                , afterBump: [
+                    'build'
+                ]
+            }
+        }
+
+
         , rig: {
             compile: {
                 options: {
@@ -91,6 +103,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-coveralls');
+    grunt.loadNpmTasks('grunt-release');
     grunt.loadNpmTasks('grunt-rigger');
 
     grunt.registerTask('test', ['jshint', 'buster:dev']);
