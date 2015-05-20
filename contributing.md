@@ -31,7 +31,7 @@ npm install -g buster
 
 ## Specs and Testing
 
-Specs are written using [rspec](http://rspec.info/) style "expectations" with [BusterJs](http://docs.busterjs.org/en/latest/) as the testing framework, toolkit & libray.
+Specs are written using [rspec](http://rspec.info/) style "expectations" with [BusterJs](http://docs.busterjs.org/en/latest/) as the testing framework, toolkit & library.
 
 Here's a breakdown of the test files:
 
@@ -39,7 +39,7 @@ Here's a breakdown of the test files:
 
 `test/spec/*` are all the spec files.
 
-`test/coverage/coverage.lcov` is a breakdown of unit test coverage. It's automatically generated when unit tests are run.
+`test/coverage/` is automatically generated when unit tests are run and contains all test coverage information.  `test/coverage/lcov-report/index.html` provides an html summary of the results. 
 
 [Travis CI](travis-ci.org/kiva/backbone.siren) will run all tests on each push to github.
 
@@ -62,28 +62,8 @@ Run buster tests only:
 
 ### Coverage reports
 
-Travis will generate coverage reports and output them to [coveralls.io](https://coveralls.io/r/kiva/backbone.siren).  Test coverage should go up, not down.
-
-### Generating [lcov](http://ltp.sourceforge.net/coverage/lcov.php) coverage reports locally
-
-You can generate your own, updated, visual lcov reports.  [buster-coverage](https://github.com/ebi/buster-coverage) will automatically generate an lcov test coverage report.
-
-To generate a visual report in html:
-
-Install [genhtml](http://linux.die.net/man/1/genhtml)
-```
-> brew install genhtml
-```
-
-Parse the coverage report and Generate an html file.  Save it to `test/coverage`:
-```
-> genhtml test/coverage/coverage.lcov -o test/coverage
-```
+The coverage report will be sent to [coveralls.io](https://coveralls.io/r/kiva/backbone.siren) when the tests are run on Travis. Test coverage should go up, not down.
 
 ## Code quality
 
 Changes should follow existing patterns and pass jshint.
-
-## Pull requests
-
-Pull requests should be made to the `pre-release` branch and should _not_ include any changes to the `/dist` folder.
