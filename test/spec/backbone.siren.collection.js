@@ -360,18 +360,6 @@ describe('Siren Collection: ', function () {
 
             expect(actions[0].name).toBe('do-stuff');
         });
-
-
-        it('warns if an action does not have the required "name" property', function () {
-            var warnStub = this.stub(console, 'warn');
-            var temp = sirenCollection._data.actions[0].name;
-
-            sirenCollection._data.actions[0].name = undefined;
-            sirenCollection.parseActions();
-            sirenCollection._data.actions[0].name = temp;
-
-            expect(warnStub).toHaveBeenCalled();
-        });
     });
 
 
