@@ -76,11 +76,12 @@ module.exports = function(grunt) {
 
         , 'release-it': {
             options: {
-                pkgFiles: ['package.json', 'bower.json'],
-                commitMessage: 'Release %s',
-                tagName: 'v%s',
-                tagAnnotation: 'Version %s',
                 buildCommand: 'grunt build'
+                , commitMessage: 'Release %s'
+                , tagName: 'v%s'
+                , tagAnnotation: 'Version %s'
+                , pkgFiles: ['package.json', 'bower.json']
+                , publish: false
             }
         }
 
