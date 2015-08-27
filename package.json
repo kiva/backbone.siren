@@ -21,7 +21,7 @@
     "api"
   ],
   "author": "uglymunky",
-  "license": "BSD",
+  "license": "MIT",
   "readmeFilename": "readme.md",
   "devDependencies": {
     "buster": "0.7.8",
