@@ -66,7 +66,7 @@ var userView = new UserView();
 ```
 {
     autoFetch: 'linked'   // Will automatically fetch sub-entities if enabled. Can be set to 'linked' or 'all'.
-    , forceUpdate: false  // Pass forceUpdate as an option into your .set() method and it will update the model, even if it fails validation
+    , forceFetch: false  //  @todo
 }
 ```
 

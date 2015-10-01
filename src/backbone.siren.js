@@ -645,6 +645,7 @@ _.extend(BbSiren, {
 
     /**
      * Given a url string, splits it and returns an array.
+	 * @todo - Siren does not, yet, have a standard notation for referencing sub-entities / properties
      *
      * @param {String} str
      * @returns {Array}
