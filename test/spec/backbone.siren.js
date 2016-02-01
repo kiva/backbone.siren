@@ -605,6 +605,16 @@ describe('Backbone.Siren: ', function () {
 
 			expect(sirenApi.getRootForPath('/my/route')).toBe('/right');
 		});
+
+		
+		it('returns the root for the parent of the path when a root is not known for the path', function() {
+			var sirenApi = new Backbone.Siren('/wrong');
+			sirenApi.alternateRoots = {
+				'/parent': '/right'
+			};
+
+			expect(sirenApi.getRootForPath('/parent/child')).toBe('/right');
+		});
 	});
 
 
