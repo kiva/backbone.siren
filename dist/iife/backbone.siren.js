@@ -1,7 +1,7 @@
 /*
-* Backbone.Siren v0.4.0
+* Backbone.Siren v0.4.1
 *
-* Copyright (c) 2015 Kiva Microfunds
+* Copyright (c) 2016 Kiva Microfunds
 * Licensed under the MIT license.
 * https://github.com/kiva/backbone.siren/blob/master/license.txt
 */
@@ -654,6 +654,7 @@
 	
 	    /**
 	     * Given a url string, splits it and returns an array.
+		 * @todo - Siren does not, yet, have a standard notation for referencing sub-entities / properties
 	     *
 	     * @param {String} str
 	     * @returns {Array}
@@ -1231,7 +1232,9 @@
 		, getRootForPath: function (path) {
 			// remove parameters an anchor tags from path
 			var strippedPath = path.split(/[\?#]/)[0];
-			return this.alternateRoots[strippedPath] ? this.alternateRoots[strippedPath] : this.apiRoot;
+			// grab the parent path (0 is "", 1 is parent)
+			var strippedPathParent = '/' + strippedPath.split('/')[1];
+			return this.alternateRoots[strippedPath] ? this.alternateRoots[strippedPath] : this.alternateRoots[strippedPathParent] ? this.alternateRoots[strippedPathParent] : this.apiRoot;
 		}
 	
 	
