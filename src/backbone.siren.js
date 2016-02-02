@@ -1223,8 +1223,8 @@ BbSiren.prototype = {
 	, getRootForPath: function (path) {
 		// remove parameters an anchor tags from path
 		var strippedPath = path.split(/[\?#]/)[0];
-		// grab the parent path (0 is "", 1 is parent)
-		var strippedPathParent = '/' + strippedPath.split('/')[1];
+		// grab the parent path
+		var strippedPathParent = strippedPath.split('/')[0];
 		return this.alternateRoots[strippedPath] ? this.alternateRoots[strippedPath] : this.alternateRoots[strippedPathParent] ? this.alternateRoots[strippedPathParent] : this.apiRoot;
 	}
 

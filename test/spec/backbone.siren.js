@@ -575,45 +575,45 @@ describe('Backbone.Siren: ', function () {
 		it('strips the parameters from the path when checking for root path', function() {
 			var sirenApi = new Backbone.Siren('/api');
 			sirenApi.alternateRoots = {
-				'/my/route': '/right'
-				,'/my/route?params': '/wrong'
-				,'/my/route#anchor': '/also-wrong'
-				,'/my/route?params#anchor': '/you-are-never-going-to-pass-this-test'
+				'my/route': '/right'
+				,'my/route?params': '/wrong'
+				,'my/route#anchor': '/also-wrong'
+				,'my/route?params#anchor': '/you-are-never-going-to-pass-this-test'
 			};
 
-			expect(sirenApi.getRootForPath('/my/route?params')).toBe('/right');
-			expect(sirenApi.getRootForPath('/my/route#anchor')).toBe('/right');
-			expect(sirenApi.getRootForPath('/my/route?params#anchor')).toBe('/right');
+			expect(sirenApi.getRootForPath('my/route?params')).toBe('/right');
+			expect(sirenApi.getRootForPath('my/route#anchor')).toBe('/right');
+			expect(sirenApi.getRootForPath('my/route?params#anchor')).toBe('/right');
 		});
 
 
 		it('returns the default root when no alternate root is found for the path', function() {
 			var sirenApi = new Backbone.Siren('/right');
 			sirenApi.alternateRoots = {
-				'/my/other-route': '/wrong'
+				'my/other-route': '/wrong'
 			};
 
-			expect(sirenApi.getRootForPath('/my/route')).toBe('/right');
+			expect(sirenApi.getRootForPath('my/route')).toBe('/right');
 		});
 
 
 		it('returns the alternate root for the path', function() {
 			var sirenApi = new Backbone.Siren('/wrong');
 			sirenApi.alternateRoots = {
-				'/my/route': '/right'
+				'my/route': '/right'
 			};
 
-			expect(sirenApi.getRootForPath('/my/route')).toBe('/right');
+			expect(sirenApi.getRootForPath('my/route')).toBe('/right');
 		});
 
 		
 		it('returns the root for the parent of the path when a root is not known for the path', function() {
 			var sirenApi = new Backbone.Siren('/wrong');
 			sirenApi.alternateRoots = {
-				'/parent': '/right'
+				'parent': '/right'
 			};
 
-			expect(sirenApi.getRootForPath('/parent/child')).toBe('/right');
+			expect(sirenApi.getRootForPath('parent/child')).toBe('/right');
 		});
 	});
 
