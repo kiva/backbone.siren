@@ -4,7 +4,7 @@
 	, "es3": true
 	, "immed": true
 	, "latedef": true
-	, "maxcomplexity": 14
+	, "maxcomplexity": 15
 	, "maxdepth": 3
 	, "maxerr": 1000000
     , "newcap": true
