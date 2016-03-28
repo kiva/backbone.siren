@@ -1,5 +1,5 @@
 /*
-* Backbone.Siren v0.4.2
+* Backbone.Siren v0.4.3
 *
 * Copyright (c) 2016 Kiva Microfunds
 * Licensed under the MIT license.
@@ -639,8 +639,6 @@
 	
 	
 	    /**
-	     * @todo is this even being used?
-	     *
 	     * Wraps the standard Backbone.ajax()
 	     *
 	     * @param {String} url
@@ -689,12 +687,12 @@
 		 * @param {Object} options
 		 * @returns {Promise}
 		 */
-	    , resolve: function (urls, options) {
+	    , resolve: function (urls, options, lastRequestObj) {
 			if (_.isArray(urls)) {
 				return BbSiren.resolveMany(urls, options);
 			}
 	
-			return BbSiren.resolveOne(urls, options);
+			return BbSiren.resolveOne(urls, options, lastRequestObj);
 	    }
 	
 	
@@ -726,9 +724,11 @@
 		 * @param {Object} options
 		 * @param {Object} options.store - store instance @todo remove the need to have this parameter
 		 * @todo - add an options.ajaxOptions parameter.
+		 * @param {Object} lastRequestObj - a reference to an object in which to store a reference to the last request
 		 */
-		, resolveOne: function (url, options) {
+		, resolveOne: function (url, options, lastRequestObj) {
 			options = options || {};
+			lastRequestObj = lastRequestObj || {};
 	
 	
 			// @todo - rootUrl should reflect the options.data object if it is set
@@ -791,7 +791,7 @@
 						store.addRequest(options.data ? rootUrl + '?' + $.param(options.data) : rootUrl, deferred.promise());
 					}
 	
-					BbSiren.ajax(rootUrl, options)
+					lastRequestObj.request = BbSiren.ajax(rootUrl, options)
 						.done(function (rawEntity) {
 							var bbSiren = BbSiren.parse(rawEntity, options);
 							deferred.resolve(bbSiren);
@@ -1205,6 +1205,17 @@
 			this.options = options;
 			this.isAbsoluteRegExp = new RegExp('^(?:[a-z]+:)?//', 'i');
 			this.alternateRoots = mapRoots(options.alternateRoots);
+			this.lastRequestObj = {};
+		}
+	
+	
+		/**
+		 * Aborts the last request if it exists
+		 */
+		, abortLastRequest: function() {
+			if(this.lastRequestObj.request) {
+				this.lastRequestObj.request.abort();
+			}
 		}
 	
 	
@@ -1259,7 +1270,7 @@
 				});
 			}
 	
-			return BbSiren.resolve(urls, options);
+			return BbSiren.resolve(urls, options, this.lastRequestObj);
 		}
 	};
 	
